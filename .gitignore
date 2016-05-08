@@ -1,3 +1,10 @@
+# R files to ignore
+*.Rdata
+*.Rproj
+*.Rhistory
+*.httr-oauth
+*.Rproj.user
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
