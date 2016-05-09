@@ -49,12 +49,15 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
 ChemData<-read.csv('Data/AllChemData.csv') #read in 1st 12 columns only
 
 #Biology Data
+source('CRANE-DataProcessing.R')
 #Coral
-Coral<-read.csv('Data/CoralBiology.csv', nrows=72)
+#Coral<-read.csv('Data/CoralBiology.csv', nrows=72)
 #Rubble
-Rubble<-read.csv('Data/RubbleBiology.csv',nrows = 36)
+#Rubble<-read.csv('Data/RubbleBiology.csv',nrows = 36)
 #Algae
-Algae<-read.csv('Data/AlgaeBiology.csv', nrows=36)
+#Algae<-read.csv('Data/AlgaeBiology.csv', nrows=36)
+
+Coral <- CoralSet
 
 #Both the Tank TA and the header TA are already corrected for %off from CRM in the excel sheet
 
@@ -100,7 +103,7 @@ ChemData$ResTime<-(1/60)*(1/ChemData$Flow)*TankVol
 ## Sum up all the biological data by aquarium
 Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
                           SA = sum(SA, na.rm = T),
-                          Org = sum(Org, na.rm = T),
+                          AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
                           Volume = sum(Volume, na.rm = T)
 )
@@ -108,13 +111,21 @@ Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
 
 Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarize,
                            SA = NA,
-                           Org = sum(Org, na.rm = T),
+                           AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
 )
 
+
+Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarize,
+                            SA = sum(FinalSA, na.rm = T),
+                            AFDW = sum(AFDW, na.rm = T),
+                            DW = sum(DW, na.rm = T),
+                            Volume = sum(FinalVol, na.rm = T)
+)
+
 #join all the biology together
-biology<-rbind(Rubble.Exp1Summary,Coral.Exp1Summary)
+biology<-rbind(Rubble.Exp1Summary,Coral.Exp1Summary, Algae.Exp1Summary)
 
 colnames(biology)[1]<-'Aquarium'
 
