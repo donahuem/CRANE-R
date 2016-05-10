@@ -77,7 +77,7 @@ text(x=CoralNubb$Volume,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex
 CoralNubb$Check[CoralNubb$TrayNum==233]<- "Outlier in AFDW"
 CoralNubb$Check[CoralNubb$TrayNum==177]<- "Low outlier in SA"
 
-write.table(CoralNubb,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralNubbins_Rprocessed.csv",sep = " ,")
+write.table(CoralNubb,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralNubbins_Rprocessed.csv",sep = " ,", col.names = NA)
 
 
 #Create dataframe for set-scale measures (coral set = 3 colonies mounted together)
@@ -115,7 +115,7 @@ CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==22] <- "low in A
 CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==14] <- "outlier in AFDW?"
 CoralSet$Check[CoralSet$Species=="Montipora" & CoralSet$SampleID==15] <- "outlier in AFDW?"
 
-write.table(CoralSet,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv", sep=",'")
+write.table(CoralSet, file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv", sep=",", col.names = NA)
 
 #Assemble Rubble Data
 #Rubble BWs
@@ -145,7 +145,7 @@ Rubble$Aq_Ex2 <- rubbleIDex2$Aquarium[match(Rubble$SampleID,rubbleIDex2$SampleID
 plot(DW~AW,data=Rubble)
 points(x=Rubble$AW[Rubble$TrayNum==120],y=Rubble$DW[Rubble$TrayNum==120],col="red")
 
-write.table(Rubble,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",sep=",")
+write.table(Rubble,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",sep=",", col.names = NA)
 
 #Algae Data
 CRANE_algae <- gs_read(CRANE_sheet,ws="ALGAE")
@@ -184,7 +184,7 @@ text(x=Algae$AW,y=Algae$DW,labels=Algae$SampleID,cex=0.7)
 plot(AFDW~AFDW,type="n",data=Algae)
 text(x=Algae$AW,y=Algae$AFDW,labels=Algae$SampleID,cex=0.7)
 
-write.table(Algae,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",sep=",")
+write.table(Algae,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",sep=",", col.names = NA)
 
 #Sand
 CRANE_sand <- gs_read(CRANE_sheet,ws="SAND")
@@ -200,7 +200,7 @@ Sand$Vol <- Sand$DW*coef(sandvol)
 #Sand$AW
 #Sand$AFDW
 
-write.table(Sand,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",")
+write.table(Sand,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
 
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed
