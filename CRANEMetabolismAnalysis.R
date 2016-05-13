@@ -43,6 +43,47 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
 
 }  
 
+NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5678,SWDensity=1.023, time=3){
+  
+  tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
+  #flow is in ml/min convert to L/hr
+  flow<-flow*60/1000;
+  
+  #time is time in between sampling points
+  
+  #now convert flow rate to kg m-2 hr-1 so that I can use Andersson et al. 2009 eq 
+  flowrate<-flow*SWDensity/tankarea;
+  
+  #DeltaTA/dt total change in TA in the tank over sample times (mmol m-2 hr-1)
+  DTAdt<-NULL
+  NEC<-NULL
+  FinTA<-NULL
+  FoutTA<-NULL
+  for (i in 1:length(TankTA)-1){
+  DTAdt[i]<-((TankTA[i+1]-TankTA[i])/(time*SurfaceArea)*TankVolume*SWDensity)/1000;
+  #F_in -How much TA in coming in from headers (mmol m-2 hr-1)
+  FinTA[i]<-((HeaderTA[i+1]+ HeaderTA[i])/2 *flowrate)/1000;
+  
+  #F_out-How much TA is leaving the tank (mmol m-2 hr-1)
+  FoutTA[i]<-((TankTA[i+1]+TankTA[i])/2*flowrate)/1000;
+  
+  #Net ecosystem calcification (mmol m-2 hr-1) due to the critters in tank
+  NEC[i]<-12*(FinTA[i]-FoutTA[i]-DTAdt[i])/2; #the 12 makes it per day
+  }
+  return(NEC)
+  #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
+  #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
+  #biogeochemistry paper)
+  #NEC is in umol cm^-2 hr-1
+  
+  #HeaderTA is TA from the header in umol/kg
+  #TankTAis TA from the tank in umol/kg
+  #Residence time is the residence time in hours
+  #Surface area is SA of the substrate in cm2
+  #TankVolume is the volume in cm3 = (default = 5678)
+  #SWDensity is density of seawater in kg/cm3 (default =1.023)
+  
+}  
 
 # Load Data-----------------------------------------
 #Chem Data
@@ -75,9 +116,9 @@ Sand<- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & 
 ChemData$HeaderTA.norm<-ChemData$HeaderTA+ChemData$NN
 
 #normalize the TA data to salinity---THE SALINITY DATA IS CAUSING PROBLEMS.....
-#ChemData$HeaderTA.norm<-ChemData$HeaderTA.norm*ChemData$HeaderSalinity/38
-#ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
-ChemData$TankTA.norm<-ChemData$TankTA
+ChemData$HeaderTA.norm<-ChemData$HeaderTA.norm*ChemData$HeaderSalinity/38
+ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
+#ChemData$TankTA.norm<-ChemData$TankTA
 
 #calculuate all the carbonate parameters with seacarb---------------------------------------
 #Tanks
@@ -112,6 +153,13 @@ ResTime.mean <- ddply(ChemData, c("Aquarium"), summarize,
                         #  N=sum(!is.na(ResTime)),
                          # SE= sd(ResTime, na.rm = T)/sqrt(N)
                            )
+
+#calculate the average flow rate by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
+Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
+                      Flow.mean = mean(Flow, na.rm = T)
+                      #  N=sum(!is.na(ResTime)),
+                      # SE= sd(ResTime, na.rm = T)/sqrt(N)
+)
 
 
 ## Sum up all the biological data by aquarium
@@ -191,13 +239,27 @@ biology<-rbind(biology,Exp2biology)
 #add the mean residence times
 AllData<-merge(ChemData, ResTime.mean, all.x=TRUE)
 
+#add the mean residence times
+AllData<-merge(AllData, Flow.mean, all.x=TRUE)
+
 #Make one huge dataset with all the biology and chem data together
 AllData<-merge(AllData,biology, by='Aquarium', all.x=TRUE)
 
 AllData$DateTime<-as.POSIXct(paste(AllData$Date, AllData$Time), format="%m/%d/%Y %H:%M")
 
+##sort all the data by time, substrate, nutrient level, and experiment
+AllData<-AllData[order(AllData$Experiment, AllData$DateTime, AllData$Substrate, AllData$NutLevel),]
+
 #Calculate NEC---------------------------------------------
 AllData$NECExp1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, TankTA = AllData$TankTA.norm, ResidenceTime = AllData$ResTime.mean, SurfaceArea = AllData$DW)
+
+#FINISH PUTTING IN THE CORRECT I AND J and TANK!!!!
+
+NEC2<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==1], 
+                TankTA = AllData$TankTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1], 
+                flow =  AllData$Flow.mean[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1], 
+                SurfaceArea = AllData$DW[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1])
+
 
 sub<-unique(AllData$Substrate)
 #sub <- sub[sub!="Mixed"]
@@ -276,6 +338,9 @@ arag <- carb$OmegaAragonite
 dim(arag) <- c(length(DIC), length(AT)) # 
 #contour(DIC, AT, arag)
 
+## Normalize the DIC Data to a constant salinity for deffeys diagram
+AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
+
 par(mfrow=c(1,1))
 for(i in 1:5){
   
@@ -295,36 +360,36 @@ for(i in 1:5){
                     
   )
    #calcification dissolution line
-  x.DIC<-seq(from=1820, to= 1950, by  = 1)
-  y.TA<-2*x.DIC-1600
+  x.DIC<-seq(from=2050, to= 2080, by  = 1)
+  y.TA<-2*x.DIC-1840
   lines(x.DIC,y.TA, col='black', lwd=3)
-  arrows(min(x.DIC),min(y.TA),max(x.DIC), max(y.TA), col='black', code=3,lwd=3)
-  text(max(x.DIC)-15, max(y.TA)+20, 'Calcification')
-  text(min(x.DIC)-15, min(y.TA)-20, 'Dissolution')
+  arrows(min(x.DIC),min(y.TA),max(x.DIC), max(y.TA), col='black', code=3,lwd=3,length=0.1)
+  text(max(x.DIC)-25, max(y.TA)+8, 'Calcification', cex=0.5)
+  text(min(x.DIC)-15, min(y.TA)-10, 'Dissolution', cex=0.5)
   #photosynthesis/respiration line
-  x.DIC<-seq(from=1720, to= 2100, by  = 1)
-  y.TA<-0.16*x.DIC +1850
+  x.DIC<-seq(from=2015, to= 2110, by  = 1)
+  y.TA<-0.16*x.DIC +1955
   lines(x.DIC,y.TA, col='black', lwd=3)
-  arrows(min(x.DIC),min(y.TA),max(x.DIC), max(y.TA), col='black', code=3,lwd=3)
-  text(max(x.DIC)-15, max(y.TA)+20, 'Photosynthesis')
-  text(min(x.DIC)-15, min(y.TA)-20, 'Respiration')
+  arrows(min(x.DIC),min(y.TA),max(x.DIC), max(y.TA), col='black', code=3,lwd=3, length=0.1)
+  text(max(x.DIC)-1, max(y.TA)+10, 'Photosynthesis', cex=0.5)
+  text(min(x.DIC)-15, min(y.TA)-10, 'Respiration', cex=0.5)
     #abline(h=0)
    # par(new = TRUE)
     #plot(AllData$TankDIC[ AllData$Substrate==sub[i]],AllData$TankTA[ AllData$Substrate==sub[i]], main=sub[i], 
      #     type = 'p', col = colors[j], pch=19, yaxt="n", ylab="", xlab="")
     for (j in 1:3){
       #par(new = TRUE)
-    points(AllData$TankDIC[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]],AllData$TankTA[AllData$NutLevel==Nuts[j]& AllData$Substrate==sub[i]], main=sub[i], 
+    points(AllData$TankDIC.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]],AllData$TankTA.norm[AllData$NutLevel==Nuts[j]& AllData$Substrate==sub[i]], main=sub[i], 
            type = 'p', col = colors[j], pch=19)
     
     
-    modelTA.DIC<-lm(AllData$TankTA[AllData$NutLevel==Nuts[j]& AllData$Substrate==sub[i]]  ~AllData$TankDIC[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]])
+    modelTA.DIC<-lm(AllData$TankTA.norm[AllData$NutLevel==Nuts[j]& AllData$Substrate==sub[i]]  ~AllData$TankDIC.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]])
     b0[i,j]<-modelTA.DIC$coefficients[1]
     b[i,j]<-modelTA.DIC$coefficients[2]
     r2[i,j]<-summary(modelTA.DIC)$r.squared
     substrate[i,j]<-sub[i]
     Nut[i,j]<-Nuts[j]
-    #x<-seq(from=1500, to=2100,by=0.5)
+    x<-seq(from=1500, to=2100,by=0.5)
     y<-b[i,j]*x+b0[i,j]
     lines(x,y, col=colors[j], lwd=3)
     
@@ -335,38 +400,3 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 }
 
 
-##make a contour plot
-AT <- seq(2080e-6, 2241e-6, length.out=10)
-DIC <- seq(1592e-6, 2068e-6, length.out=10)
-dat <- expand.grid(AT, DIC)
-
-carb <- carb(flag=15, var1=dat$Var1, var2=dat$Var2, S=35, T=25, P=0, Pt=0, Sit=0, k1k2="l", kf="pf", pHscale="T")
-
-
-# Do a simple contour plot
-arag <- carb$OmegaAragonite
-dim(arag) <- c(length(DIC), length(AT)) # 
-contour(DIC, AT, arag)
-
-
-filled.contour(DIC*1e6, AT*1e6, arag, 
-        xlab="DIC",
-        ylab="Total alkalinity (umol/kg)",
-        levels=seq(1, 7, by=0.25),  
-        labcex=1.5,
-        method="edge",
-        col = rainbow(40),
-        lwd=2,
-        lty="solid"
-)
-par(new = TRUE)
-image(DIC*1e6, AT*1e6, arag, col=rainbow(6),useRaster=TRUE,
-      xlab = "X Coordinate (feet)", ylab = "Y Coordinate (feet)",
-      main = "Surface elevation data")
-box()
-
-levelplot(arag ~ DIC*1e6 + AT*1e6, 
-          xlab = "X Coordinate (feet)", ylab = "Y Coordinate (feet)",
-          main = "Surface elevation data",
-          col.regions = terrain.colors(100)
-)
