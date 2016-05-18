@@ -197,10 +197,11 @@ sandvol <- lm(Sand$MeasVol~Sand$DW-1)
 plot(Sand$MeasVol ~ Sand$DW)
 abline(0,coef(sandvol))
 Sand$Vol <- Sand$DW*coef(sandvol)
-#Sand$AW
-#Sand$AFDW
+Sand$AW <- Sand_Wts_raw$`AW in Tray`[Sand_Wts_raw$TrayNum<100]- Sand_Wts_raw$TrayWt[Sand_Wts_raw$TrayNum<100]
+Sand$AFDW <- Sand$DW - Sand$AW
+Sand$pcAFDW <- Sand$AFDW/Sand$DW
 
-write.table(Sand,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
+write.table(Sand,file="/Users/megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
 
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed
