@@ -60,12 +60,12 @@ NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5678,SWDensity=1
   FinTA<-NULL
   FoutTA<-NULL
   for (i in 1:length(TankTA)-1){
-  DTAdt[i]<-((TankTA[i+1]-TankTA[i])/(time*SurfaceArea)*TankVolume*SWDensity)/1000;
+  DTAdt[i]<-((TankTA[i+1]-TankTA[i])/(time*SurfaceArea[i])*TankVolume*SWDensity)/1000;
   #F_in -How much TA in coming in from headers (mmol m-2 hr-1)
-  FinTA[i]<-((HeaderTA[i+1]+ HeaderTA[i])/2 *flowrate)/1000;
+  FinTA[i]<-((HeaderTA[i+1]+ HeaderTA[i])/2 *flowrate[i])/1000;
   
   #F_out-How much TA is leaving the tank (mmol m-2 hr-1)
-  FoutTA[i]<-((TankTA[i+1]+TankTA[i])/2*flowrate)/1000;
+  FoutTA[i]<-((TankTA[i+1]+TankTA[i])/2*flowrate[i])/1000;
   
   #Net ecosystem calcification (mmol m-2 hr-1) due to the critters in tank
   NEC[i]<-12*(FinTA[i]-FoutTA[i]-DTAdt[i])/2; #the 12 makes it per day
@@ -251,17 +251,28 @@ AllData$DateTime<-as.POSIXct(paste(AllData$Date, AllData$Time), format="%m/%d/%Y
 AllData<-AllData[order(AllData$Experiment, AllData$DateTime, AllData$Substrate, AllData$NutLevel),]
 
 #Calculate NEC---------------------------------------------
-AllData$NECExp1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, TankTA = AllData$TankTA.norm, ResidenceTime = AllData$ResTime.mean, SurfaceArea = AllData$DW)
+#AllData$NECExp1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, TankTA = AllData$TankTA.norm, ResidenceTime = AllData$ResTime.mean, SurfaceArea = AllData$DW)
 
 #FINISH PUTTING IN THE CORRECT I AND J and TANK!!!!
-
-NEC2<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==1], 
-                TankTA = AllData$TankTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1], 
-                flow =  AllData$Flow.mean[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1], 
-                SurfaceArea = AllData$DW[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==1])
-
-
+Nuts<-unique(AllData$NutLevel)
 sub<-unique(AllData$Substrate)
+
+#NEC2<-matrix(data=NA, nrow=6, ncol=3)
+NEC2 <- array(NA, dim=c(6,3,3))
+time<-matrix(data=NA, nrow=6, ncol=3)
+
+for (i in 1:length(Nuts)){
+  for (t in 1:3){
+
+NEC2[,i,t]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==t], 
+                TankTA = AllData$TankTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t], 
+                flow =  AllData$Flow.mean[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t], 
+                SurfaceArea = AllData$DW[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t])
+time[,i]<-AllData$DateTime[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==1][2:7]
+   }
+ }
+
+
 #sub <- sub[sub!="Mixed"]
 #sub<-droplevels(sub)
 
@@ -274,9 +285,9 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
 
 par(mfrow=c(2,2))
 for (i in 1:5){
-plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NECExp1[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
-points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NECExp1[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
-points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NECExp1[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
+points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
 par(mfrow=c(2,2))
@@ -325,7 +336,6 @@ b0<-matrix(nrow=5,ncol=3)
 r2<-matrix(nrow=5,ncol=3)
 substrate<-matrix(nrow=5,ncol=3)
 Nut<-matrix(nrow=5,ncol=3)
-Nuts<-unique(AllData$NutLevel)
 colors<-c('white','blue','magenta')
 
 ##make a contour plot for Deffey diagram
