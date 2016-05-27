@@ -15,6 +15,7 @@ Coral_Wts_raw <- gs_read(Coral_Wts_sheet)
 
 #CRANE_sheet has BW for CoralSets, Rubble, Sand; normalizations for BW; CoralSet holder volumes; WW plus SA and Vol conversions for algae;Expt IDs
 CRANE_sheet <- gs_key("1Fks1OzSzpRkNe1X6u9Ez1W6qHmPmTgxR0scueF3OARA",lookup=TRUE)
+
 CRANE_coralnubb <- gs_read(CRANE_sheet,ws="CoralNubbin")
 CRANE_coralset <- gs_read(CRANE_sheet,ws="CoralSet")
 CRANE_BWnorms <- gs_read(CRANE_sheet,ws="BW_Normalization")
@@ -201,7 +202,14 @@ Sand$AW <- Sand_Wts_raw$`AW in Tray`[Sand_Wts_raw$TrayNum<100]- Sand_Wts_raw$Tra
 Sand$AFDW <- Sand$DW - Sand$AW
 Sand$pcAFDW <- Sand$AFDW/Sand$DW
 
-write.table(Sand,file="/Users/megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
+SandIDex1 <- subset(CRANE_IDexpt1,Substrate=="Sand")
+SandIDex2 <- subset(CRANE_IDexpt2,Substrate=="Sand")
+Sand$Nuts <- SandIDex1$NutLevel[match(Sand$SampleID,SandIDex1$SampleID)]
+Sand$Tank <- SandIDex1$BlackTank[match(Sand$SampleID,SandIDex1$SampleID)]
+Sand$Aq_Ex1 <- SandIDex1$Aquarium[match(Sand$SampleID,SandIDex1$SampleID)]
+Sand$Aq_Ex2 <- SandIDex2$Aquarium[match(Sand$SampleID,SandIDex2$SampleID)]
+
+write.table(Sand,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
 
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed
