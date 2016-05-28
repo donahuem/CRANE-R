@@ -43,13 +43,16 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
 
 }  
 
-NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5678,SWDensity=1.023, time=3){
+NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3){
   
   tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
   #flow is in ml/min convert to L/hr
   flow<-flow*60/1000;
   
   #time is time in between sampling points
+  #SA is in cm^3, convert to m^3
+  SurfaceArea<-SurfaceArea/(100^2);
+  
   
   #now convert flow rate to kg m-2 hr-1 so that I can use Andersson et al. 2009 eq 
   flowrate<-flow*SWDensity/tankarea;
@@ -164,14 +167,14 @@ Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
 
 ## Sum up all the biological data by aquarium
 Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
-                          SA = sum(SA, na.rm = T),
+                          SA = sum(SA, na.rm = T)*0.01, #the SA for coral and algae are in mm2 while Sand is in cm2
                           AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
                           Volume = sum(Volume, na.rm = T)
 )
 
 Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
-                           SA = sum(SA, na.rm = T),
+                           SA = sum(SA, na.rm = T)*0.01,
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
@@ -193,14 +196,14 @@ Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarize,
 )
 
 Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarize,
-                            SA = sum(FinalSA, na.rm = T),
+                            SA = sum(FinalSA, na.rm = T)*0.01,
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(FinalVol, na.rm = T)
 )
 
 Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarize,
-                           SA = sum(FinalSA, na.rm = T),
+                           SA = sum(FinalSA, na.rm = T)*0.01,
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(FinalVol, na.rm = T)
@@ -208,14 +211,14 @@ Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarize,
 
 Sand.Exp1Summary <- ddply(Sand, c("Aq_Ex1"), summarize,
                            SA = sum(SA, na.rm = T),
-                           AFDW = NA,
+                           AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Vol, na.rm = T)
 )
 
 Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2"), summarize,
                           SA = sum(SA, na.rm = T),
-                          AFDW = NA,
+                          AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
                           Volume = sum(Vol, na.rm = T)
 )
@@ -258,36 +261,45 @@ Nuts<-unique(AllData$NutLevel)
 sub<-unique(AllData$Substrate)
 
 #NEC2<-matrix(data=NA, nrow=6, ncol=3)
-NEC2 <- array(NA, dim=c(6,3,3))
-time<-matrix(data=NA, nrow=6, ncol=3)
+NEC2 <- array(NA, dim=c(6,72))
+NEC1<-array(NA, dim=c(7,72))
+#sort data by aquarium so that I can calculate NEC easier
 
-for (i in 1:length(Nuts)){
-  for (t in 1:3){
+AllData<-AllData[order(AllData$Aquarium),]
 
-NEC2[,i,t]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==t], 
-                TankTA = AllData$TankTA.norm[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t], 
-                flow =  AllData$Flow.mean[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t], 
-                SurfaceArea = AllData$DW[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i]& AllData$Tank==t])
-time[,i]<-AllData$DateTime[AllData$NutLevel==Nuts[j] & AllData$Substrate==sub[i] & AllData$Tank==1][2:7]
-   }
- }
+for (i in 1:length(unique(AllData$Aquarium))){
+  NEC2[,i]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$Aquarium==i], 
+                       TankTA = AllData$TankTA.norm[AllData$Aquarium==i], 
+                       flow =  AllData$Flow.mean[AllData$Aquarium==i], 
+                       SurfaceArea = AllData$SA[AllData$Aquarium==i])
+  
+  
+}
 
+
+  AllData$NEC1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
+                    TankTA = AllData$TankTA.norm, 
+                    ResidenceTime = AllData$ResTime.mean, 
+                    SurfaceArea = AllData$AFDW)
+
+
+#### stopped here-----------------------------
 
 #sub <- sub[sub!="Mixed"]
 #sub<-droplevels(sub)
 
 NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
-                      Mean = mean(NECExp1, na.rm = T),
-                      N=sum(!is.na(NECExp1)),
-                      SE= sd(NECExp1, na.rm = T)/sqrt(N)
+                      Mean = mean(NEC1, na.rm = T),
+                      N=sum(!is.na(NEC1)),
+                      SE= sd(NEC1, na.rm = T)/sqrt(N)
 )
 
 
 par(mfrow=c(2,2))
 for (i in 1:5){
-plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
-points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
-points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==subs[i]],AllData$NECExp1[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
+points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
 par(mfrow=c(2,2))
@@ -305,8 +317,16 @@ for (i in 1:5){
   
 }
 
+#calculate daily average per substrate and nutrient
+NEC.mean2 <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
+                  Mean2 = mean(Mean, na.rm = T),
+                  N=sum(!is.na(Mean)),
+                  SE= sd(Mean, na.rm = T)/sqrt(N)
+)
+
+
 Exp1Data<-AllData[AllData$Experiment==1 ,]
-NECExp1.model <- lmer(NECExp1 ~ NutLevel*Time + Substrate + (1|Tank), data=Exp1Data)
+NECExp1.model <- lmer(NEC1 ~ NutLevel*Time + Substrate + (1|Tank), data=Exp1Data)
 #NECExp1.model <- lm(NECExp1 ~ NutLevel*Time + Tank + Substrate, data=Exp1Data)
 anova(NECExp1.model)
 
