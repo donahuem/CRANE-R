@@ -121,7 +121,7 @@ write.table(CoralSet, file="../../Google Drive/CRANE shared folder/Data/Weights,
 #Assemble Rubble Data
 #Rubble BWs
 CRANE_rubble <- gs_read(CRANE_sheet,ws="RUBBLE")
-Rubble <- with(CRANE_rubble,data.frame(SampleID,InitialTemp,FinalTemp,Volume,TrayNum))
+Rubble <- with(CRANE_rubble,data.frame(SampleID,InitialTemp,FinalTemp,Volume,TrayNum, deltaSAWt))
 Rubble$InitBW <- BWCalc(StopperAir,Rubble$InitialTemp, CRANE_rubble$`InitialBW (g)`)
 Rubble$FinalBW <- BWCalc(StopperAir,Rubble$FinalTemp, CRANE_rubble$`FinalBw (g)`)
 Rubble$DeltaBW <- Rubble$FinalBW - Rubble$InitBW
@@ -135,6 +135,9 @@ Rubble$DW <- Rubble_Wts_raw$`Dry Wt w Tray`[match(Rubble$TrayNum,Rubble_Wts_raw$
 Rubble$AW <- Rubble_Wts_raw$`Ash Wt w Tray`[match(Rubble$TrayNum,Rubble_Wts_raw$`Tray #`)]-Rubble$TrayWt
 Rubble$AFDW <- Rubble$DW - Rubble$AW
 Rubble$pcAFDW <- Rubble$AFDW/Rubble$DW
+#Rubble SA
+Rubble$SA<-Rubble$deltaSAWt*WaxConversionFactor
+
 
 rubbleIDex1 <- subset(CRANE_IDexpt1,Substrate=="Rubble")
 rubbleIDex2 <- subset(CRANE_IDexpt2,Substrate=="Rubble")
@@ -145,6 +148,10 @@ Rubble$Aq_Ex2 <- rubbleIDex2$Aquarium[match(Rubble$SampleID,rubbleIDex2$SampleID
 
 plot(DW~AW,data=Rubble)
 points(x=Rubble$AW[Rubble$TrayNum==120],y=Rubble$DW[Rubble$TrayNum==120],col="red")
+
+plot(Volume ~SA,data=Rubble,type="n")
+text(x=Rubble$SA,y=Rubble$Volume,labels=Rubble$SampleID,cex=0.7)
+plot(AFDW ~SA, data=Rubble)
 
 write.table(Rubble,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",sep=",", col.names = NA)
 
@@ -193,7 +200,7 @@ Sand <- with(CRANE_sand,data.frame(SampleID,InitialBW,InitialTemp,PercentOutside
 Sand_Wts_Sheet <- gs_key("1Tvh1nzn5Bpz73yED5FsSS2tLFcyNPYNf6pdPF7orOew", lookup=TRUE)
 Sand_Wts_raw <- gs_read(Sand_Wts_Sheet,ws="DW AFDW etc")
 Sand$DW <- Sand_Wts_raw$`DW in Tray`[Sand_Wts_raw$TrayNum<100] - Sand_Wts_raw$`TrayWt`[Sand_Wts_raw$TrayNum<100]
-Sand$SA <- pi *(.82/2)^2  #lid of petri dish is 82mm; get SA in cm2
+Sand$SA <- pi *(8.2/2)^2  #lid of petri dish is 82mm; get SA in cm2
 sandvol <- lm(Sand$MeasVol~Sand$DW-1)
 plot(Sand$MeasVol ~ Sand$DW)
 abline(0,coef(sandvol))

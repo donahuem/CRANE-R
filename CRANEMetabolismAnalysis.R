@@ -77,7 +77,7 @@ NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=
   #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
   #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
   #biogeochemistry paper)
-  #NEC is in umol cm^-2 hr-1
+  #NEC is in mmol m^-2 d-1
   
   #HeaderTA is TA from the header in umol/kg
   #TankTAis TA from the tank in umol/kg
@@ -182,14 +182,14 @@ Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
 
 
 Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarize,
-                           SA = NA,
+                          SA = sum(SA, na.rm = T)*0.01,
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
 )
 
 Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarize,
-                            SA = NA,
+                            SA = sum(SA, na.rm = T)*0.01,
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(Volume, na.rm = T)
@@ -253,16 +253,18 @@ AllData$DateTime<-as.POSIXct(paste(AllData$Date, AllData$Time), format="%m/%d/%Y
 ##sort all the data by time, substrate, nutrient level, and experiment
 AllData<-AllData[order(AllData$Experiment, AllData$DateTime, AllData$Substrate, AllData$NutLevel),]
 
-#Calculate NEC---------------------------------------------
-#AllData$NECExp1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, TankTA = AllData$TankTA.norm, ResidenceTime = AllData$ResTime.mean, SurfaceArea = AllData$DW)
+# change the order of the factors for nutrient level so that it is ambient then medium then high
 
-#FINISH PUTTING IN THE CORRECT I AND J and TANK!!!!
+AllData$NutLevel <- factor(AllData$NutLevel, levels = c("Ambient", "Med", "High"))
+
+#Calculate NEC---------------------------------------------
+
 Nuts<-unique(AllData$NutLevel)
 sub<-unique(AllData$Substrate)
 
 #NEC2<-matrix(data=NA, nrow=6, ncol=3)
 NEC2 <- array(NA, dim=c(6,72))
-NEC1<-array(NA, dim=c(7,72))
+
 #sort data by aquarium so that I can calculate NEC easier
 
 AllData<-AllData[order(AllData$Aquarium),]
@@ -276,81 +278,287 @@ for (i in 1:length(unique(AllData$Aquarium))){
   
 }
 
-
-  AllData$NEC1<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
+#NEC using lagrangian method with AFDW normalization
+  AllData$NEC.AFDW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
                     TankTA = AllData$TankTA.norm, 
                     ResidenceTime = AllData$ResTime.mean, 
                     SurfaceArea = AllData$AFDW)
 
+  
+  #NEC using lagrangian method with dry weight normalization
+  AllData$NEC.DW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
+                            TankTA = AllData$TankTA.norm, 
+                            ResidenceTime = AllData$ResTime.mean, 
+                            SurfaceArea = AllData$DW)
+  
+  #NEC using lagrangian method with volume normalization
+  AllData$NEC.Vol<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
+                            TankTA = AllData$TankTA.norm, 
+                            ResidenceTime = AllData$ResTime.mean, 
+                            SurfaceArea = AllData$Volume)  
+  
+  #NEC using lagrangian method with SA normalization
+  AllData$NEC.SA<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
+                           TankTA = AllData$TankTA.norm, 
+                           ResidenceTime = AllData$ResTime.mean, 
+                           SurfaceArea = AllData$SA) 
 
-#### stopped here-----------------------------
+
+  #plot the different NEC calcs versus each other
+  par(mfrow=c(2,2))
+  plot(AllData$NEC.SA, AllData$NEC.AFDW, col=AllData$Substrate, xlab='SA', ylab='AFDW')
+  legend('topright', legend=unique(AllData$Substrate), col=unique(AllData$Substrate), pch=19, bty = 'n')
+  plot(AllData$NEC.Vol, AllData$NEC.DW, col=AllData$Substrate, xlab='Volume', ylab='DW')
+  plot(AllData$NEC.Vol, AllData$NEC.SA, col=AllData$Substrate, xlab='Volume', ylab='SA')
+  plot(AllData$NEC.DW, AllData$NEC.AFDW, col=AllData$Substrate, xlab='Dry Weight', ylab='AFDW')
+  
+  
+  #### stopped here-----------------------------
 
 #sub <- sub[sub!="Mixed"]
 #sub<-droplevels(sub)
 
 NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
-                      Mean = mean(NEC1, na.rm = T),
-                      N=sum(!is.na(NEC1)),
-                      SE= sd(NEC1, na.rm = T)/sqrt(N)
+                     Mean.AFDW = mean(NEC.AFDW, na.rm = T),
+                     N=sum(!is.na(NEC.AFDW)),
+                     SE.AFDW= sd(NEC.AFDW, na.rm = T)/sqrt(N),
+                     Mean.SA = mean(NEC.SA, na.rm = T),
+                     SE.SA= sd(NEC.SA, na.rm = T)/sqrt(N),
+                     Mean.DW = mean(NEC.DW, na.rm = T),
+                     SE.DW= sd(NEC.DW, na.rm = T)/sqrt(N),
+                     Mean.Vol = mean(NEC.Vol, na.rm = T),
+                     SE.Vol= sd(NEC.Vol, na.rm = T)/sqrt(N)
 )
 
 
 par(mfrow=c(2,2))
 for (i in 1:5){
-plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
-points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
-points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC1[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
+points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
-par(mfrow=c(2,2))
-for (i in 1:5){
-  plot(NEC.mean$DateTime[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]], main=sub[i], type = 'b',
-       ylim=c(min(NEC.mean$Mean[NEC.mean$Substrate==sub[i]])-0.2,max(NEC.mean$Mean[NEC.mean$Substrate==sub[i]])+0.2))
-  error.bar(NEC.mean$DateTime[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]],
-           NEC.mean$SE[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]],NEC.mean$SE[NEC.mean$NutLevel=='Ambient'& NEC.mean$Substrate==sub[i]])
-  lines(NEC.mean$DateTime[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]], col='red', type = 'b')
-  error.bar(NEC.mean$DateTime[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]],
-            NEC.mean$SE[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]],NEC.mean$SE[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]])
-  lines(NEC.mean$DateTime[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='Med'& NEC.mean$Substrate==sub[i]], col='blue', type = 'b')
-  error.bar(NEC.mean$DateTime[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]],NEC.mean$Mean[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]],
-            NEC.mean$SE[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]],NEC.mean$SE[NEC.mean$NutLevel=='High'& NEC.mean$Substrate==sub[i]])
+##Plot NEC averages across time for each normalization
+##NORMALIZED BY AFDW
+par(mfrow=c(3,2))
+
+y<-NEC.mean$Mean.AFDW
+yse<-NEC.mean$SE.AFDW
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NEC.mean$Substrate))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NEC.mean$DateTime [NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]),
+         y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)))
+    
+    arrows(unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           + yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           - yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+     
+  }
+  axis(1, at=unique(NEC.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y),col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+
+##NORMALIZED BY SA
+par(mfrow=c(3,2))
+
+y<-NEC.mean$Mean.SA
+yse<-NEC.mean$SE.SA
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol cm"^{-2}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NEC.mean$Substrate))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NEC.mean$DateTime [NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]),
+         y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)))
+    
+    arrows(unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           + yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           - yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NEC.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y),col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+
+##Volume
+par(mfrow=c(3,2))
+
+y<-NEC.mean$Mean.Vol
+yse<-NEC.mean$SE.Vol
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol cm"^{-3}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NEC.mean$Substrate))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NEC.mean$DateTime [NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]),
+         y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)))
+    
+    arrows(unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           + yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           - yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NEC.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y),col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+
+#DW
+par(mfrow=c(3,2))
+
+y<-NEC.mean$Mean.DW
+yse<-NEC.mean$SE.DW
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol g DW"^{-1}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NEC.mean$Substrate))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NEC.mean$DateTime [NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]),
+         y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)))
+    
+    arrows(unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           + yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
+           - yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NEC.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y),col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+
+#-------------------------------------------------------------------------------
+
+#calculate daily average per substrate and nutrient
+NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
+                  Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
+                  N2=sum(!is.na(Mean.AFDW)),
+                  SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
+                  Mean.SA2 = mean(Mean.SA, na.rm = T),
+                  SE.SA2= sd(Mean.SA, na.rm = T)/sqrt(N2),
+                  Mean.DW2 = mean(Mean.DW, na.rm = T),
+                  SE.DW2= sd(Mean.DW, na.rm = T)/sqrt(N2),
+                  Mean.Vol2 = mean(Mean.Vol, na.rm = T),
+                  SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
+)
+
+
+
+# calculate mean calcification rate
+NEC.mean.calc <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
+                      Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0], na.rm = T),
+                      N2=sum(Mean.AFDW>0),
+                      SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0], na.rm = T)/sqrt(N2),
+                      Mean.SA2 = mean(Mean.SA[Mean.SA>0], na.rm = T),
+                      SE.SA2= sd(Mean.SA[Mean.SA>0], na.rm = T)/sqrt(N2),
+                      Mean.DW2 = mean(Mean.DW[Mean.DW>0], na.rm = T),
+                      SE.DW2= sd(Mean.DW[Mean.DW>0], na.rm = T)/sqrt(N2),
+                      Mean.Vol2 = mean(Mean.Vol[Mean.Vol>0], na.rm = T),
+                      SE.Vol2= sd(Mean.Vol[Mean.Vol>0], na.rm = T)/sqrt(N2)
+)
+
+# calculate mean dissolution rate
+NEC.mean.dis <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
+                       Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW<0], na.rm = T),
+                       N2=sum(Mean.AFDW<0),
+                       SE.AFDW2= sd(Mean.AFDW[Mean.AFDW<0], na.rm = T)/sqrt(N2),
+                       Mean.SA2 = mean(Mean.SA[Mean.SA<0], na.rm = T),
+                       SE.SA2= sd(Mean.SA[Mean.SA<0], na.rm = T)/sqrt(N2),
+                       Mean.DW2 = mean(Mean.DW[Mean.DW<0], na.rm = T),
+                       SE.DW2= sd(Mean.DW[Mean.DW<0], na.rm = T)/sqrt(N2),
+                       Mean.Vol2 = mean(Mean.Vol[Mean.Vol<0], na.rm = T),
+                       SE.Vol2= sd(Mean.Vol[Mean.Vol<0], na.rm = T)/sqrt(N2)
+)
+
+#replace the NAs with 0
+NEC.mean.dis[is.na(NEC.mean.dis)]<-0
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+x<-barplot(NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]], main=sub[i], ylim=c(0,25))
+  errorbars(x,NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]],0,NEC.mean.calc$SE.AFDW2[NEC.mean.calc$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+  
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]], main=sub[i], ylim=c(0,-10))
+  errorbars(x,NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]],0,NEC.mean.dis$SE.AFDW2[NEC.mean.dis$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
 }
 
-#calculate daily average per substrate and nutrient
-NEC.mean2 <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
-                  Mean2 = mean(Mean, na.rm = T),
-                  N=sum(!is.na(Mean)),
-                  SE= sd(Mean, na.rm = T)/sqrt(N)
-)
-
-
-Exp1Data<-AllData[AllData$Experiment==1 ,]
-NECExp1.model <- lmer(NEC1 ~ NutLevel*Time + Substrate + (1|Tank), data=Exp1Data)
-#NECExp1.model <- lm(NECExp1 ~ NutLevel*Time + Tank + Substrate, data=Exp1Data)
-anova(NECExp1.model)
-
-
-#integrate under the curve to calculate net NEC.... 
-Exp1Data$DateTime<-as.factor(Exp1Data$DateTime)
-
-levels(Exp1Data$DateTime)<-c(1:7)
-Exp1Data$DateTime <- droplevels(Exp1Data$DateTime)
-Exp1Data$DateTime <- as.integer(Exp1Data$DateTime)
-
-require(pracma)
-AUC = trapz(Exp1Data$DateTime[1:7],AllData$NECExp1[1:7])
-
-NEC.int<-NA
-for (i in 1:36){
-NEC.int[i]<-trapz(Exp1Data$DateTime[Exp1Data$Aquarium==i],Exp1Data$NECExp1[Exp1Data$Aquarium==i])
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(0,25))
+  errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
 }
 
-ddply(Exp1Data, c("Aquarium"), summarize,
-      NEC.int=trapz(Exp1Data$DateTime,Exp1Data$NECExp1)
-      )
-
-##TA vs DIC plots
+##TA vs DIC plots--------------------------------------------
 b<-matrix(nrow=5,ncol=3)
 b0<-matrix(nrow=5,ncol=3)
 r2<-matrix(nrow=5,ncol=3)
@@ -430,3 +638,28 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 }
 
 
+## extra
+Exp1Data<-AllData[AllData$Experiment==1 ,]
+NECExp1.model <- lmer(NEC1 ~ NutLevel*Time + Substrate + (1|Tank), data=Exp1Data)
+#NECExp1.model <- lm(NECExp1 ~ NutLevel*Time + Tank + Substrate, data=Exp1Data)
+anova(NECExp1.model)
+
+
+#integrate under the curve to calculate net NEC.... 
+Exp1Data$DateTime<-as.factor(Exp1Data$DateTime)
+
+levels(Exp1Data$DateTime)<-c(1:7)
+Exp1Data$DateTime <- droplevels(Exp1Data$DateTime)
+Exp1Data$DateTime <- as.integer(Exp1Data$DateTime)
+
+require(pracma)
+AUC = trapz(Exp1Data$DateTime[1:7],AllData$NECExp1[1:7])
+
+NEC.int<-NA
+for (i in 1:36){
+  NEC.int[i]<-trapz(Exp1Data$DateTime[Exp1Data$Aquarium==i],Exp1Data$NECExp1[Exp1Data$Aquarium==i])
+}
+
+ddply(Exp1Data, c("Aquarium"), summarize,
+      NEC.int=trapz(Exp1Data$DateTime,Exp1Data$NECExp1)
+)
