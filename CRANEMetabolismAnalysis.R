@@ -44,6 +44,27 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
    
 }  
 
+NCPCalc<-function(HeaderDIC,TankDIC,ResidenceTime,SurfaceArea, TankVolume=5678,SWDenstiy=1.023, NEC){
+  
+  deltaDIC<-((HeaderDIC-TankDIC)/(ResidenceTime*SurfaceArea)*TankVolume*SWDenstiy)/1000
+  #substract calcification rate
+  NCP<-deltaDIC-NEC
+  return(NCP)
+  #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
+  #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
+  #biogeochemistry paper)
+  #NCP is in umol C cm^-2 hr-1  (or umol g-1 hr-1 if using one of the other measurements)
+  
+  #HeaderDIC is DIC from the header in umol/kg
+  #TankDICis DIC from the tank in umol/kg
+  #Residence time is the residence time in hours
+  #Surface area is SA of the substrate in cm2
+  #TankVolume is the volume in cm3 = (default = 5678)
+  #SWDensity is density of seawater in kg/cm3 (default =1.023)
+  #NEC is the calcification rate at that time 
+  
+}  
+
 NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3){
   
   tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
@@ -313,12 +334,49 @@ for (i in 1:length(unique(AllData$Aquarium))){
   plot(AllData$NEC.Vol, AllData$NEC.SA, col=AllData$Substrate, xlab='Volume', ylab='SA')
   plot(AllData$NEC.DW, AllData$NEC.AFDW, col=AllData$Substrate, xlab='Dry Weight', ylab='AFDW')
   
+
+  ###NCP calcs----------------------------------------------
+  ## Normalize the DIC Data to a constant salinity f
+  AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
+  AllData$HeaderDIC.norm<-AllData$HeaderDIC*AllData$HeaderSalinity/38
   
-  #### stopped here-----------------------------
+  #NCP using lagrangian method with AFDW normalization
+  AllData$NCP.AFDW<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
+                            TankDIC = AllData$TankDIC, 
+                            ResidenceTime = AllData$ResTime.mean, 
+                            SurfaceArea = AllData$AFDW,
+                            NEC = AllData$NEC.AFDW)
+  
+  
+  #NCP using lagrangian method with dry weight normalization
+  AllData$NCP.DW<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
+                            TankDIC = AllData$TankDIC, 
+                            ResidenceTime = AllData$ResTime.mean, 
+                            SurfaceArea = AllData$DW,
+                            NEC = AllData$NEC.DW)
+  
+  #NCP using lagrangian method with volume normalization
+  AllData$NCP.Vol<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
+                            TankDIC = AllData$TankDIC, 
+                            ResidenceTime = AllData$ResTime.mean, 
+                            SurfaceArea = AllData$Vol,
+                            NEC = AllData$NEC.Vol) 
+  
+  #NEC using lagrangian method with SA normalization
+  AllData$NCP.SA<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
+                           TankDIC = AllData$TankDIC, 
+                           ResidenceTime = AllData$ResTime.mean, 
+                           SurfaceArea = AllData$SA,
+                           NEC = AllData$NEC.SA) 
+  
+  
+    
+  #### calculate means------------------
 
 #sub <- sub[sub!="Mixed"]
 #sub<-droplevels(sub)
 
+  #calcification
 NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                      Mean.AFDW = mean(NEC.AFDW, na.rm = T),
                      N=sum(!is.na(NEC.AFDW)),
@@ -330,8 +388,20 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                      Mean.Vol = mean(NEC.Vol, na.rm = T),
                      SE.Vol= sd(NEC.Vol, na.rm = T)/sqrt(N)
 )
-
-
+#production
+  NCP.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
+                    Mean.AFDW = mean(NCP.AFDW, na.rm = T),
+                    N=sum(!is.na(NCP.AFDW)),
+                    SE.AFDW= sd(NCP.AFDW, na.rm = T)/sqrt(N),
+                    Mean.SA = mean(NCP.SA, na.rm = T),
+                    SE.SA= sd(NCP.SA, na.rm = T)/sqrt(N),
+                    Mean.DW = mean(NCP.DW, na.rm = T),
+                    SE.DW= sd(NCP.DW, na.rm = T)/sqrt(N),
+                    Mean.Vol = mean(NCP.Vol, na.rm = T),
+                    SE.Vol= sd(NCP.Vol, na.rm = T)/sqrt(N)
+  )
+  
+  
 par(mfrow=c(2,2))
 for (i in 1:5){
 plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
@@ -339,7 +409,7 @@ points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],All
 points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
-##Plot NEC averages across time for each normalization
+##Plot NEC averages across time for each normalization-------------------------------------------------------
 ##NORMALIZED BY AFDW
 par(mfrow=c(3,2))
 
@@ -489,7 +559,157 @@ for (i in 1:length(sub)){
 legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
 #-------------------------------------------------------------------------------
+##Plot NCP averages across time for each normalization
+##NORMALIZED BY AFDW
+par(mfrow=c(3,2))
 
+y<-NCP.mean$Mean.AFDW
+yse<-NCP.mean$SE.AFDW
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+5), ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NCP.mean$NutLevel))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NCP.mean$DateTime [NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]),
+         y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+5))
+    
+    arrows(unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           + yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           - yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NCP.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NCP.mean$DateTime)[a],min(y),unique(NCP.mean$DateTime)[b],max(y)+5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLevel), pch=19, bty = 'n')
+
+##NORMALIZED BY SA
+par(mfrow=c(3,2))
+
+y<-NCP.mean$Mean.SA
+yse<-NCP.mean$SE.SA
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+0.5), ylab=expression(paste("NCP ",mu,"mol cm"^{-2}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NCP.mean$NutLevel))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NCP.mean$DateTime [NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]),
+         y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.5))
+    
+    arrows(unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           + yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           - yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NCP.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NCP.mean$DateTime)[a],min(y),unique(NCP.mean$DateTime)[b],max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLevel), pch=19, bty = 'n')
+
+##NORMALIZED BY Vol
+par(mfrow=c(3,2))
+
+y<-NCP.mean$Mean.Vol
+yse<-NCP.mean$SE.Vol
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+0.5), ylab=expression(paste("NCP ",mu,"mol cm"^{-3}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NCP.mean$NutLevel))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NCP.mean$DateTime [NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]),
+         y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.5))
+    
+    arrows(unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           + yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           - yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NCP.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NCP.mean$DateTime)[a],min(y),unique(NCP.mean$DateTime)[b],max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLevel), pch=19, bty = 'n')
+
+#Normalized by DW
+par(mfrow=c(3,2))
+
+y<-NCP.mean$Mean.DW
+yse<-NCP.mean$SE.DW
+for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+0.5), ylab=expression(paste("NCP ",mu,"mol g DW"^{-1}," hr"^{-1})), main = sub[i])
+  
+  abline(h=0)
+  par(new = TRUE)
+  cols <- c(unique(NCP.mean$NutLevel))
+  #
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(NCP.mean$DateTime [NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]),
+         y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.5))
+    
+    arrows(unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           + yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           unique(NCP.mean$DateTime), y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]
+           - yse[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1)
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    
+  }
+  axis(1, at=unique(NCP.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+  
+  #shaded area for night
+  a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+  b<-ifelse(i<=4,6,13)
+  rect(unique(NCP.mean$DateTime)[a],min(y),unique(NCP.mean$DateTime)[b],max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+}
+legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLevel), pch=19, bty = 'n')
+
+
+##----------------------------------------------------------------------
 #calculate daily average per substrate and nutrient
 NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                   Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
@@ -577,8 +797,7 @@ arag <- carb$OmegaAragonite
 dim(arag) <- c(length(DIC), length(AT)) # 
 #contour(DIC, AT, arag)
 
-## Normalize the DIC Data to a constant salinity for deffeys diagram
-AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
+
 
 par(mfrow=c(1,1))
 for(i in 1:5){
@@ -638,6 +857,11 @@ for(i in 1:5){
 legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','white'), pch=19, bty = 'n')
 }
 
+
+###Looking at feedbacks
+
+plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel)
+plot(AllData$TankpH, AllData$NEC.AFDW, col=AllData$NutLevel)
 
 ## extra
 Exp1Data<-AllData[AllData$Experiment==1 ,]
