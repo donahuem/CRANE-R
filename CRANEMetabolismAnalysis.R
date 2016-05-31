@@ -32,7 +32,7 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
   #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
   #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
   #biogeochemistry paper)
-  #NEC is in umol cm^-2 hr-1
+  #NEC is in umol cm^-2 hr-1  (or umol g-1 hr-1 if using one of the other measurements)
   
   #HeaderTA is TA from the header in umol/kg
   #TankTAis TA from the tank in umol/kg
@@ -40,7 +40,8 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
   #Surface area is SA of the substrate in cm2
   #TankVolume is the volume in cm3 = (default = 5678)
   #SWDensity is density of seawater in kg/cm3 (default =1.023)
-
+# 
+   
 }  
 
 NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3){
@@ -167,14 +168,14 @@ Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
 
 ## Sum up all the biological data by aquarium
 Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
-                          SA = sum(SA, na.rm = T)*0.01, #the SA for coral and algae are in mm2 while Sand is in cm2
+                          SA = sum(SA, na.rm = T), #the SA for coral and algae are in mm2 while Sand is in cm2
                           AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
                           Volume = sum(Volume, na.rm = T)
 )
 
 Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
-                           SA = sum(SA, na.rm = T)*0.01,
+                           SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
@@ -182,28 +183,28 @@ Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
 
 
 Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarize,
-                          SA = sum(SA, na.rm = T)*0.01,
+                          SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
 )
 
 Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarize,
-                            SA = sum(SA, na.rm = T)*0.01,
+                            SA = sum(SA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(Volume, na.rm = T)
 )
 
 Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarize,
-                            SA = sum(FinalSA, na.rm = T)*0.01,
+                            SA = sum(FinalSA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(FinalVol, na.rm = T)
 )
 
 Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarize,
-                           SA = sum(FinalSA, na.rm = T)*0.01,
+                           SA = sum(FinalSA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(FinalVol, na.rm = T)
@@ -345,7 +346,7 @@ par(mfrow=c(3,2))
 y<-NEC.mean$Mean.AFDW
 yse<-NEC.mean$SE.AFDW
 for (i in 1:length(sub)){
-  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), main = sub[i])
+  plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+5), ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), main = sub[i])
   
   abline(h=0)
   par(new = TRUE)
@@ -356,7 +357,7 @@ for (i in 1:length(sub)){
     
     plot(as.numeric(NEC.mean$DateTime [NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]),
          y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], col = cols[j],
-         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)))
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+5))
     
     arrows(unique(NEC.mean$DateTime), y[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]]
            + yse[NEC.mean$Substrate==sub[i] & NEC.mean$NutLevel==Nuts[j]], 
@@ -372,7 +373,7 @@ for (i in 1:length(sub)){
   #shaded area for night
   a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
   b<-ifelse(i<=4,6,13)
-  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y),col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  rect(unique(NEC.mean$DateTime)[a],min(y),unique(NEC.mean$DateTime)[b],max(y)+5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
 }
 legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
