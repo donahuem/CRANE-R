@@ -26,7 +26,10 @@ error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 
 NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWDenstiy=1.023){
  
-   NEC<-((HeaderTA-TankTA)/(ResidenceTime*SurfaceArea)*TankVolume*SWDenstiy)/1000
+   #NEC<-0.5*(HeaderTA-TankTA)*TankVolume*SWDenstiy/(ResidenceTime*SurfaceArea)/1000
+   
+   NEC<-0.5*(HeaderTA-TankTA)*(TankVolume/SurfaceArea)*(SWDenstiy/ResidenceTime)/1000
+   
    
    return(NEC)
   #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
@@ -46,7 +49,7 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
 
 NCPCalc<-function(HeaderDIC,TankDIC,ResidenceTime,SurfaceArea, TankVolume=5678,SWDenstiy=1.023, NEC){
   
-  deltaDIC<-((HeaderDIC-TankDIC)/(ResidenceTime*SurfaceArea)*TankVolume*SWDenstiy)/1000
+  deltaDIC<-(TankVolume*SWDenstiy*(HeaderDIC-TankDIC)/(ResidenceTime*SurfaceArea))/1000
   #substract calcification rate
   NCP<-deltaDIC-NEC
   return(NCP)
@@ -110,10 +113,59 @@ NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=
   
 }  
 
+
+NCPCalc2<-function(HeaderDIC,TankDIC,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3, NEC){
+  
+  tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
+  #flow is in ml/min convert to L/hr
+  flow<-flow*60/1000;
+  
+  #time is time in between sampling points
+  #SA is in cm^3, convert to m^3
+  SurfaceArea<-SurfaceArea/(100^2);
+  
+  
+  #now convert flow rate to kg m-2 hr-1 so that I can use Andersson et al. 2009 eq 
+  flowrate<-flow*SWDensity/tankarea;
+  
+  #DeltaTA/dt total change in TA in the tank over sample times (mmol m-2 hr-1)
+  DTAdt<-NULL
+  FinTA<-NULL
+  FoutTA<-NULL
+  NCP1<-NULL
+  NCP<-NULL
+  for (i in 1:length(TankDIC)-1){
+    DTAdt[i]<-((TankDIC[i+1]-TankDIC[i])/(time*SurfaceArea[i])*TankVolume*SWDensity)/1000;
+    #F_in -How much TA in coming in from headers (mmol m-2 hr-1)
+    FinTA[i]<-((HeaderDIC[i+1]+ HeaderDIC[i]) *flowrate[i])/1000;
+    
+    #F_out-How much TA is leaving the tank (mmol m-2 hr-1)
+    FoutTA[i]<-((TankDIC[i+1]+TankDIC[i])*flowrate[i])/1000;
+    
+    #Net ecosystem calcification (mmol m-2 hr-1) due to the critters in tank
+    NCP1[i]<-12*(FinTA[i]-FoutTA[i]-DTAdt[i]); #the 12 makes it per day
+    NCP[i]<-NCP1[i]-NEC[i]
+    }
+  return(NCP)
+  #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
+  #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
+  #biogeochemistry paper)
+  #NEC is in mmol m^-2 d-1
+  
+  #HeaderTA is TA from the header in umol/kg
+  #TankTAis TA from the tank in umol/kg
+  #Residence time is the residence time in hours
+  #Surface area is SA of the substrate in cm2
+  #TankVolume is the volume in cm3 = (default = 5678)
+  #SWDensity is density of seawater in kg/cm3 (default =1.023)
+  
+}  
+
+
 # Load Data-----------------------------------------
 #Chem Data
-ChemData<-read.csv('Data/AllChemData.csv') #read in 1st 12 columns only
-
+ChemData<-read.csv('Data/AllChemData_noCorrect.csv') #read in 1st 12 columns only
+ChemData<-ChemData[,-c(24,25)]
 #Biology Data
 #sourcing this doesn't work very well because or slow internet connections instead I will pull from the csv files created and 
 #stored in the google drive folder
@@ -138,10 +190,11 @@ Sand<- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & 
 #normalize the TA to N+N concentrations.  Right now we are using 0,3,6 as place holders until the real data get here
 #I am also only normalizing the headers for nw because the N+N in the tanks are very low due to uptake
 
-ChemData$HeaderTA.norm<-ChemData$HeaderTA+ChemData$NN
+ChemData$HeaderTA.norm<-ChemData$HeaderTA-ChemData$HeaderN-ChemData$HeaderP
+#ChemData$HeaderTA.norm<-ChemData$HeaderTA
 
 #normalize the TA data to salinity---THE SALINITY DATA IS CAUSING PROBLEMS.....
-ChemData$HeaderTA.norm<-ChemData$HeaderTA.norm*ChemData$HeaderSalinity/38
+ChemData$HeaderTA.norm<-ChemData$HeaderTA*ChemData$HeaderSalinity/38
 ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
 #ChemData$TankTA.norm<-ChemData$TankTA
 
@@ -281,12 +334,12 @@ AllData$NutLevel <- factor(AllData$NutLevel, levels = c("Ambient", "Med", "High"
 
 #Calculate NEC---------------------------------------------
 
-Nuts<-unique(AllData$NutLevel)
+Nuts<-unique(AllData$NutLevel)[c(1,3,2)] #puts the order for for loops as ambient, then med, then high
 sub<-unique(AllData$Substrate)
 
 #NEC2<-matrix(data=NA, nrow=6, ncol=3)
 NEC2 <- array(NA, dim=c(6,72))
-
+NCP2 <- array(NA, dim=c(6,72))
 #sort data by aquarium so that I can calculate NEC easier
 
 AllData<-AllData[order(AllData$Aquarium),]
@@ -299,6 +352,16 @@ for (i in 1:length(unique(AllData$Aquarium))){
   
   
 }
+
+#for (i in 1:length(unique(AllData$Aquarium))){
+ # NCP2[,i]<-NCPCalc2(HeaderDIC = AllData$HeaderDIC.norm[AllData$Aquarium==i], 
+  #                   TankDIC = AllData$TankDIC.norm[AllData$Aquarium==i], 
+   #                  flow =  AllData$Flow.mean[AllData$Aquarium==i], 
+    #                 SurfaceArea = AllData$SA[AllData$Aquarium==i],
+     #                NEC=NEC2[,i])
+  
+  
+#}
 
 #NEC using lagrangian method with AFDW normalization
   AllData$NEC.AFDW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
@@ -328,7 +391,7 @@ for (i in 1:length(unique(AllData$Aquarium))){
 
   #plot the different NEC calcs versus each other
   par(mfrow=c(2,2))
-  plot(AllData$NEC.SA, AllData$NEC.AFDW, col=AllData$Substrate, xlab='SA', ylab='AFDW')
+  plot(AllData$NEC.SA, AllData$NEC.AFDW, col=AllData$Substrate, xlab='SA', ylab='AFDW', main='NEC')
   legend('topright', legend=unique(AllData$Substrate), col=unique(AllData$Substrate), pch=19, bty = 'n')
   plot(AllData$NEC.Vol, AllData$NEC.DW, col=AllData$Substrate, xlab='Volume', ylab='DW')
   plot(AllData$NEC.Vol, AllData$NEC.SA, col=AllData$Substrate, xlab='Volume', ylab='SA')
@@ -337,40 +400,54 @@ for (i in 1:length(unique(AllData$Aquarium))){
 
   ###NCP calcs----------------------------------------------
   ## Normalize the DIC Data to a constant salinity f
+  #AllData$TankDIC.norm<-AllData$TankDIC
+  #AllData$HeaderDIC.norm<-AllData$HeaderDIC
+  
   AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
   AllData$HeaderDIC.norm<-AllData$HeaderDIC*AllData$HeaderSalinity/38
   
+  
   #NCP using lagrangian method with AFDW normalization
-  AllData$NCP.AFDW<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
-                            TankDIC = AllData$TankDIC, 
+  AllData$NCP.AFDW<-NCPCalc(HeaderDIC = AllData$HeaderDIC.norm, 
+                            TankDIC = AllData$TankDIC.norm, 
                             ResidenceTime = AllData$ResTime.mean, 
                             SurfaceArea = AllData$AFDW,
                             NEC = AllData$NEC.AFDW)
   
   
   #NCP using lagrangian method with dry weight normalization
-  AllData$NCP.DW<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
-                            TankDIC = AllData$TankDIC, 
+  AllData$NCP.DW<-NCPCalc(HeaderDIC = AllData$HeaderDIC.norm, 
+                            TankDIC = AllData$TankDIC.norm, 
                             ResidenceTime = AllData$ResTime.mean, 
                             SurfaceArea = AllData$DW,
                             NEC = AllData$NEC.DW)
   
   #NCP using lagrangian method with volume normalization
-  AllData$NCP.Vol<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
-                            TankDIC = AllData$TankDIC, 
+  AllData$NCP.Vol<-NCPCalc(HeaderDIC = AllData$HeaderDIC.norm, 
+                            TankDIC = AllData$TankDIC.norm, 
                             ResidenceTime = AllData$ResTime.mean, 
                             SurfaceArea = AllData$Vol,
                             NEC = AllData$NEC.Vol) 
   
   #NEC using lagrangian method with SA normalization
-  AllData$NCP.SA<-NCPCalc(HeaderDIC = AllData$HeaderDIC, 
-                           TankDIC = AllData$TankDIC, 
+  AllData$NCP.SA<-NCPCalc(HeaderDIC = AllData$HeaderDIC.norm, 
+                           TankDIC = AllData$TankDIC.norm, 
                            ResidenceTime = AllData$ResTime.mean, 
                            SurfaceArea = AllData$SA,
                            NEC = AllData$NEC.SA) 
   
   
-    
+  
+  
+  #plot the different NCP calcs versus each other
+  par(mfrow=c(2,2))
+  plot(AllData$NCP.SA, AllData$NCP.AFDW, col=AllData$Substrate, xlab='SA', ylab='AFDW', main='NCP')
+  legend('topright', legend=unique(AllData$Substrate), col=unique(AllData$Substrate), pch=19, bty = 'n')
+  plot(AllData$NCP.Vol, AllData$NCP.DW, col=AllData$Substrate, xlab='Volume', ylab='DW')
+  plot(AllData$NCP.Vol, AllData$NCP.SA, col=AllData$Substrate, xlab='Volume', ylab='SA')
+  plot(AllData$NCP.DW, AllData$NCP.AFDW, col=AllData$Substrate, xlab='Dry Weight', ylab='AFDW')
+  
+  
   #### calculate means------------------
 
 #sub <- sub[sub!="Mixed"]
@@ -412,7 +489,7 @@ points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllD
 ##Plot NEC averages across time for each normalization-------------------------------------------------------
 ##NORMALIZED BY AFDW
 par(mfrow=c(3,2))
-
+cols <- c(unique(NEC.mean$NutLevel))
 y<-NEC.mean$Mean.AFDW
 yse<-NEC.mean$SE.AFDW
 for (i in 1:length(sub)){
@@ -420,7 +497,7 @@ for (i in 1:length(sub)){
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NEC.mean$Substrate))
+  
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -449,15 +526,17 @@ legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLeve
 
 ##NORMALIZED BY SA
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NEC.mean$Mean.SA
 yse<-NEC.mean$SE.SA
+cols <- c(unique(NEC.mean$NutLevel))
 for (i in 1:length(sub)){
   plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol cm"^{-2}," hr"^{-1})), main = sub[i])
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NEC.mean$Substrate))
+  
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -486,15 +565,17 @@ legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLeve
 
 ##Volume
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NEC.mean$Mean.Vol
 yse<-NEC.mean$SE.Vol
+#cols <- c(unique(NEC.mean$NutLevel))
 for (i in 1:length(sub)){
   plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)), ylab=expression(paste("NEC ",mu,"mol cm"^{-3}," hr"^{-1})), main = sub[i])
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NEC.mean$Substrate))
+  
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -521,9 +602,10 @@ for (i in 1:length(sub)){
 }
 legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
-#DW
+##DW
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NEC.mean$Mean.DW
 yse<-NEC.mean$SE.DW
 for (i in 1:length(sub)){
@@ -531,7 +613,7 @@ for (i in 1:length(sub)){
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NEC.mean$Substrate))
+  #cols <- c(unique(NEC.mean$NutLevel))
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -562,7 +644,8 @@ legend('topright', legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLeve
 ##Plot NCP averages across time for each normalization
 ##NORMALIZED BY AFDW
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NCP.mean$Mean.AFDW
 yse<-NCP.mean$SE.AFDW
 for (i in 1:length(sub)){
@@ -570,7 +653,7 @@ for (i in 1:length(sub)){
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NCP.mean$NutLevel))
+#  cols <- unique(NCP.mean$NutLevel)
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -600,17 +683,23 @@ legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLeve
 ##NORMALIZED BY SA
 par(mfrow=c(3,2))
 
+rm(y)
+rm(yse)
+
 y<-NCP.mean$Mean.SA
 yse<-NCP.mean$SE.SA
+
 for (i in 1:length(sub)){
   plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+0.5), ylab=expression(paste("NCP ",mu,"mol cm"^{-2}," hr"^{-1})), main = sub[i])
   
-  abline(h=0)
+ 
   par(new = TRUE)
-  cols <- c(unique(NCP.mean$NutLevel))
+  abline(h=0)
+#  cols <- unique(NCP.mean$NutLevel)
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
+   
     
     plot(as.numeric(NCP.mean$DateTime [NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]]),
          y[NCP.mean$Substrate==sub[i] & NCP.mean$NutLevel==Nuts[j]], col = cols[j],
@@ -636,7 +725,8 @@ legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLeve
 
 ##NORMALIZED BY Vol
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NCP.mean$Mean.Vol
 yse<-NCP.mean$SE.Vol
 for (i in 1:length(sub)){
@@ -644,7 +734,7 @@ for (i in 1:length(sub)){
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NCP.mean$NutLevel))
+ # cols <- unique(NCP.mean$NutLevel)
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -673,7 +763,8 @@ legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLeve
 
 #Normalized by DW
 par(mfrow=c(3,2))
-
+rm(y)
+rm(yse)
 y<-NCP.mean$Mean.DW
 yse<-NCP.mean$SE.DW
 for (i in 1:length(sub)){
@@ -681,7 +772,7 @@ for (i in 1:length(sub)){
   
   abline(h=0)
   par(new = TRUE)
-  cols <- c(unique(NCP.mean$NutLevel))
+  #cols <- unique(NCP.mean$NutLevel)
   #
   for (j in 1:length(Nuts)){
     par(new = TRUE)
@@ -723,6 +814,28 @@ NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                   SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
 )
 
+NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
+                      Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
+                      N2=sum(!is.na(Mean.AFDW)),
+                      SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
+                      Mean.SA2 = mean(Mean.SA, na.rm = T),
+                      SE.SA2= sd(Mean.SA, na.rm = T)/sqrt(N2),
+                      Mean.DW2 = mean(Mean.DW, na.rm = T),
+                      SE.DW2= sd(Mean.DW, na.rm = T)/sqrt(N2),
+                      Mean.Vol2 = mean(Mean.Vol, na.rm = T),
+                      SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
+)
+#NEC.mean.Net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+ #                     Mean.AFDW2 = mean(NEC.AFDW, na.rm = T),
+  #                    N2=sum(!is.na(NEC.AFDW)),
+  #                    SE.AFDW2= sd(NEC.AFDW, na.rm = T)/sqrt(N2),
+   #                   Mean.SA2 = mean(NEC.SA, na.rm = T),
+    #                  SE.SA2= sd(NEC.SA, na.rm = T)/sqrt(N2),
+     #                 Mean.DW2 = mean(NEC.DW, na.rm = T),
+      #                SE.DW2= sd(NEC.DW, na.rm = T)/sqrt(N2),
+       #               Mean.Vol2 = mean(NEC.Vol, na.rm = T),
+                  #    SE.Vol2= sd(NEC.Vol, na.rm = T)/sqrt(N2)
+#)
 
 
 # calculate mean calcification rate
@@ -738,6 +851,29 @@ NEC.mean.calc <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                       SE.Vol2= sd(Mean.Vol[Mean.Vol>0], na.rm = T)/sqrt(N2)
 )
 
+NCP.mean.P <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
+                       Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0], na.rm = T),
+                       N2=sum(Mean.AFDW>0),
+                       SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0], na.rm = T)/sqrt(N2),
+                       Mean.SA2 = mean(Mean.SA[Mean.SA>0], na.rm = T),
+                       SE.SA2= sd(Mean.SA[Mean.SA>0], na.rm = T)/sqrt(N2),
+                       Mean.DW2 = mean(Mean.DW[Mean.DW>0], na.rm = T),
+                       SE.DW2= sd(Mean.DW[Mean.DW>0], na.rm = T)/sqrt(N2),
+                       Mean.Vol2 = mean(Mean.Vol[Mean.Vol>0], na.rm = T),
+                       SE.Vol2= sd(Mean.Vol[Mean.Vol>0], na.rm = T)/sqrt(N2)
+)
+# calculate mean calcification rate
+#NEC.mean.calc <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+ #                      Mean.AFDW2 = mean(NEC.AFDW[NEC.AFDW>0], na.rm = T),
+  #                     N2=sum(NEC.AFDW>0),
+   #                    SE.AFDW2= sd(NEC.AFDW[NEC.AFDW>0], na.rm = T)/sqrt(N2),
+  #                     Mean.SA2 = mean(NEC.SA[NEC.SA>0], na.rm = T),
+  #                     SE.SA2= sd(NEC.SA[NEC.SA>0], na.rm = T)/sqrt(N2),
+  #                     Mean.DW2 = mean(NEC.DW[NEC.DW>0], na.rm = T),
+  #                     SE.DW2= sd(NEC.DW[NEC.DW>0], na.rm = T)/sqrt(N2),
+  #                     Mean.Vol2 = mean(NEC.Vol[NEC.Vol>0], na.rm = T),
+  #                     SE.Vol2= sd(NEC.Vol[NEC.Vol>0], na.rm = T)/sqrt(N2)
+#)
 # calculate mean dissolution rate
 NEC.mean.dis <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                        Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW<0], na.rm = T),
@@ -750,13 +886,68 @@ NEC.mean.dis <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                        Mean.Vol2 = mean(Mean.Vol[Mean.Vol<0], na.rm = T),
                        SE.Vol2= sd(Mean.Vol[Mean.Vol<0], na.rm = T)/sqrt(N2)
 )
+NEC.mean.dis[is.na(NEC.mean.dis)]<-0 #replace the NAs with 0
 
-#replace the NAs with 0
-NEC.mean.dis[is.na(NEC.mean.dis)]<-0
+NCP.mean.R <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
+                      Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW<0], na.rm = T),
+                      N2=sum(Mean.AFDW<0),
+                      SE.AFDW2= sd(Mean.AFDW[Mean.AFDW<0], na.rm = T)/sqrt(N2),
+                      Mean.SA2 = mean(Mean.SA[Mean.SA<0], na.rm = T),
+                      SE.SA2= sd(Mean.SA[Mean.SA<0], na.rm = T)/sqrt(N2),
+                      Mean.DW2 = mean(Mean.DW[Mean.DW<0], na.rm = T),
+                      SE.DW2= sd(Mean.DW[Mean.DW<0], na.rm = T)/sqrt(N2),
+                      Mean.Vol2 = mean(Mean.Vol[Mean.Vol<0], na.rm = T),
+                      SE.Vol2= sd(Mean.Vol[Mean.Vol<0], na.rm = T)/sqrt(N2)
+)
+
+#P/R
+#NCP.mean.PR <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
+ #                   Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.AFDW[Mean.AFDW<0]), na.rm = T),
+  #                  N2=sum(!is.na(Mean.AFDW)),
+  #                  SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.AFDW[Mean.AFDW<0]), na.rm = T)/sqrt(N2),
+  #                  Mean.SA2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.SA<0]), na.rm = T),
+  #                  SE.SA2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.SA<0]), na.rm = T)/sqrt(N2),
+  #                  Mean.DW2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.DW<0]), na.rm = T),
+  #                  SE.DW2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.DW<0]), na.rm = T)/sqrt(N2),
+  #                  Mean.Vol2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.Vol<0]), na.rm = T),
+  #                  SE.Vol2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.Vol<0]), na.rm = T)/sqrt(N2)
+#)
+
+# need to calculat the averages this way because I need to average across tanks... the number of samples 
+#that are photosynthesizing does not equal the number of samples that are respiring... thus, I take a mean of means
+NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
+                     Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
+                     Mean.AFDW2.r =mean(abs(NCP.AFDW[NCP.AFDW<0]), na.rm = T),       
+                     PR.AFDW2=Mean.AFDW2.p/Mean.AFDW2.r
+                     #N2=sum(!is.na(Mean.AFDW2.p)),
+                     #SE.AFDW2.pr=sd(PR.AFDW2)/sqrt(N2)
+                     )
+NCP.mean.PRbyTank[is.na(NCP.mean.PRbyTank)]<-0 #replace the NAs with 0
+
+NCP.mean.PR<-ddply(NCP.mean.PRbyTank, c("Substrate","NutLevel"), summarize,
+                Mean.AFDW2=mean(PR.AFDW2, na.rm=T),
+                N2=3,
+                SE.AFDW2=sd(PR.AFDW2)/sqrt(N2)
+)
+
+# calculate mean dissolution rate
+#NEC.mean.dis <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+#                      Mean.AFDW2 = mean(NEC.AFDW[NEC.AFDW<0], na.rm = T),
+#                      N2=sum(NEC.AFDW<0),
+#                      SE.AFDW2= sd(NEC.AFDW[NEC.AFDW<0], na.rm = T)/sqrt(N2),
+#                      Mean.SA2 = mean(NEC.SA[NEC.SA<0], na.rm = T),
+#                      SE.SA2= sd(NEC.SA[NEC.SA<0], na.rm = T)/sqrt(N2),
+#                      Mean.DW2 = mean(NEC.DW[NEC.DW<0], na.rm = T),
+#                      SE.DW2= sd(NEC.DW[NEC.DW<0], na.rm = T)/sqrt(N2),
+#                      Mean.Vol2 = mean(NEC.Vol[NEC.Vol<0], na.rm = T),
+#                      SE.Vol2= sd(NEC.Vol[NEC.Vol<0], na.rm = T)/sqrt(N2)
+#)
+
+
 
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-x<-barplot(NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]], main=sub[i], ylim=c(0,25))
+x<-barplot(NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Calcification')
   errorbars(x,NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]],0,NEC.mean.calc$SE.AFDW2[NEC.mean.calc$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
@@ -765,16 +956,55 @@ x<-barplot(NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]], main=sub[i
 
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]], main=sub[i], ylim=c(0,-10))
+  x<-barplot(NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]], main=sub[i], ylim=c(0,-10), xlab = 'Mean Dissolution')
   errorbars(x,NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]],0,NEC.mean.dis$SE.AFDW2[NEC.mean.dis$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
 }
 
+
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(0,25))
+  x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Net NEC')
   errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
+#NCP
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NCP.mean.P$Mean.AFDW2[NCP.mean.P$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Photosynthesis')
+  errorbars(x,NCP.mean.P$Mean.AFDW2[NCP.mean.P$Substrate==sub[i]],0,NCP.mean.P$SE.AFDW2[NCP.mean.P$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NCP.mean.R$Mean.AFDW2[NCP.mean.R$Substrate==sub[i]], main=sub[i], ylim=c(0,-20), xlab = 'Mean Respiration')
+  errorbars(x,NCP.mean.R$Mean.AFDW2[NCP.mean.R$Substrate==sub[i]],0,NCP.mean.R$SE.AFDW2[NCP.mean.R$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
+
+
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-10,25), xlab = 'Mean Net NCP')
+  errorbars(x,NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]],0,NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,10), xlab = 'Mean P/R')
+  errorbars(x,NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.AFDW2[NCP.mean.PR$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
 }
@@ -792,12 +1022,15 @@ AT <- seq(2000e-6, 2341e-6, length.out=10)
 DIC <- seq(1492e-6, 2300e-6, length.out=10)
 dat <- expand.grid(AT, DIC)
 
-carb <- carb(flag=15, var1=dat$Var1, var2=dat$Var2, S=35, T=25, P=0, Pt=0, Sit=0, k1k2="l", kf="pf", pHscale="T")
+carb <- carb(flag=15, var1=,dat$Var1, var2=dat$Var2, S=35, T=25, P=0, Pt=0, Sit=0, k1k2="l", kf="pf", pHscale="T")
+
 arag <- carb$OmegaAragonite
 dim(arag) <- c(length(DIC), length(AT)) # 
+
 #contour(DIC, AT, arag)
-
-
+#THE ARAGNOATITE SATURATION STATE CONTOURS ARE WRONG
+arag<-arag[c(10,9,8,7,6,5,4,3,2,1),]
+arag<-arag[,c(10,9,8,7,6,5,4,3,2,1)]
 
 par(mfrow=c(1,1))
 for(i in 1:5){
@@ -808,10 +1041,11 @@ for(i in 1:5){
                  xlab="DIC",
                  ylab="Total alkalinity",
                  key.title = title(main = expression(paste(Omega[arg]))),
-                 levels=seq(0, 9, by=0.25),  
+                 #levels=seq(0, 9, by=0.25), 
+                 levels = pretty(c(0,9), 50),
                  #labcex=1.5,
                  #method="edge",
-                 col = rainbow(40),
+                 col = rainbow(50),
                  lwd=2,
                  lty="solid",
                  main=sub[i]
@@ -861,30 +1095,5 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 ###Looking at feedbacks
 
 plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel)
-plot(AllData$TankpH, AllData$NEC.AFDW, col=AllData$NutLevel)
+plot(AllData$NCP.AFDW, AllData$NEC.AFDW, col=AllData$NutLevel)
 
-## extra
-Exp1Data<-AllData[AllData$Experiment==1 ,]
-NECExp1.model <- lmer(NEC1 ~ NutLevel*Time + Substrate + (1|Tank), data=Exp1Data)
-#NECExp1.model <- lm(NECExp1 ~ NutLevel*Time + Tank + Substrate, data=Exp1Data)
-anova(NECExp1.model)
-
-
-#integrate under the curve to calculate net NEC.... 
-Exp1Data$DateTime<-as.factor(Exp1Data$DateTime)
-
-levels(Exp1Data$DateTime)<-c(1:7)
-Exp1Data$DateTime <- droplevels(Exp1Data$DateTime)
-Exp1Data$DateTime <- as.integer(Exp1Data$DateTime)
-
-require(pracma)
-AUC = trapz(Exp1Data$DateTime[1:7],AllData$NECExp1[1:7])
-
-NEC.int<-NA
-for (i in 1:36){
-  NEC.int[i]<-trapz(Exp1Data$DateTime[Exp1Data$Aquarium==i],Exp1Data$NECExp1[Exp1Data$Aquarium==i])
-}
-
-ddply(Exp1Data, c("Aquarium"), summarize,
-      NEC.int=trapz(Exp1Data$DateTime,Exp1Data$NECExp1)
-)
