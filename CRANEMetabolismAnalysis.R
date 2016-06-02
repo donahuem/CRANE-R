@@ -332,6 +332,11 @@ AllData<-AllData[order(AllData$Experiment, AllData$DateTime, AllData$Substrate, 
 
 AllData$NutLevel <- factor(AllData$NutLevel, levels = c("Ambient", "Med", "High"))
 
+
+#add a column for "Day" or "Night"
+time<-unique(AllData$Time)
+AllData$DayNight<-ifelse(AllData$Time==time[1]|AllData$Time==time[2]|AllData$Time==time[3], 'Day', 'Night')
+
 #Calculate NEC---------------------------------------------
 
 Nuts<-unique(AllData$NutLevel)[c(1,3,2)] #puts the order for for loops as ambient, then med, then high
@@ -802,6 +807,14 @@ legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLeve
 
 ##----------------------------------------------------------------------
 #calculate daily average per substrate and nutrient
+#add a day night column
+time<-unique(NEC.mean$DateTime)
+NEC.mean$DayNight<-ifelse(NEC.mean$DateTime==time[1]|NEC.mean$DateTime==time[2]|NEC.mean$DateTime==time[3]|
+                            NEC.mean$DateTime==time[7]|NEC.mean$DateTime==time[8]|
+                            NEC.mean$DateTime==time[9]|NEC.mean$DateTime==time[10]|NEC.mean$DateTime==time[11]|
+                            NEC.mean$DateTime==time[14], 'Day', 'Night')
+NCP.mean$DayNight<-NEC.mean$DayNight
+
 NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                   Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                   N2=sum(!is.na(Mean.AFDW)),
@@ -838,83 +851,31 @@ NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
 #)
 
 
-# calculate mean calcification rate
-NEC.mean.calc <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
-                      Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0], na.rm = T),
-                      N2=sum(Mean.AFDW>0),
-                      SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0], na.rm = T)/sqrt(N2),
-                      Mean.SA2 = mean(Mean.SA[Mean.SA>0], na.rm = T),
-                      SE.SA2= sd(Mean.SA[Mean.SA>0], na.rm = T)/sqrt(N2),
-                      Mean.DW2 = mean(Mean.DW[Mean.DW>0], na.rm = T),
-                      SE.DW2= sd(Mean.DW[Mean.DW>0], na.rm = T)/sqrt(N2),
-                      Mean.Vol2 = mean(Mean.Vol[Mean.Vol>0], na.rm = T),
-                      SE.Vol2= sd(Mean.Vol[Mean.Vol>0], na.rm = T)/sqrt(N2)
+#calculate averages for day and night
+NEC.mean.DayNight <- ddply(NEC.mean, c("Substrate","NutLevel", "DayNight"), summarize,
+                      Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
+                      N2=sum(!is.na(Mean.AFDW)),
+                      SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
+                      Mean.SA2 = mean(Mean.SA, na.rm = T),
+                      SE.SA2= sd(Mean.SA, na.rm = T)/sqrt(N2),
+                      Mean.DW2 = mean(Mean.DW, na.rm = T),
+                      SE.DW2= sd(Mean.DW, na.rm = T)/sqrt(N2),
+                      Mean.Vol2 = mean(Mean.Vol, na.rm = T),
+                      SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
 )
 
-NCP.mean.P <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
-                       Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0], na.rm = T),
-                       N2=sum(Mean.AFDW>0),
-                       SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0], na.rm = T)/sqrt(N2),
-                       Mean.SA2 = mean(Mean.SA[Mean.SA>0], na.rm = T),
-                       SE.SA2= sd(Mean.SA[Mean.SA>0], na.rm = T)/sqrt(N2),
-                       Mean.DW2 = mean(Mean.DW[Mean.DW>0], na.rm = T),
-                       SE.DW2= sd(Mean.DW[Mean.DW>0], na.rm = T)/sqrt(N2),
-                       Mean.Vol2 = mean(Mean.Vol[Mean.Vol>0], na.rm = T),
-                       SE.Vol2= sd(Mean.Vol[Mean.Vol>0], na.rm = T)/sqrt(N2)
-)
-# calculate mean calcification rate
-#NEC.mean.calc <- ddply(AllData, c("Substrate","NutLevel"), summarize,
- #                      Mean.AFDW2 = mean(NEC.AFDW[NEC.AFDW>0], na.rm = T),
-  #                     N2=sum(NEC.AFDW>0),
-   #                    SE.AFDW2= sd(NEC.AFDW[NEC.AFDW>0], na.rm = T)/sqrt(N2),
-  #                     Mean.SA2 = mean(NEC.SA[NEC.SA>0], na.rm = T),
-  #                     SE.SA2= sd(NEC.SA[NEC.SA>0], na.rm = T)/sqrt(N2),
-  #                     Mean.DW2 = mean(NEC.DW[NEC.DW>0], na.rm = T),
-  #                     SE.DW2= sd(NEC.DW[NEC.DW>0], na.rm = T)/sqrt(N2),
-  #                     Mean.Vol2 = mean(NEC.Vol[NEC.Vol>0], na.rm = T),
-  #                     SE.Vol2= sd(NEC.Vol[NEC.Vol>0], na.rm = T)/sqrt(N2)
-#)
-# calculate mean dissolution rate
-NEC.mean.dis <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
-                       Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW<0], na.rm = T),
-                       N2=sum(Mean.AFDW<0),
-                       SE.AFDW2= sd(Mean.AFDW[Mean.AFDW<0], na.rm = T)/sqrt(N2),
-                       Mean.SA2 = mean(Mean.SA[Mean.SA<0], na.rm = T),
-                       SE.SA2= sd(Mean.SA[Mean.SA<0], na.rm = T)/sqrt(N2),
-                       Mean.DW2 = mean(Mean.DW[Mean.DW<0], na.rm = T),
-                       SE.DW2= sd(Mean.DW[Mean.DW<0], na.rm = T)/sqrt(N2),
-                       Mean.Vol2 = mean(Mean.Vol[Mean.Vol<0], na.rm = T),
-                       SE.Vol2= sd(Mean.Vol[Mean.Vol<0], na.rm = T)/sqrt(N2)
-)
-NEC.mean.dis[is.na(NEC.mean.dis)]<-0 #replace the NAs with 0
+NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summarize,
+                      Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
+                      N2=sum(!is.na(Mean.AFDW)),
+                      SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
+                      Mean.SA2 = mean(Mean.SA, na.rm = T),
+                      SE.SA2= sd(Mean.SA, na.rm = T)/sqrt(N2),
+                      Mean.DW2 = mean(Mean.DW, na.rm = T),
+                      SE.DW2= sd(Mean.DW, na.rm = T)/sqrt(N2),
+                      Mean.Vol2 = mean(Mean.Vol, na.rm = T),
+                      SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2))
 
-NCP.mean.R <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
-                      Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW<0], na.rm = T),
-                      N2=sum(Mean.AFDW<0),
-                      SE.AFDW2= sd(Mean.AFDW[Mean.AFDW<0], na.rm = T)/sqrt(N2),
-                      Mean.SA2 = mean(Mean.SA[Mean.SA<0], na.rm = T),
-                      SE.SA2= sd(Mean.SA[Mean.SA<0], na.rm = T)/sqrt(N2),
-                      Mean.DW2 = mean(Mean.DW[Mean.DW<0], na.rm = T),
-                      SE.DW2= sd(Mean.DW[Mean.DW<0], na.rm = T)/sqrt(N2),
-                      Mean.Vol2 = mean(Mean.Vol[Mean.Vol<0], na.rm = T),
-                      SE.Vol2= sd(Mean.Vol[Mean.Vol<0], na.rm = T)/sqrt(N2)
-)
-
-#P/R
-#NCP.mean.PR <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
- #                   Mean.AFDW2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.AFDW[Mean.AFDW<0]), na.rm = T),
-  #                  N2=sum(!is.na(Mean.AFDW)),
-  #                  SE.AFDW2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.AFDW[Mean.AFDW<0]), na.rm = T)/sqrt(N2),
-  #                  Mean.SA2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.SA<0]), na.rm = T),
-  #                  SE.SA2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.SA<0]), na.rm = T)/sqrt(N2),
-  #                  Mean.DW2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.DW<0]), na.rm = T),
-  #                  SE.DW2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.DW<0]), na.rm = T)/sqrt(N2),
-  #                  Mean.Vol2 = mean(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.Vol<0]), na.rm = T),
-  #                  SE.Vol2= sd(Mean.AFDW[Mean.AFDW>0]/abs(Mean.SA[Mean.Vol<0]), na.rm = T)/sqrt(N2)
-#)
-
-# need to calculat the averages this way because I need to average across tanks... the number of samples 
-#that are photosynthesizing does not equal the number of samples that are respiring... thus, I take a mean of means
+#PR
 NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
                      Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
                      Mean.AFDW2.r =mean(abs(NCP.AFDW[NCP.AFDW<0]), na.rm = T),       
@@ -930,80 +891,61 @@ NCP.mean.PR<-ddply(NCP.mean.PRbyTank, c("Substrate","NutLevel"), summarize,
                 SE.AFDW2=sd(PR.AFDW2)/sqrt(N2)
 )
 
-# calculate mean dissolution rate
-#NEC.mean.dis <- ddply(AllData, c("Substrate","NutLevel"), summarize,
-#                      Mean.AFDW2 = mean(NEC.AFDW[NEC.AFDW<0], na.rm = T),
-#                      N2=sum(NEC.AFDW<0),
-#                      SE.AFDW2= sd(NEC.AFDW[NEC.AFDW<0], na.rm = T)/sqrt(N2),
-#                      Mean.SA2 = mean(NEC.SA[NEC.SA<0], na.rm = T),
-#                      SE.SA2= sd(NEC.SA[NEC.SA<0], na.rm = T)/sqrt(N2),
-#                      Mean.DW2 = mean(NEC.DW[NEC.DW<0], na.rm = T),
-#                      SE.DW2= sd(NEC.DW[NEC.DW<0], na.rm = T)/sqrt(N2),
-#                      Mean.Vol2 = mean(NEC.Vol[NEC.Vol<0], na.rm = T),
-#                      SE.Vol2= sd(NEC.Vol[NEC.Vol<0], na.rm = T)/sqrt(N2)
-#)
 
-
-
+#NEC plots net
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-x<-barplot(NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Calcification')
-  errorbars(x,NEC.mean.calc$Mean.AFDW2[NEC.mean.calc$Substrate==sub[i]],0,NEC.mean.calc$SE.AFDW2[NEC.mean.calc$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
-}
-  
-
-par(mfrow=c(3,2))
-for (i in 1:length(sub)){
-  x<-barplot(NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]], main=sub[i], ylim=c(0,-10), xlab = 'Mean Dissolution')
-  errorbars(x,NEC.mean.dis$Mean.AFDW2[NEC.mean.dis$Substrate==sub[i]],0,NEC.mean.dis$SE.AFDW2[NEC.mean.dis$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
-}
-
-
-par(mfrow=c(3,2))
-for (i in 1:length(sub)){
-  x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Net NEC')
+  x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-5,15), 
+             ylab=expression(paste("Net NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
+  lines(x,c(0,0,0))
 }
 
-#NCP
+#NEC plots by day
+y2<-c(20,10)
+DN<-c('Day','Night')
+for (j in 1:2){
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.P$Mean.AFDW2[NCP.mean.P$Substrate==sub[i]], main=sub[i], ylim=c(0,25), xlab = 'Mean Photosynthesis')
-  errorbars(x,NCP.mean.P$Mean.AFDW2[NCP.mean.P$Substrate==sub[i]],0,NCP.mean.P$SE.AFDW2[NCP.mean.P$Substrate==sub[i]])
+  x<-barplot(NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i] & NEC.mean.DayNight$DayNight==DN[j]], main=sub[i], ylim=c(-2,y2[j]), xlab = DN[j],
+             ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
+  errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
+  lines(x,c(0,0,0))
+}  
 }
 
 
-par(mfrow=c(3,2))
-for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.R$Mean.AFDW2[NCP.mean.R$Substrate==sub[i]], main=sub[i], ylim=c(0,-20), xlab = 'Mean Respiration')
-  errorbars(x,NCP.mean.R$Mean.AFDW2[NCP.mean.R$Substrate==sub[i]],0,NCP.mean.R$SE.AFDW2[NCP.mean.R$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
-}
-
-
-
+#NCP net
 
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-10,25), xlab = 'Mean Net NCP')
+  x<-barplot(NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-10,25),
+             ylab=expression(paste("Net NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]],0,NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
+  lines(x,c(0,0,0))
 }
 
+#NCP day and night
+y1<-c(0,-25)
+y2<-c(35,0)
+for (j in 1:2){
+  par(mfrow=c(3,2))
+  for (i in 1:length(sub)){
+    x<-barplot(NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]], main=sub[i], ylim=c(y1[j],y2[j]), xlab = DN[j],
+               ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
+    errorbars(x,NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]],0,NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]])
+    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0))
+  }  
+}
 
+#P/R
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,10), xlab = 'Mean P/R')
+  x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,6), ylab = 'Mean P/R')
   errorbars(x,NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.AFDW2[NCP.mean.PR$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
@@ -1092,8 +1034,124 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 }
 
 
-###Looking at feedbacks
+###Looking at feedbacks--------------------------------------------
 
-plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel)
-plot(AllData$NCP.AFDW, AllData$NEC.AFDW, col=AllData$NutLevel)
+plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
+legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
 
+plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
+
+pdf("NECvsOmega.pdf", width=6, height=8)
+par(mfrow=c(3,2))
+cols <- c(unique(NEC.mean$NutLevel))
+y<-AllData$NEC.AFDW
+yse<-NEC.mean$SE.AFDW
+for (i in 1:length(sub)){
+  plot(NA, xlab=expression(paste(Omega)[arag]),ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])), 
+       ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), main = sub[i], xlim=c(1.5,6))
+  
+  abline(h=0, lty=2)
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    plot(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]],
+         y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = cols[j],
+         pch=21, type="p", xaxt='n', xlim=c(1.5,6), ylab='', xlab='',ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])))
+    
+   model<-lm(y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]]~AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]])
+    lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3)
+  }
+}
+  legend('top', horiz = TRUE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+
+dev.off()
+
+
+## pH plots----------------------------------------------------------------
+deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarize,
+                           pHMean = mean(TankpH-HeaderpH, na.rm = T),
+                           N2=sum(!is.na(TankpH)),
+                           pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
+                           
+)
+
+
+#delta pH day and night
+y1<-c(0,-0.20)
+y2<-c(0.2,0)
+for (j in 1:2){
+  par(mfrow=c(3,2))
+  for (i in 1:length(sub)){
+    x<-barplot(deltapHMeans$pHMean[deltapHMeans$Substrate==sub[i] & deltapHMeans$DayNight==DN[j]], main=sub[i], ylim=c(y1[j],y2[j]), xlab = DN[j],
+               ylab=expression(paste(Delta,"pH")))
+    errorbars(x,deltapHMeans$pHMean[deltapHMeans$Substrate==sub[i]& deltapHMeans$DayNight==DN[j]],0,deltapHMeans$pHSE[deltapHMeans$Substrate==sub[i]& deltapHMeans$DayNight==DN[j]])
+    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0))
+  }  
+}
+
+#absolute change in pH
+deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+                      pHMean = mean(abs(TankpH-HeaderpH), na.rm = T),
+                      N2=sum(!is.na(TankpH)),
+                      pHSE= sd(abs(TankpH-HeaderpH), na.rm = T)/sqrt(N2)
+                      
+)
+
+
+  par(mfrow=c(3,2))
+  for (i in 1:length(sub)){
+    x<-barplot(deltapHMeans.net$pHMean[deltapHMeans.net$Substrate==sub[i] ], main=sub[i], ylim=c(0,0.2), 
+               ylab=expression(paste('abs(',Delta,"pH)")))
+    errorbars(x,deltapHMeans.net$pHMean[deltapHMeans.net$Substrate==sub[i]],0,deltapHMeans.net$pHSE[deltapHMeans.net$Substrate==sub[i]])
+    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0))
+  }  
+
+#pH across time by substrate
+  
+  deltapHMeans.time <- ddply(AllData, c("Substrate","NutLevel", "DateTime"), summarize,
+                        pHMean = mean(TankpH-HeaderpH, na.rm = T),
+                        N2=sum(!is.na(TankpH)),
+                        pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
+                        
+  )
+  
+  #Delta pH across time
+  par(mfrow=c(3,2))
+  rm(y)
+  rm(yse)
+  y<-deltapHMeans.time$pHMean
+  yse<-deltapHMeans.time$pHSE
+  for (i in 1:length(sub)){
+    plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+0.1), ylab=expression(paste(Delta,"pH")), main = sub[i])
+    
+    abline(h=0)
+    par(new = TRUE)
+    #cols <- unique(NCP.mean$NutLevel)
+    #
+    for (j in 1:length(Nuts)){
+      par(new = TRUE)
+      
+      plot(as.numeric(deltapHMeans.time$DateTime [deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]),
+           y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]], col = cols[j],
+           pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.1))
+      
+      arrows(unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]]
+             + yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
+             unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]
+             - yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
+             angle=90, code=3, length = 0.1)
+      start<-ifelse(i<=4,c(1),c(8))
+      stops<-ifelse(i<=4,c(7),c(14))
+      
+    }
+    axis(1, at=unique(deltapHMeans.time $DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+    
+    #shaded area for night
+    a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+    b<-ifelse(i<=4,6,13)
+    rect(unique(deltapHMeans.time $DateTime)[a],min(y),unique(deltapHMeans.time $DateTime)[b],max(y)+.1,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  }
+  legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
+  
+  
