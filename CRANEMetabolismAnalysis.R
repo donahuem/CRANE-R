@@ -483,7 +483,7 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                     SE.Vol= sd(NCP.Vol, na.rm = T)/sqrt(N)
   )
   
-  
+    
 par(mfrow=c(2,2))
 for (i in 1:5){
 plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
@@ -877,18 +877,25 @@ NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summ
 
 #PR
 NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
-                     Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
-                     Mean.AFDW2.r =mean(abs(NCP.AFDW[NCP.AFDW<0]), na.rm = T),       
-                     PR.AFDW2=Mean.AFDW2.p/Mean.AFDW2.r
+                     #Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
+                     Mean.AFDW2.p = mean(NCP.AFDW[DayNight=='Day'], na.rm=T),
+                     Mean.AFDW2.r =mean(abs(NCP.AFDW[DayNight=='Night']), na.rm = T),       
+                     GPP=Mean.AFDW2.p+Mean.AFDW2.r,
+                     PR.AFDW2=GPP/Mean.AFDW2.r,
+                     Mean.AFDW2.Day = mean(NEC.AFDW[DayNight=='Day'], na.rm=T), #day NEC
+                     Mean.AFDW2.Night = mean(NEC.AFDW[DayNight=='Night'], na.rm=T) #Night NEC
                      #N2=sum(!is.na(Mean.AFDW2.p)),
                      #SE.AFDW2.pr=sd(PR.AFDW2)/sqrt(N2)
                      )
-NCP.mean.PRbyTank[is.na(NCP.mean.PRbyTank)]<-0 #replace the NAs with 0
+
+#NCP.mean.PRbyTank[is.na(NCP.mean.PRbyTank)]<-0 #replace the NAs with 0
 
 NCP.mean.PR<-ddply(NCP.mean.PRbyTank, c("Substrate","NutLevel"), summarize,
                 Mean.AFDW2=mean(PR.AFDW2, na.rm=T),
+                Mean.GPP=mean(GPP, na.rm=T),
                 N2=3,
-                SE.AFDW2=sd(PR.AFDW2)/sqrt(N2)
+                SE.AFDW2=sd(PR.AFDW2)/sqrt(N2),
+                SE.GPP=sd(GPP)/sqrt(N2)
 )
 
 
@@ -942,14 +949,139 @@ for (j in 1:2){
   }  
 }
 
+#GPP: add dark respiration to light net photosynthesis to get gross photosynthesis
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,max(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]])+2),
+             ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
+  errorbars(x,NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate==sub[i]])
+            
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
 #P/R
 par(mfrow=c(3,2))
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,6), ylab = 'Mean P/R')
+  x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,max(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]])+2), ylab = 'Mean P/R')
   errorbars(x,NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.AFDW2[NCP.mean.PR$Substrate==sub[i]])
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
 }
+
+## find % of time calcifying  or dissolving
+#put a 1 next to times that are calcifying and a 0 for times dissolving
+AllData$CD<-ifelse(AllData$NEC.AFDW>0,1,0)
+
+PercentCalc<-ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
+                   N = sum(!is.na(CD)),
+                   PercentCalc = sum(CD)/N, #percent of the time calcifying
+                   PercentDis = 1-PercentCalc) #percent of the time dissolving
+#average across tanks
+PercentCalc.mean<-ddply(PercentCalc, c("Substrate","NutLevel"), summarize,
+                        Mean.PercentCalc = mean(PercentCalc, na.rm = T),
+                        N2=sum(!is.na(PercentCalc)),
+                        SE.PercentCalc= sd(PercentCalc, na.rm = T)/sqrt(N2),
+                        Mean.PercentDis = mean(PercentDis, na.rm = T),
+                        SE.PercentDis= sd(PercentDis, na.rm = T)/sqrt(N2))
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(PercentCalc.mean$Mean.PercentCalc[PercentCalc.mean$Substrate==sub[i]], main=sub[i], ylim=c(0,1), ylab = 'Mean % Calc')
+  errorbars(x,PercentCalc.mean$Mean.PercentCalc[PercentCalc.mean$Substrate==sub[i]],0,PercentCalc.mean$SE.PercentCalc[PercentCalc.mean$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+
+par(mfrow=c(3,2))
+for (i in 1:length(sub)){
+  x<-barplot(PercentCalc.mean$Mean.PercentDis[PercentCalc.mean$Substrate==sub[i]], main=sub[i], ylim=c(0,1), ylab = 'Mean % Dissolution')
+  errorbars(x,PercentCalc.mean$Mean.PercentDis[PercentCalc.mean$Substrate==sub[i]],0,PercentCalc.mean$SE.PercentDis[PercentCalc.mean$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+}
+## Stats-------------------------------------
+#I took the average across times then ran GLMs for each inidividual substrate using black tank as a random effect
+
+#NEC net
+
+#Take the average of everytihng across aquariums so its easier to code in the model.  I need to drop the factors for that to work
+AllData2<-AllData
+levels(AllData2$Substrate)<-c(1:5)
+AllData2$Substrate<-as.numeric(droplevels(AllData2$Substrate))
+levels(AllData2$NutLevel)<-c(1:3)
+AllData2$NutLevel<-as.numeric(droplevels(AllData2$NutLevel))
+
+Mean.Time<-aggregate(AllData2, list(AllData2$Aquarium), mean)
+#now add the factors back for the GLM
+Mean.Time$NutLevel<-as.factor(Mean.Time$NutLevel)
+levels(Mean.Time$NutLevel)<-c('Ambient','Med','High')
+Mean.Time$Substrate<-as.factor(Mean.Time$Substrate)
+levels(Mean.Time$Substrate)<-c('Algae','Coral','Mixed','Rubble','Sand')
+
+#Algae
+##how to do the model as a repeated measures anova for both time and aquarium
+#model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank/Aquarium)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
+
+#AlgaeMean<-Mean.Time[Mean.Time$Substrate=='Algae',]
+model.NECNet.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Algae',]) #Net NEC mean across 24 hours
+model.NECDay.algae<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # day calcification
+model.NECNight.algae<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # night calcification
+model.NCPNet.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Algae',]) # Net NCP mean across 24 hours
+model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # GCP light +dark photosynthesi
+model.R.algae<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # dark respiration
+
+
+#Coral
+#CoralMean<-Mean.Time[Mean.Time$Substrate=='Coral',]
+model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
+model.NECDay.Coral<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
+model.NECNight.Coral<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
+model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
+model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',])
+model.R.Coral<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) # dark respiration
+
+
+#Rubble
+#RubbleMean<-Mean.Time[Mean.Time$Substrate=='Rubble',]
+model.NECNet.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Rubble',])
+model.NECDay.Rubble<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) 
+model.NECNight.Rubble<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) 
+model.NCPNet.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Rubble',])
+model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',])
+model.R.Rubble<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) # dark respiration
+
+
+#Sand
+#SandMean<-Mean.Time[Mean.Time$Substrate=='Sand',]
+model.NECNet.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
+model.NECDay.Sand<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
+model.NECNight.Sand<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
+model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
+model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',])
+model.R.Sand<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) # dark respiration
+
+#Mixed
+model.NECNet.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
+model.NECDay.Mixed<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
+model.NECNight.Mixed<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
+model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
+model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',])
+model.R.Mixed<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) # dark respiration
+
+#omega vs NEC------------------- varying intercepts for aquarium within black tank and varying slopes (and intercept) by nutrient level
+
+model.NECOmega.Algae<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Algae',])
+
+model.NECOmega.Coral<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
+coef(model.NECOmega.Coral) #get the coefficients
+
+model.NECOmega.Sand<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
+
+model.NECOmega.Rubble<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Rubble',])
+
+model.NECOmega.Mixed<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
+
 
 ##TA vs DIC plots--------------------------------------------
 b<-matrix(nrow=5,ncol=3)
