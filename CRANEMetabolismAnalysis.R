@@ -16,6 +16,7 @@ library('lme4')
 library('lmerTest')
 library('reshape2')
 library('seacarb')
+library('MuMIn')
 # Functions-----------------------------------------
 #easy errorbar barplots
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
@@ -1286,4 +1287,22 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   }
   legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
   
+  ##nutrient plots --- these are currently inflated because I don't have all the data for the header tanks
+  meanNuts<-ddply(AllData, 'NutLevel', summarize,
+        meanNN=mean(HeaderN, na.rm=T),
+        SENN=sd(HeaderN, na.rm=T)/sqrt(7),
+        meanP=mean(HeaderP, na.rm=T),
+        SEP=sd(HeaderP, na.rm=T)/sqrt(7))
+        
+  par(mfrow=c(1,2)) #average nitrate for experiment
+  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NH'[4]^{'+'})), 
+             ylab=expression(paste(mu,'M')), ylim=c(0,10))
+  errorbars(x,meanNuts$meanNN,0,meanNuts$SENN)
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  
+  #average phosphate for experiment
+  x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})), 
+             ylab='', ylim=c(0,2.5))
+  errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
+  axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
