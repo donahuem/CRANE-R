@@ -5,6 +5,7 @@ fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, 
 
 library(googlesheets)
 suppressMessages(library(dplyr))
+library(plyr)
 library(gdata)
 
 #authorize access to google sheets
@@ -267,4 +268,3 @@ Nutrients_CH <-subset(Nutrients,subset=(Nutrients$Substrate.Experiment=="CHAIN")
 Nutrients_CARS <- subset(Nutrients,subset=(Nutrients$Substrate.Experiment=="Algae" | Nutrients$Substrate.Experiment=="Coral" |Nutrients$Substrate.Experiment=="Rubble"|Nutrients$Substrate.Experiment=="Sediment"))
 Nutrients_CH$Substrate.Experiment <- factor(Nutrients_CH$Substrate.Experiment)
 Nutrients_CARS$Substrate.Experiment <- factor(Nutrients_CARS$Substrate.Experiment)
-
