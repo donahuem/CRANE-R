@@ -1,5 +1,8 @@
 #Data Processing for Weights, Volumes, and Surface Areas
 
+#location for writing processed files
+fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+
 library(googlesheets)
 suppressMessages(library(dplyr))
 library(gdata)
@@ -19,7 +22,7 @@ CRANE_sheet <- gs_key("1Fks1OzSzpRkNe1X6u9Ez1W6qHmPmTgxR0scueF3OARA",lookup=TRUE
 CRANE_coralnubb <- gs_read(CRANE_sheet,ws="CoralNubbin")
 CRANE_coralset <- gs_read(CRANE_sheet,ws="CoralSet")
 CRANE_BWnorms <- gs_read(CRANE_sheet,ws="BW_Normalization")
-Calibration <- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/buoyant weight calibration_curves.csv",header=TRUE)
+Calibration <- read.csv(paste(fileloc,"buoyant weight calibration_curves.csv",sep=""),header=TRUE)
 
 TrayWts_sheet <- gs_key("1IePBN4KmpqXHjJLy0201li2MjZDwXD3JchqznrrKtrk", lookup=TRUE)
 TrayWts_raw <- gs_read(TrayWts_sheet,range = "A1:B500")
@@ -30,13 +33,13 @@ coralIDex1 <- subset(CRANE_IDexpt1,Substrate=="Coral")
 CRANE_IDexpt2 <- gs_read(CRANE_sheet,ws="Experiment2ID")
 coralIDex2 <- subset(CRANE_IDexpt2,Substrate=="Coral")
 
-#SA: get wax dip weights and Wax dipping normalizations
-WaxWts_sheet <- gs_key("18bC8SBWhdq1tSiThx4HxDjzCkEyfq9zkEU2qtSs73qI")
+#SA: get wax dip weights and Wax dipping normalizations for Coral
+WaxWts_sheet <- gs_key("18bC8SBWhdq1tSiThx4HxDjzCkEyfq9zkEU2qtSs73qI")  #filename:  Coral SA_jks
 WaxWts_raw <- gs_read(WaxWts_sheet,range = "A1:C300")
-WaxtoSA_sheet <-gs_key("1P_IP3Csn0XCjwOeGdu1_6pXJth7B5K1w2xnPZiHpseE")
+WaxtoSA_sheet <-gs_key("1P_IP3Csn0XCjwOeGdu1_6pXJth7B5K1w2xnPZiHpseE") #filename: SA measurements for wax dipping
 WaxtoSA_raw <- gs_read(WaxtoSA_sheet)
-SAmod <- lm(WaxtoSA_raw$`SA(mm2)`~ 0 + WaxtoSA_raw$`Delta Weight`)
-WaxConversionFactor <- SAmod$coefficients[1]/100  #from Jess' 6 wax dips of dowel standards
+SAmod <-lm(WaxtoSA_raw$`SA(mm2)`~ 0 + WaxtoSA_raw$`Delta Weight`) #suspect that radius column is really diameter
+WaxConversionFactor <- SAmod$coefficients[1]/100  #from Jess' 6 wax dips of dowel standards; divide by 100 for cm2
   #aggregate samples with multiple pieces
 WaxWts_byNubb <- aggregate(cbind(WaxWts_raw$`Initial Weight`,WaxWts_raw$`Final Weight`)~WaxWts_raw$`Tray #`,FUN=sum)
 names(WaxWts_byNubb)[names(WaxWts_byNubb)=="V1"]<-"InitWt"
@@ -78,7 +81,7 @@ text(x=CoralNubb$Volume,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex
 CoralNubb$Check[CoralNubb$TrayNum==233]<- "Outlier in AFDW"
 CoralNubb$Check[CoralNubb$TrayNum==177]<- "Low outlier in SA"
 
-write.table(CoralNubb,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralNubbins_Rprocessed.csv",sep = " ,", col.names = NA)
+write.table(CoralNubb,file=paste(fileloc,"CoralNubbins_Rprocessed.csv",sep=""),sep = " ,", col.names = NA)
 
 
 #Create dataframe for set-scale measures (coral set = 3 colonies mounted together)
@@ -116,20 +119,25 @@ CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==22] <- "low in A
 CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==14] <- "outlier in AFDW?"
 CoralSet$Check[CoralSet$Species=="Montipora" & CoralSet$SampleID==15] <- "outlier in AFDW?"
 
-write.table(CoralSet, file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv", sep=",", col.names = NA)
+write.table(CoralSet, file=paste(fileloc,"CoralSets_Rprocessed.csv",sep=""), sep=",", col.names = NA)
 
 #Assemble Rubble Data
 #Rubble BWs
+#3 outliers in BWs: 324 low; 330 and 312 high;  correct from original datasheets
+# probably lost or gained a small chunk during expt
+#should probably exclude these three values from the BW analysis
 CRANE_rubble <- gs_read(CRANE_sheet,ws="RUBBLE")
 Rubble <- with(CRANE_rubble,data.frame(SampleID,InitialTemp,FinalTemp,Volume,TrayNum, deltaSAWt))
 Rubble$InitBW <- BWCalc(StopperAir,Rubble$InitialTemp, CRANE_rubble$`InitialBW (g)`)
 Rubble$FinalBW <- BWCalc(StopperAir,Rubble$FinalTemp, CRANE_rubble$`FinalBw (g)`)
 Rubble$DeltaBW <- Rubble$FinalBW - Rubble$InitBW
-Rubble$pcDeltaBW <- (Rubble$FinalBW - Rubble$InitBW)/Rubble$InitBW
+Rubble$DeltaBW_all <- Rubble$DeltaBW
+Rubble$DeltaBW[Rubble$SampleID == 324 | Rubble$SampleID == 330 | Rubble$SampleID == 312] <- NA
+Rubble$pcDeltaBW <- Rubble$DeltaBW/Rubble$InitBW
 
 #Rubble DW & AFDW
 Rubble_Wts_sheet <- gs_key("1eD0DqrBoojarmvJxPT3r5ntcCVnfy6vEbYofk9wj3Mc", lookup=TRUE)
-Rubble_Wts_raw <- gs_read(Rubble_Wts_sheet)
+Rubble_Wts_raw <- gs_read(Rubble_Wts_sheet,ws="Weights")
 Rubble$TrayWt <- TrayWts_raw$TrayWt[match(Rubble$TrayNum,TrayWts_raw$TrayNum)]
 Rubble$DW <- Rubble_Wts_raw$`Dry Wt w Tray`[match(Rubble$TrayNum,Rubble_Wts_raw$`Tray #`)]-Rubble$TrayWt
 Rubble$AW <- Rubble_Wts_raw$`Ash Wt w Tray`[match(Rubble$TrayNum,Rubble_Wts_raw$`Tray #`)]-Rubble$TrayWt
@@ -139,6 +147,14 @@ Rubble$pcAFDW <- Rubble$AFDW/Rubble$DW
 Rubble$SA<-Rubble$deltaSAWt*WaxConversionFactor
 
 
+Rubble_WaxConv <- gs_read(Rubble_Wts_sheet,ws="WaxConversionMsmts")
+SAmodR <- lm(Rubble_WaxConv$`SA (mm)` ~ 0+Rubble_WaxConv$`DeltaWax Wt`)
+WaxConversionFactor_R <- SAmodR$coefficients[1]/100
+Rubble$SA <- with(Rubble_Wts_raw,(deltaWt)*WaxConversionFactor_R)
+
+plot(Rubble$SA ~ Rubble$DeltaBW,type='n')
+text(Rubble$DeltaBW, Rubble$SA, label=Rubble$SampleID,cex=0.5)
+
 rubbleIDex1 <- subset(CRANE_IDexpt1,Substrate=="Rubble")
 rubbleIDex2 <- subset(CRANE_IDexpt2,Substrate=="Rubble")
 Rubble$Nuts <- rubbleIDex1$NutLevel[match(Rubble$SampleID,rubbleIDex1$SampleID)]
@@ -147,13 +163,9 @@ Rubble$Aq_Ex1 <- rubbleIDex1$Aquarium[match(Rubble$SampleID,rubbleIDex1$SampleID
 Rubble$Aq_Ex2 <- rubbleIDex2$Aquarium[match(Rubble$SampleID,rubbleIDex2$SampleID)]
 
 plot(DW~AW,data=Rubble)
-points(x=Rubble$AW[Rubble$TrayNum==120],y=Rubble$DW[Rubble$TrayNum==120],col="red")
+#points(x=Rubble$AW[Rubble$TrayNum==120],y=Rubble$DW[Rubble$TrayNum==120],col="red")
 
-plot(Volume ~SA,data=Rubble,type="n")
-text(x=Rubble$SA,y=Rubble$Volume,labels=Rubble$SampleID,cex=0.7)
-plot(AFDW ~SA, data=Rubble)
-
-write.table(Rubble,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",sep=",", col.names = NA)
+write.table(Rubble,file=paste(fileloc,"Rubble_Rprocessed.csv",sep=""),sep=",", col.names = NA)
 
 #Algae Data
 CRANE_algae <- gs_read(CRANE_sheet,ws="ALGAE")
@@ -180,19 +192,16 @@ Algae$pcAFDW <- Algae$AFDW/Algae$DW
 
 #Algae WW are tightly related to volume; assume Gsal is a cynlinder, then SA is estimable from cross-sectional radius and volume
 AlgVol_lm <- lm(CRANE_AlgalVol$`Volume of Algae`~CRANE_AlgalVol$`Algae Wet Weight (g)`-1)
-AlgRadius <- mean(CRANE_AlgalSA$`Algal cross section diameters (mm)`)/2/10 #convert to cm
+AlgRadius <- mean(CRANE_AlgalSA$`Algal cross section diameters (mm)`)/2/10 #convert diam to radius and mm to cm
 Algae$FinalVol <- Algae$FinalWW*coef(AlgVol_lm)
 Algae$BitsVol <- Algae$BitsWW*coef(AlgVol_lm)
-Algae$FinalSA <- 2*Algae$FinalVol/AlgRadius  + 2*pi*AlgRadius^2
-Algae$BitsSA <- 2*Algae$BitsVol/AlgRadius  + 2*pi*AlgRadius^2
+Algae$FinalSA <- 2*Algae$FinalVol/AlgRadius
+Algae$BitsSA <- 2*Algae$BitsVol/AlgRadius
 
 plot(DW~AW,type="n",data=Algae)
 text(x=Algae$AW,y=Algae$DW,labels=Algae$SampleID,cex=0.7)
 
-plot(AFDW~AFDW,type="n",data=Algae)
-text(x=Algae$AW,y=Algae$AFDW,labels=Algae$SampleID,cex=0.7)
-
-write.table(Algae,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",sep=",", col.names = NA)
+write.table(Algae,file=paste(fileloc,"Algae_Rprocessed.csv",sep=""),sep=",", col.names = NA)
 
 #Sand
 CRANE_sand <- gs_read(CRANE_sheet,ws="SAND")
@@ -205,6 +214,7 @@ sandvol <- lm(Sand$MeasVol~Sand$DW-1)
 plot(Sand$MeasVol ~ Sand$DW)
 abline(0,coef(sandvol))
 Sand$Vol <- Sand$DW*coef(sandvol)
+
 Sand$AW <- Sand_Wts_raw$`AW in Tray`[Sand_Wts_raw$TrayNum<100]- Sand_Wts_raw$TrayWt[Sand_Wts_raw$TrayNum<100]
 Sand$AFDW <- Sand$DW - Sand$AW
 Sand$pcAFDW <- Sand$AFDW/Sand$DW
@@ -216,7 +226,7 @@ Sand$Tank <- SandIDex1$BlackTank[match(Sand$SampleID,SandIDex1$SampleID)]
 Sand$Aq_Ex1 <- SandIDex1$Aquarium[match(Sand$SampleID,SandIDex1$SampleID)]
 Sand$Aq_Ex2 <- SandIDex2$Aquarium[match(Sand$SampleID,SandIDex2$SampleID)]
 
-write.table(Sand,file="../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv", sep=",", col.names = NA)
+write.table(Sand,file=paste(fileloc,"Sand_Rprocessed.csv",sep=""), sep=",", col.names = NA)
 
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed
