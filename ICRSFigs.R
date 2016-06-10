@@ -189,7 +189,7 @@ dev.off()
 substrate<-c('Algae','Coral','Rubble','Sediment','Mixed')
 #change layout so that mixed is centered
 boxcol=c('green','red','purple','yellow','white')
-png("Respiration.png", width=6, height=7, res=300)
+png("Respiration.png", width=3800, height=4000, res=300)
 par(mfrow=c(3,2))
 layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
                 3,3,3,3,3,0,4,4,4,4,4,
@@ -336,3 +336,46 @@ i=4
     
  # }
   dev.off()
+  
+  ### Calcification  figure-------------
+  boxcol=c('green','red','purple','yellow','white') 
+  png("NetCalcification.png", width=3800, height=4000, res=300)
+  par(mfrow=c(3,2))
+  par(bg=NA)
+  layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
+                  3,3,3,3,3,0,4,4,4,4,4,
+                  0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
+  
+  y1<-c(-0.5,0,-1.2,-1.5,0)
+  y2<-c(4,15,1.5,3,3)
+  for (i in 1:length(sub)){
+    x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i],ylim=c(y1[i],y2[i]), 
+               #ylab=expression(paste("Net NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+               col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
+    errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]],
+              col='white', lwd=3)
+    #axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0), col='white')
+    axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+    axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+    box(col = boxcol[i])
+  }
+  dev.off()
+  
+  #Day and night Calcification
+  #NEC plots by day
+  y2<-c(5,20,5,5,5,10)
+  y3<-c(-2,0,-1,-2,0)
+  DN<-c('Day','Night')
+ # for (j in 1:2){
+  j=1
+    par(mfrow=c(3,2))
+    for (i in 1:length(sub)){
+      x<-barplot(NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i] & NEC.mean.DayNight$DayNight==DN[j]], main=sub[i], ylim=c(y3[i],y2[i]), 
+                 #ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1}))
+                  )
+      errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]])
+      axis(1, at=x, labels=c("Ambeint","Medium","High"))
+      lines(x,c(0,0,0))
+    }  
+  #}
