@@ -877,7 +877,7 @@ NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summ
                       SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2))
 
 #PR
-NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
+NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank", "Aquarium"), summarize,
                      #Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
                      Mean.AFDW2.p = mean(NCP.AFDW[DayNight=='Day'], na.rm=T),
                      Mean.AFDW2.r =mean(abs(NCP.AFDW[DayNight=='Night']), na.rm = T),       
@@ -1020,6 +1020,13 @@ levels(Mean.Time$NutLevel)<-c('Ambient','Med','High')
 Mean.Time$Substrate<-as.factor(Mean.Time$Substrate)
 levels(Mean.Time$Substrate)<-c('Algae','Coral','Mixed','Rubble','Sand')
 
+
+#add mean respiration rates by aquarium to all data so that I can add it to the photosynthesis
+#to get GPP across each time point
+
+AllData <-merge(AllData, NCP.mean.PRbyTank[,c(4,6)], all.x=TRUE, by.x = "Aquarium")
+AllData$GPP<-AllData$NCP.AFDW+AllData$Mean.AFDW2.r
+
 #Algae
 ##how to do the model as a repeated measures anova for both time and aquarium
 #model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
@@ -1028,14 +1035,18 @@ levels(Mean.Time$Substrate)<-c('Algae','Coral','Mixed','Rubble','Sand')
 #model.NECNet.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Algae',]) #Net NEC mean across 24 hours
 #model.NECDay.algae<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # day calcification
 #model.NECNight.algae<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # night calcification
-model.NCPNet.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Algae',]) # Net NCP mean across 24 hours
-model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # GCP light +dark photosynthesi
-model.R.algae<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # dark respiration
+#model.NCPNet.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Algae',]) # Net NCP mean across 24 hours
+#model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # GCP light +dark photosynthesi
+#model.R.algae<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',]) # dark respiration
 
+## HOW DO I RUN THESE SAME MODELS FOR GPP AND HOLD THE POWER??? ONE IDEA: ADD AVERAGE RESPIRATION TO ALL THE DAY RATES
 
-#model.NECNet.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' ,]) 
-#model.NECDay.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Day',]) 
-#model.NECNight.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Night',]) 
+model.NECNet.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' ,]) 
+model.NECDay.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Day',]) 
+model.NECNight.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Night',]) 
+model.NCPNet.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' ,]) 
+model.R.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Night',]) 
+model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Day',]) 
 
 
 #Coral
@@ -1043,13 +1054,16 @@ model.R.algae<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.
 #model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
 #model.NECDay.Coral<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
 #model.NECNight.Coral<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
-model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
+#model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
 model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',])
-model.R.Coral<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) # dark respiration
+#model.R.Coral<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) # dark respiration
 
 model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
 model.NECDay.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
 model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
+model.NECNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
+model.R.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
+model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
 
 
 
@@ -1058,39 +1072,49 @@ model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllDat
 #model.NECNet.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Rubble',])
 #model.NECDay.Rubble<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) 
 #model.NECNight.Rubble<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) 
-model.NCPNet.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Rubble',])
-model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',])
-model.R.Rubble<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) # dark respiration
+#model.NCPNet.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Rubble',])
+#model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',])
+#model.R.Rubble<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',]) # dark respiration
 
 
 model.NECNet.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' ,]) 
 model.NECDay.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Day',]) 
 model.NECNight.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Night',]) 
+model.NCPNet.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' ,]) 
+model.R.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Night',]) 
+model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Day',]) 
 
 #Sand
 #SandMean<-Mean.Time[Mean.Time$Substrate=='Sand',]
 #model.NECNet.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
 #model.NECDay.Sand<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
 #model.NECNight.Sand<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
-model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
+#model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
 model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',])
-model.R.Sand<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) # dark respiration
+#model.R.Sand<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) # dark respiration
 
 model.NECNet.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' ,]) 
 model.NECDay.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Day',]) 
 model.NECNight.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Night',]) 
+model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' ,]) 
+model.R.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Night',]) 
+model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Day',]) 
+
 
 #Mixed
 #model.NECNet.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
 #model.NECDay.Mixed<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
 #model.NECNight.Mixed<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
-model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
+#model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
 model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',])
-model.R.Mixed<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) # dark respiration
+#model.R.Mixed<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) # dark respiration
 
 model.NECNet.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' ,]) 
 model.NECDay.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Day',]) 
 model.NECNight.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Night',]) 
+model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' ,]) 
+model.R.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Night',]) 
+model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Day',]) 
 
 #omega vs NEC------------------- varying intercepts for aquarium within black tank and varying slopes (and intercept) by nutrient level
 
