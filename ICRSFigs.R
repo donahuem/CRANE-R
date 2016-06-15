@@ -182,7 +182,7 @@ layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
 
 par(bg=NA) 
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]], main=substrate[i], ylim=c(0,max(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]])+15),
+  x<-barplot(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]], main=substrate[i], ylim=c(0,max(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]])+10),
              #ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
              col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
   errorbars(x,NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate==sub[i]],
@@ -205,12 +205,12 @@ par(mfrow=c(3,2))
 layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
                 3,3,3,3,3,0,4,4,4,4,4,
                 0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
-
+j<-2
 par(bg=NA) 
 for (i in 1:length(sub)){
-  y=NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]]
+  y<-NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]]
   
-  x<-barplot(abs(y), main=substrate[i], ylim=c(0,max(abs(y))+15),
+  x<-barplot(abs(y), main=substrate[i], ylim=c(0,max(abs(y))+5),
              #ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
              col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
   errorbars(x,abs(y),0,NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]],
@@ -267,7 +267,7 @@ yse<-deltapHMeans.time$pHSE
   
   abline(h=0, lty=2, col='white')
   par(new = TRUE)
-  cols <- c('green','red','purple','orange','white')
+  cols <- c('green','red','purple','yellow','white')
   #
   # for (j in 1:length(Nutlevels)){
   for (i in 1:5){
@@ -357,7 +357,7 @@ i=4
                   3,3,3,3,3,0,4,4,4,4,4,
                   0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
   
-  y1<-c(-0.5,0,-1.2,-1.5,0)
+  y1<-c(-3,0,-2,-3.5,-1.5)
   y2<-c(4,15,1.5,3,3)
   for (i in 1:length(sub)){
     x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i],ylim=c(y1[i],y2[i]), 
@@ -376,8 +376,8 @@ i=4
   
   #Day and night Calcification
   #NEC plots by day
-  y2<-c(5,20,3,5,4)
-  y3<-c(-2,0,-1,-2,0)
+  y2<-c(2,20,2,4,4)
+  y3<-c(-3.5,0,-2,-3.5,0)
   DN<-c('Day','Night')
   png("DayCalcification.png", width=3800, height=4000, res=300)
   par(mfrow=c(3,2))
@@ -405,8 +405,8 @@ i=4
   dev.off()
   
   #night calcification
-  y2<-c(3,10,0,1,4)
-  y3<-c(-1,0,-2,-2.5,-2.5)
+  y2<-c(3,12,0,1,4)
+  y3<-c(-4,0,-3,-6,-3)
   DN<-c('Day','Night')
   png("NightCalcification.png", width=3800, height=4000, res=300)
   par(mfrow=c(3,2))

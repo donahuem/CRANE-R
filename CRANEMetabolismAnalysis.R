@@ -195,9 +195,9 @@ ChemData$HeaderTA.norm<-ChemData$HeaderTA-ChemData$HeaderN-ChemData$HeaderP
 #ChemData$HeaderTA.norm<-ChemData$HeaderTA
 
 #normalize the TA data to salinity---THE SALINITY DATA IS CAUSING PROBLEMS.....
-ChemData$HeaderTA.norm<-ChemData$HeaderTA*ChemData$HeaderSalinity/38
-ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
-#ChemData$TankTA.norm<-ChemData$TankTA
+#ChemData$HeaderTA.norm<-ChemData$HeaderTA*ChemData$HeaderSalinity/38
+#ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
+ChemData$TankTA.norm<-ChemData$TankTA
 
 #calculuate all the carbonate parameters with seacarb---------------------------------------
 #Tanks
@@ -340,7 +340,7 @@ AllData$DayNight<-ifelse(AllData$Time==time[1]|AllData$Time==time[2]|AllData$Tim
 
 #Calculate NEC---------------------------------------------
 
-Nuts<-unique(AllData$NutLevel)[c(1,3,2)] #puts the order for for loops as ambient, then med, then high
+Nuts<-unique(AllData$NutLevel)[c(1,3,2)] #puts the order for loops as ambient, then med, then high
 sub<-unique(AllData$Substrate)
 
 #NEC2<-matrix(data=NA, nrow=6, ncol=3)
@@ -350,6 +350,7 @@ NCP2 <- array(NA, dim=c(6,72))
 
 AllData<-AllData[order(AllData$Aquarium),]
 
+#calculating NEC using eularian....I AM NOT USING THIS... WAS JUST A TEST
 for (i in 1:length(unique(AllData$Aquarium))){
   NEC2[,i]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$Aquarium==i], 
                        TankTA = AllData$TankTA.norm[AllData$Aquarium==i], 
@@ -369,7 +370,7 @@ for (i in 1:length(unique(AllData$Aquarium))){
   
 #}
 
-#NEC using lagrangian method with AFDW normalization
+#NEC using lagrangian method with AFDW normalization--THIS IS WHAT i AM USING
   AllData$NEC.AFDW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
                     TankTA = AllData$TankTA.norm, 
                     ResidenceTime = AllData$ResTime.mean, 
@@ -406,11 +407,11 @@ for (i in 1:length(unique(AllData$Aquarium))){
 
   ###NCP calcs----------------------------------------------
   ## Normalize the DIC Data to a constant salinity f
-  #AllData$TankDIC.norm<-AllData$TankDIC
-  #AllData$HeaderDIC.norm<-AllData$HeaderDIC
+  AllData$TankDIC.norm<-AllData$TankDIC
+  AllData$HeaderDIC.norm<-AllData$HeaderDIC
   
-  AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
-  AllData$HeaderDIC.norm<-AllData$HeaderDIC*AllData$HeaderSalinity/38
+  #AllData$TankDIC.norm<-AllData$TankDIC*AllData$TankSalinity/38
+  #AllData$HeaderDIC.norm<-AllData$HeaderDIC*AllData$HeaderSalinity/38
   
   
   #NCP using lagrangian method with AFDW normalization
@@ -459,7 +460,7 @@ for (i in 1:length(unique(AllData$Aquarium))){
 #sub <- sub[sub!="Mixed"]
 #sub<-droplevels(sub)
 
-  #calcification
+  #calcification mean by substrate, treatment, and sampling time--- this just takes the means over the replicate aquaria
 NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                      Mean.AFDW = mean(NEC.AFDW, na.rm = T),
                      N=sum(!is.na(NEC.AFDW)),
@@ -816,6 +817,7 @@ NEC.mean$DayNight<-ifelse(NEC.mean$DateTime==time[1]|NEC.mean$DateTime==time[2]|
                             NEC.mean$DateTime==time[14], 'Day', 'Night')
 NCP.mean$DayNight<-NEC.mean$DayNight
 
+#summarize across all the different times
 NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                   Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                   N2=sum(!is.na(Mean.AFDW)),
@@ -1055,10 +1057,10 @@ model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$
 #model.NECDay.Coral<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
 #model.NECNight.Coral<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) 
 #model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Coral',])
-model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',])
+#model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',])
 #model.R.Coral<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',]) # dark respiration
 
-model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
+model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank) +(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
 model.NECDay.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
 model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
 model.NECNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
@@ -1090,7 +1092,7 @@ model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData
 #model.NECDay.Sand<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
 #model.NECNight.Sand<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) 
 #model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Sand',])
-model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',])
+#model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',])
 #model.R.Sand<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',]) # dark respiration
 
 model.NECNet.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' ,]) 
@@ -1106,7 +1108,7 @@ model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$S
 #model.NECDay.Mixed<-lmer(Mean.AFDW2.Day~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
 #model.NECNight.Mixed<-lmer(Mean.AFDW2.Night~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) 
 #model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
-model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',])
+#model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',])
 #model.R.Mixed<-lmer(Mean.AFDW2.r~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',]) # dark respiration
 
 model.NECNet.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' ,]) 
@@ -1121,7 +1123,7 @@ model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$
 model.NECOmega.Algae<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Algae',])
 
 model.NECOmega.Coral<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
-coef(model.NECOmega.Coral) #get the coefficients
+#coef(model.NECOmega.Coral) #get the coefficients
 
 model.NECOmega.Sand<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
 
@@ -1129,7 +1131,8 @@ model.NECOmega.Rubble<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquari
 
 model.NECOmega.Mixed<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
 
-
+# models for pH vs NCP
+ model.pH.NCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
 ##TA vs DIC plots--------------------------------------------
 b<-matrix(nrow=5,ncol=3)
 b0<-matrix(nrow=5,ncol=3)
