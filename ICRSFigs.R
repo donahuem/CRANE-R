@@ -157,7 +157,7 @@ x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NO'[2]^{'-'}
            ylab=expression(paste(mu,'M')), ylim=c(0,10),col=c('lightblue','orange','hotpink'),
            col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', border='white')
 errorbars(x,meanNuts$meanNN,0,meanNuts$SENN, col='white')
-axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2)
+axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2)
 axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
 box(col = 'white')
 
@@ -165,7 +165,7 @@ box(col = 'white')
 x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})),ylab='', ylim=c(0,2.5), border='white',
            col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3,col=c('lightblue','orange','hotpink'), col.main='white')
 errorbars(x,meanNuts$meanP,0,meanNuts$SEP, col='white')
-axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2)
+axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2)
 axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
 box(col = 'white')
 dev.off()
@@ -188,7 +188,7 @@ for (i in 1:length(sub)){
   errorbars(x,NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate==sub[i]],
             col='white', lwd=3)
   
-  axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+  axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
   axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
   box(col = boxcol[i])
 }
@@ -216,7 +216,7 @@ for (i in 1:length(sub)){
   errorbars(x,abs(y),0,NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]],
             col='white', lwd=3)
   
-  axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+  axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
   axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
   box(col = boxcol[i])
 }
@@ -241,9 +241,9 @@ modelpHNCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
 #r.squaredGLMM(modelpHNCP)
 d<-order(AllData$NCP.AFDW)
 y.new<-predict(modelpHNCP, interval='confidence')
-lines(AllData$NCP.AFDW[d], y.new[d,2],col='red', lwd=1)
-lines(AllData$NCP.AFDW[d], y.new[d,1],col='red', lwd=3)
-lines(AllData$NCP.AFDW[d], y.new[d,3],col='red', lwd=1)
+#lines(AllData$NCP.AFDW[d], y.new[d,2],col='red', lwd=1)
+#lines(AllData$NCP.AFDW[d], y.new[d,1],col='red', lwd=3)
+#lines(AllData$NCP.AFDW[d], y.new[d,3],col='red', lwd=1)
 #move xlabel dowm
 title(xlab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})), line=5, cex.lab=3, col.lab='white')
 dev.off()
@@ -365,9 +365,9 @@ i=4
                col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
     errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]],
               col='white', lwd=3)
-    #axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    #axis(1, at=x, labels=c("Ambient","Medium","High"))
     lines(x,c(0,0,0), col='white')
-    axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+    axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
     axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
     box(col = boxcol[i])
   }
@@ -395,9 +395,9 @@ i=4
       
       errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],
                 col='white', lwd=3)
-    #  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    #  axis(1, at=x, labels=c("Ambient","Medium","High"))
       lines(x,c(0,0,0), col='white')
-      axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+      axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
       axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
       box(col = boxcol[i])
       
@@ -424,9 +424,9 @@ i=4
     
     errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],
               col='white', lwd=3)
-    #  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    #  axis(1, at=x, labels=c("Ambient","Medium","High"))
     lines(x,c(0,0,0), col='white')
-    axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+    axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
     axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
     box(col = boxcol[i])
     
