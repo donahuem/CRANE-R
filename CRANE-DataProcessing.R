@@ -190,6 +190,12 @@ Algae$DW <- Algae_Wts_raw$`DW with Tray`[match(Algae$TrayNum1,Algae_Wts_raw$Tray
 Algae$AW <- Algae_Wts_raw$`AW with Tray`[match(Algae$TrayNum1,Algae_Wts_raw$Tray)]-Algae$TrayWt
 Algae$AFDW <- Algae$DW - Algae$AW
 Algae$pcAFDW <- Algae$AFDW/Algae$DW
+#Bits
+Algae$TrayWtBits <- TrayWts_raw$TrayWt[match(Algae$TrayNumBits,TrayWts_raw$TrayNum)]
+Algae$DWbits <- Algae_Wts_raw$`DW with Tray`[match(Algae$TrayNumBits,Algae_Wts_raw$Tray)]-Algae$TrayWtBits
+Algae$AWbits <- Algae_Wts_raw$`AW with Tray`[match(Algae$TrayNumBits,Algae_Wts_raw$Tray)]-Algae$TrayWtBits
+Algae$AFDWbits <- Algae$DWbits - Algae$AWbits
+Algae$pcAFDWbits <- Algae$AFDWbits/Algae$DWbits
 
 #Algae WW are tightly related to volume; assume Gsal is a cynlinder, then SA is estimable from cross-sectional radius and volume
 AlgVol_lm <- lm(CRANE_AlgalVol$`Volume of Algae`~CRANE_AlgalVol$`Algae Wet Weight (g)`-1)
