@@ -577,7 +577,7 @@ cols <- c('green','red','purple','yellow','white')
   #b<-ifelse(i<=4,6,13)
   plot(as.numeric(deltapHMeans.time$DateTime [deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]),
        y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]], col = 'black',
-       pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(-0.2, 0.2),
+       pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(-0.2, 0.3),
        col.lab='white',  cex.main=3, cex.axis=2, cex.lab=2, col.main='white')
   
   a<-ifelse(i<=4,1,7) #because mixed has different dates than the rest of the substrats

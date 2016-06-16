@@ -226,6 +226,16 @@ TankVol<-5678 #hole was at 6 quarts is the volume of each tank
 
 ChemData$ResTime<-(1/60)*(1/ChemData$Flow)*TankVol
 
+
+#Add the algae bit
+Algae$FinalSA<-Algae$FinalSA+Algae$BitsSA
+Algae$FinalWW<-Algae$FinalWW+Algae$BitsWW
+Algae$FinalVol<-Algae$FinalVol+Algae$BitsVol
+Algae$AFDW<-Algae$AFDW+Algae$AFDWbits
+Algae$DW<-Algae$DW+Algae$DWbits
+
+#what about dry weight????
+
 #calculate the average residence time by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
 ResTime.mean <- ddply(ChemData, c("Aquarium"), summarize,
                           ResTime.mean = mean(ResTime, na.rm = T)
@@ -491,6 +501,13 @@ for (i in 1:5){
 plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
 points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
 points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+}
+
+par(mfrow=c(2,2))
+for (i in 1:5){
+  plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
+  points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+  points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
 ##Plot NEC averages across time for each normalization-------------------------------------------------------
@@ -1120,16 +1137,16 @@ model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$
 
 #omega vs NEC------------------- varying intercepts for aquarium within black tank and varying slopes (and intercept) by nutrient level
 
-model.NECOmega.Algae<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Algae',])
+model.NECOmega.Algae<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Algae',])
 
-model.NECOmega.Coral<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
+model.NECOmega.Coral<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
 #coef(model.NECOmega.Coral) #get the coefficients
 
-model.NECOmega.Sand<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
+model.NECOmega.Sand<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
 
-model.NECOmega.Rubble<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Rubble',])
+model.NECOmega.Rubble<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Rubble',])
 
-model.NECOmega.Mixed<-lmer(NEC.AFDW~ (1+TankOmegaArag|NutLevel)+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
+model.NECOmega.Mixed<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
 
 # models for pH vs NCP
  model.pH.NCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
