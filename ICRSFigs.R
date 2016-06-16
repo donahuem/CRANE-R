@@ -4,7 +4,9 @@
 png("NECvsOmegaICRS.png", width=2800, height=3200, res=300)
 par(bg=NA) 
 par(mfrow=c(3,2))
-cols <- c(239,117,254)
+#cols <- c(239,117,254)
+cols <- c('lightblue','orange','hotpink')
+
 y<-AllData$NEC.AFDW
 yse<-NEC.mean$SE.AFDW
 for (i in 1:length(sub)){
@@ -40,7 +42,10 @@ dev.off()
 png("CoralOmegaICRS1.png", width=2800, height=3200, res=300)
 par(bg=NA) 
 par(mfrow=c(1,1))
-cols <- c(239,117,254)
+#cols <- c(239,117,254)
+
+cols <- c('lightblue','orange','hotpink')
+
 y<-AllData$NEC.AFDW
 yse<-NEC.mean$SE.AFDW
 i=2
@@ -74,7 +79,10 @@ dev.off()
 png("CoralOmegaICRS2.png", width=2800, height=3200, res=300)
 par(bg=NA) 
 par(mfrow=c(1,1))
-cols <- c(239,117,254)
+#cols <- c(239,117,254)
+
+cols <- c('lightblue','orange','hotpink')
+
 y<-AllData$NEC.AFDW
 yse<-NEC.mean$SE.AFDW
 i=2
@@ -108,7 +116,10 @@ dev.off()
 png("CoralOmegaICRS3.png", width=2800, height=3200, res=300)
 par(bg=NA) 
 par(mfrow=c(1,1))
-cols <- c(239,117,254)
+#cols <- c(239,117,254)
+
+cols <- c('lightblue','orange','hotpink')
+
 y<-AllData$NEC.AFDW
 yse<-NEC.mean$SE.AFDW
 i=2
@@ -171,7 +182,7 @@ layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
 
 par(bg=NA) 
 for (i in 1:length(sub)){
-  x<-barplot(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]], main=substrate[i], ylim=c(0,max(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]])+15),
+  x<-barplot(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]], main=substrate[i], ylim=c(0,max(NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]])+10),
              #ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
              col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
   errorbars(x,NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate==sub[i]],
@@ -189,17 +200,17 @@ dev.off()
 substrate<-c('Algae','Coral','Rubble','Sediment','Mixed')
 #change layout so that mixed is centered
 boxcol=c('green','red','purple','yellow','white')
-png("Respiration.png", width=6, height=7, res=300)
+png("Respiration.png", width=3800, height=4000, res=300)
 par(mfrow=c(3,2))
 layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
                 3,3,3,3,3,0,4,4,4,4,4,
                 0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
-
+j<-2
 par(bg=NA) 
 for (i in 1:length(sub)){
-  y=NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]]
+  y<-NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]]
   
-  x<-barplot(abs(y), main=substrate[i], ylim=c(0,max(abs(y))+15),
+  x<-barplot(abs(y), main=substrate[i], ylim=c(0,max(abs(y))+5),
              #ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
              col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
   errorbars(x,abs(y),0,NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]],
@@ -256,7 +267,7 @@ yse<-deltapHMeans.time$pHSE
   
   abline(h=0, lty=2, col='white')
   par(new = TRUE)
-  cols <- c('green','red','purple','orange','white')
+  cols <- c('green','red','purple','yellow','white')
   #
   # for (j in 1:length(Nutlevels)){
   for (i in 1:5){
@@ -336,3 +347,197 @@ i=4
     
  # }
   dev.off()
+  
+  ### Calcification  figure-------------
+  boxcol=c('green','red','purple','yellow','white') 
+  png("NetCalcification.png", width=3800, height=4000, res=300)
+  par(mfrow=c(3,2))
+  par(bg=NA)
+  layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
+                  3,3,3,3,3,0,4,4,4,4,4,
+                  0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
+  
+  y1<-c(-3,0,-2,-3.5,-1.5)
+  y2<-c(4,15,1.5,3,3)
+  for (i in 1:length(sub)){
+    x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=substrate[i],ylim=c(y1[i],y2[i]), 
+               #ylab=expression(paste("Net NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+               col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
+    errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]],
+              col='white', lwd=3)
+    #axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0), col='white')
+    axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+    axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+    box(col = boxcol[i])
+  }
+  
+  dev.off()
+  
+  #Day and night Calcification
+  #NEC plots by day
+  y2<-c(2,20,2,4,4)
+  y3<-c(-3.5,0,-2,-3.5,0)
+  DN<-c('Day','Night')
+  png("DayCalcification.png", width=3800, height=4000, res=300)
+  par(mfrow=c(3,2))
+  par(bg=NA)
+  layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
+                  3,3,3,3,3,0,4,4,4,4,4,
+                  0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
+  
+  # for (j in 1:2){
+  j=1
+    for (i in 1:length(sub)){
+      x<-barplot(NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i] & NEC.mean.DayNight$DayNight==DN[j]], main=substrate[i], ylim=c(y3[i],y2[i]), 
+                 #ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1}))
+                 col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
+      
+      errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],
+                col='white', lwd=3)
+    #  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+      lines(x,c(0,0,0), col='white')
+      axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+      axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+      box(col = boxcol[i])
+      
+        }  
+  dev.off()
+  
+  #night calcification
+  y2<-c(3,12,0,1,4)
+  y3<-c(-4,0,-3,-6,-3)
+  DN<-c('Day','Night')
+  png("NightCalcification.png", width=3800, height=4000, res=300)
+  par(mfrow=c(3,2))
+  par(bg=NA)
+  layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
+                  3,3,3,3,3,0,4,4,4,4,4,
+                  0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
+  
+  # for (j in 1:2){
+  j=2
+  for (i in 1:length(sub)){
+    x<-barplot(NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i] & NEC.mean.DayNight$DayNight==DN[j]], main=substrate[i], ylim=c(y3[i],y2[i]), 
+               #ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1}))
+               col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white', col='lightblue', border='white')
+    
+    errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],
+              col='white', lwd=3)
+    #  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    lines(x,c(0,0,0), col='white')
+    axis(1, at=x, labels=c("Ambeint","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2, tick=FALSE)
+    axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+    box(col = boxcol[i])
+    
+  }  
+  dev.off()
+  
+  ###PH by time PDF
+  pdf("pH_Time.pdf", width=14, height=8)
+  
+  par(mfrow=c(1,2))
+  par(mar=c(5,6,4,2)+0.1 )
+  par(bg=NA)
+  rm(y)
+  rm(yse)
+  y<-deltapHMeans.time$pHMean
+  yse<-deltapHMeans.time$pHSE
+  
+  
+  plot(NA, ylim=c(-0.2,0.3), xaxt="n", xlab="Time", ylab=expression(paste(Delta,"pH")),col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white')
+  
+  abline(h=0, lty=2, col='white')
+  par(new = TRUE)
+  cols <- c('green','red','purple','yellow','white')
+  #
+  # for (j in 1:length(Nutlevels)){
+  for (i in 1:5){
+    par(new = TRUE)
+    
+    
+    
+    plot(as.numeric(deltapHMeans.time$DateTime [deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]]),
+         y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]], col = cols[i],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(-0.2,0.3),
+         col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white')
+    
+    arrows(unique(deltapHMeans.time$DateTime), y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]]
+           + yse[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]], 
+           unique(deltapHMeans.time$DateTime), y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]]
+           - yse[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[1]], 
+           angle=90, code=3, length = 0.1, col='white')
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    # a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+    #b<-ifelse(i<=4,6,13)
+    
+    a<-ifelse(i<=4,1,7) #because mixed has different dates than the rest of the substrats
+    b<-ifelse(i<=4,3,10)
+    
+    c<-ifelse(i<=4,5,13) #because mixed has different dates than the rest of the substrats
+    d<-ifelse(i<=4,6,14)
+    
+    axis(1, at=unique(deltapHMeans.time $DateTime)[start:stops], 
+         labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"),
+         col.tick = "white", col.axis="white", cex.axis=2)
+    axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+    box(col = 'white')
+  }
+  #shaded area for night
+  rect(unique(deltapHMeans.time $DateTime)[a]+3600,min(y),unique(deltapHMeans.time $DateTime)[b]+3600,max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  
+  rect(unique(deltapHMeans.time $DateTime)[c]+3600,min(y),unique(deltapHMeans.time $DateTime)[d]+3600,max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  
+  legend('topright',legend=substrate, col=cols, pch=19, bty = 'n',text.col='white', cex=2)
+  
+  
+  #--------------------------
+  rm(y)
+  rm(yse)
+  y<-deltapHMeans.time$pHMean
+  yse<-deltapHMeans.time$pHSE
+  i=4
+  #for (i in 1:length(sub)){
+  plot(NA, xaxt='n', xlab="Time",ylim=c(-0.2, 0.2), ylab="", main = sub[i],col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white')
+  
+  abline(h=0, lty=2, col='white')
+  par(new = TRUE)
+  cols <- c('lightblue','orange','hotpink')
+  
+  for (j in 1:length(Nuts)){
+    par(new = TRUE)
+    
+    plot(as.numeric(deltapHMeans.time$DateTime [deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]),
+         y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]], col = cols[j],
+         pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(-0.2, 0.2),
+         col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3, col.main='white')
+    
+    arrows(unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]]
+           + yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
+           unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]
+           - yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
+           angle=90, code=3, length = 0.1, col='white')
+    start<-ifelse(i<=4,c(1),c(8))
+    stops<-ifelse(i<=4,c(7),c(14))
+    a<-ifelse(i<=4,1,7) #because mixed has different dates than the rest of the substrats
+    b<-ifelse(i<=4,3,10)
+    
+    c<-ifelse(i<=4,5,13) #because mixed has different dates than the rest of the substrats
+    d<-ifelse(i<=4,6,14)
+    axis(1, at=unique(deltapHMeans.time $DateTime)[start:stops], 
+         labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"),
+         col.tick = "white", col.axis="white", cex.axis=2)
+    axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
+    box(col = 'white')
+  }
+  rect(unique(deltapHMeans.time $DateTime)[a]+3600,min(y),unique(deltapHMeans.time $DateTime)[b]+3600,max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  rect(unique(deltapHMeans.time $DateTime)[c]+3600,min(y),unique(deltapHMeans.time $DateTime)[d]+3600,max(y)+.5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+  
+  legend('topright', legend=unique(deltapHMeans.time $NutLevel),  col = c('lightblue','orange','hotpink'), pch=19, bty = 'n',
+         text.col='white', cex=2)
+  
+  
+  # }
+  dev.off()
+  
