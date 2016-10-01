@@ -162,7 +162,7 @@ axis(2,  col.tick = "white", col.axis="white", cex.axis=2)
 box(col = 'white')
 
 #average phosphate for experiment
-x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})),ylab='', ylim=c(0,2.5), border='white',
+x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})),ylab='', ylim=c(0,3), border='white',
            col.lab='white',  cex.main=3, cex.axis=2, cex.lab=3,col=c('lightblue','orange','hotpink'), col.main='white')
 errorbars(x,meanNuts$meanP,0,meanNuts$SEP, col='white')
 axis(1, at=x, labels=c("Ambient","Medium","High"),col.tick= "white", col.axis="white", cex.axis=2)

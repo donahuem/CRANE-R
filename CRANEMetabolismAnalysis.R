@@ -69,6 +69,24 @@ NCPCalc<-function(HeaderDIC,TankDIC,ResidenceTime,SurfaceArea, TankVolume=5678,S
   
 }  
 
+##Calculate Nutrient uptake
+NutCalc<-function(HeaderN,TankN,ResidenceTime,SurfaceArea, TankVolume=5678,SWDenstiy=1.023){
+  
+  #NEC<-0.5*(HeaderTA-TankTA)*TankVolume*SWDenstiy/(ResidenceTime*SurfaceArea)/1000
+  
+  NutRate<-(HeaderN-TankN)*(TankVolume/SurfaceArea)*(SWDenstiy/ResidenceTime)/1000
+  
+  
+  return(NutRate)
+  #Nutcalc calculated the nutrient uptake of a flow through mesocosm system at a given time point
+  #this uses residence time (lagrangian) r
+  #Nutrate is in umol cm^-2 hr-1  (or umol g-1 hr-1 if using one of the other measurements)
+  
+  
+}  
+
+##I did not use these functions but kept them here just in case--------
+
 NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3){
   
   tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
@@ -185,11 +203,11 @@ Algae <- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes 
 Sand<- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv",header=TRUE)
 
 
-#Both the Tank TA and the header TA are already corrected for %off from CRM in the excel sheet
+#I did not use the TA corrected to CRM because it made the data messier.... something was off
 
 ## Normalize the TA----------------------------------------------------------------------
-#normalize the TA to N+N concentrations.  Right now we are using 0,3,6 as place holders until the real data get here
-#I am also only normalizing the headers for nw because the N+N in the tanks are very low due to uptake
+#normalize the TA to N+N concentrations.  
+#I am also only normalizing the headers for now because the N+N in the tanks are very low due to uptake and we dont have all those data
 
 ChemData$HeaderTA.norm<-ChemData$HeaderTA-ChemData$HeaderN-ChemData$HeaderP
 #ChemData$HeaderTA.norm<-ChemData$HeaderTA
@@ -197,7 +215,7 @@ ChemData$HeaderTA.norm<-ChemData$HeaderTA-ChemData$HeaderN-ChemData$HeaderP
 #normalize the TA data to salinity---THE SALINITY DATA IS CAUSING PROBLEMS.....
 #ChemData$HeaderTA.norm<-ChemData$HeaderTA*ChemData$HeaderSalinity/38
 #ChemData$TankTA.norm<-ChemData$TankTA*ChemData$TankSalinity/38
-ChemData$TankTA.norm<-ChemData$TankTA
+ChemData$TankTA.norm<-ChemData$TankTA ### this is not salinity normalize... but its named norm here because of the code below
 
 #calculuate all the carbonate parameters with seacarb---------------------------------------
 #Tanks
@@ -222,19 +240,18 @@ ChemData[,c("HeaderCO2","HeaderHCO3","HeaderCO3","HeaderDIC","HeaderOmegaArag","
 
 ## convert flow to residence time
 #Flow is now in ml per min
-TankVol<-5678 #hole was at 6 quarts is the volume of each tank
+TankVol<-5678 #hole was at 6 quarts... this is the volume of each tank in ml
 
 ChemData$ResTime<-(1/60)*(1/ChemData$Flow)*TankVol
 
 
-#Add the algae bit
+#Add the algae bits to the final biomass
 Algae$FinalSA<-Algae$FinalSA+Algae$BitsSA
 Algae$FinalWW<-Algae$FinalWW+Algae$BitsWW
 Algae$FinalVol<-Algae$FinalVol+Algae$BitsVol
 Algae$AFDW<-Algae$AFDW+Algae$AFDWbits
 Algae$DW<-Algae$DW+Algae$DWbits
 
-#what about dry weight????
 
 #calculate the average residence time by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
 ResTime.mean <- ddply(ChemData, c("Aquarium"), summarize,
@@ -251,7 +268,7 @@ Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
 )
 
 
-## Sum up all the biological data by aquarium
+## Sum up all the biological data by aquarium for each experiment
 Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
                           SA = sum(SA, na.rm = T), #the SA for coral and algae are in mm2 while Sand is in cm2
                           AFDW = sum(AFDW, na.rm = T),
@@ -309,10 +326,11 @@ Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2"), summarize,
                           Volume = sum(Vol, na.rm = T)
 )
 #join all the biology together
-biology<-rbind(Rubble.Exp1Summary,Coral.Exp1Summary, Algae.Exp1Summary,Sand.Exp1Summary)
+biology<-rbind(Rubble.Exp1Summary,Coral.Exp1Summary, Algae.Exp1Summary,Sand.Exp1Summary) #exp 1
 
-biology2<-rbind(Rubble.Exp2Summary,Coral.Exp2Summary, Algae.Exp2Summary,Sand.Exp2Summary)
+biology2<-rbind(Rubble.Exp2Summary,Coral.Exp2Summary, Algae.Exp2Summary,Sand.Exp2Summary) #exp2
 
+#this sums up all 4 parts for each aquarium for total biomass etc per aquarium
 Exp2biology <- ddply(biology2, c("Aq_Ex2"), summarize,
                             SA = sum(SA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
@@ -328,12 +346,12 @@ biology<-rbind(biology,Exp2biology)
 #add the mean residence times
 AllData<-merge(ChemData, ResTime.mean, all.x=TRUE)
 
-#add the mean residence times
+#add the mean Flow rates times
 AllData<-merge(AllData, Flow.mean, all.x=TRUE)
 
 #Make one huge dataset with all the biology and chem data together
 AllData<-merge(AllData,biology, by='Aquarium', all.x=TRUE)
-
+#format the dates
 AllData$DateTime<-as.POSIXct(paste(AllData$Date, AllData$Time), format="%m/%d/%Y %H:%M")
 
 ##sort all the data by time, substrate, nutrient level, and experiment
@@ -353,14 +371,15 @@ AllData$DayNight<-ifelse(AllData$Time==time[1]|AllData$Time==time[2]|AllData$Tim
 Nuts<-unique(AllData$NutLevel)[c(1,3,2)] #puts the order for loops as ambient, then med, then high
 sub<-unique(AllData$Substrate)
 
-#NEC2<-matrix(data=NA, nrow=6, ncol=3)
-NEC2 <- array(NA, dim=c(6,72))
-NCP2 <- array(NA, dim=c(6,72))
 #sort data by aquarium so that I can calculate NEC easier
 
 AllData<-AllData[order(AllData$Aquarium),]
 
 #calculating NEC using eularian....I AM NOT USING THIS... WAS JUST A TEST
+#NEC2<-matrix(data=NA, nrow=6, ncol=3)
+NEC2 <- array(NA, dim=c(6,72))
+NCP2 <- array(NA, dim=c(6,72))
+
 for (i in 1:length(unique(AllData$Aquarium))){
   NEC2[,i]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$Aquarium==i], 
                        TankTA = AllData$TankTA.norm[AllData$Aquarium==i], 
@@ -370,17 +389,9 @@ for (i in 1:length(unique(AllData$Aquarium))){
   
 }
 
-#for (i in 1:length(unique(AllData$Aquarium))){
- # NCP2[,i]<-NCPCalc2(HeaderDIC = AllData$HeaderDIC.norm[AllData$Aquarium==i], 
-  #                   TankDIC = AllData$TankDIC.norm[AllData$Aquarium==i], 
-   #                  flow =  AllData$Flow.mean[AllData$Aquarium==i], 
-    #                 SurfaceArea = AllData$SA[AllData$Aquarium==i],
-     #                NEC=NEC2[,i])
-  
-  
-#}
 
-#NEC using lagrangian method with AFDW normalization--THIS IS WHAT i AM USING
+
+#NEC using lagrangian method with AFDW normalization--THIS IS WHAT I AM USING
   AllData$NEC.AFDW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
                     TankTA = AllData$TankTA.norm, 
                     ResidenceTime = AllData$ResTime.mean, 
@@ -416,7 +427,7 @@ for (i in 1:length(unique(AllData$Aquarium))){
   
 
   ###NCP calcs----------------------------------------------
-  ## Normalize the DIC Data to a constant salinity f
+  ## Normalize the DIC Data to a constant salinity... again.. didnt do this cuz salinity data is no good
   AllData$TankDIC.norm<-AllData$TankDIC
   AllData$HeaderDIC.norm<-AllData$HeaderDIC
   
@@ -1065,6 +1076,7 @@ AllData$GPP<-AllData$NCP.AFDW+AllData$Mean.AFDW2.r
 
 ## HOW DO I RUN THESE SAME MODELS FOR GPP AND HOLD THE POWER??? ONE IDEA: ADD AVERAGE RESPIRATION TO ALL THE DAY RATES
 
+#Algae
 model.NECNet.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' ,]) 
 model.NECDay.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Day',]) 
 model.NECNight.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Night',]) 
@@ -1085,7 +1097,7 @@ model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$
 model.NECNet.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank) +(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
 model.NECDay.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
 model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
-model.NECNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
+model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
 model.R.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
 model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
 
@@ -1144,14 +1156,14 @@ model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$
 
 model.NECOmega.Algae<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Algae',])
 
-model.NECOmega.Coral<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
+model.NECOmega.Coral<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Coral',])
 #coef(model.NECOmega.Coral) #get the coefficients
 
-model.NECOmega.Sand<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
+model.NECOmega.Sand<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Sand',])
 
-model.NECOmega.Rubble<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Rubble',])
+model.NECOmega.Rubble<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Rubble',])
 
-model.NECOmega.Mixed<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel++ (1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
+model.NECOmega.Mixed<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+(1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
 
 # models for pH vs NCP
  model.pH.NCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
@@ -1239,7 +1251,7 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 
 
 ###Looking at feedbacks--------------------------------------------
-
+##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
 plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
 legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
 
@@ -1358,7 +1370,8 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   }
   legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
   
-  ##nutrient plots --- these are currently inflated because I don't have all the data for the header tanks
+  ##nutrient plots --- just for the headers.... 
+  #calculate the mean nutrient conditions
   meanNuts<-ddply(AllData, 'NutLevel', summarize,
         meanNN=mean(HeaderN, na.rm=T),
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
@@ -1366,14 +1379,14 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
         SEP=sd(HeaderP, na.rm=T)/sqrt(7))
         
   par(mfrow=c(1,2)) #average nitrate for experiment
-  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NH'[4]^{'+'})), 
+  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NO'[2]^{'-'})), 
              ylab=expression(paste(mu,'M')), ylim=c(0,10))
   errorbars(x,meanNuts$meanNN,0,meanNuts$SENN)
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
   #average phosphate for experiment
   x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})), 
-             ylab='', ylim=c(0,2.5))
+             ylab='', ylim=c(0,3.0))
   errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
@@ -1723,6 +1736,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  
  
  #Plot NEC versus NCP-----------------------
+ b<-matrix(nrow=5,ncol=3)
  for(i in 1:5){
    plot(0,type='n', xlim=c(-20,60), ylim=c(-10,20), xlab='NCP', ylab='NEC',main=sub[i])
    for (j in 1:3){
