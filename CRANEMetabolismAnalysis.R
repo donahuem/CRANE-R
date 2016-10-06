@@ -6,6 +6,7 @@
 ### Edited by ---                               ###
 ###################################################
 
+#{r message=FALSE, warning=FALSE} #hide the warning messages in rmarkdown
 # Clear workspace --------------------------------
 rm(list=ls())
 
@@ -84,102 +85,6 @@ NutCalc<-function(HeaderN,TankN,ResidenceTime,SurfaceArea, TankVolume=5678,SWDen
   
   
 }  
-
-##I did not use these functions but kept them here just in case--------
-
-NECCalc2<-function(HeaderTA,TankTA,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3){
-  
-  tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
-  #flow is in ml/min convert to L/hr
-  flow<-flow*60/1000;
-  
-  #time is time in between sampling points
-  #SA is in cm^3, convert to m^3
-  SurfaceArea<-SurfaceArea/(100^2);
-  
-  
-  #now convert flow rate to kg m-2 hr-1 so that I can use Andersson et al. 2009 eq 
-  flowrate<-flow*SWDensity/tankarea;
-  
-  #DeltaTA/dt total change in TA in the tank over sample times (mmol m-2 hr-1)
-  DTAdt<-NULL
-  NEC<-NULL
-  FinTA<-NULL
-  FoutTA<-NULL
-  for (i in 1:length(TankTA)-1){
-  DTAdt[i]<-((TankTA[i+1]-TankTA[i])/(time*SurfaceArea[i])*TankVolume*SWDensity)/1000;
-  #F_in -How much TA in coming in from headers (mmol m-2 hr-1)
-  FinTA[i]<-((HeaderTA[i+1]+ HeaderTA[i])/2 *flowrate[i])/1000;
-  
-  #F_out-How much TA is leaving the tank (mmol m-2 hr-1)
-  FoutTA[i]<-((TankTA[i+1]+TankTA[i])/2*flowrate[i])/1000;
-  
-  #Net ecosystem calcification (mmol m-2 hr-1) due to the critters in tank
-  NEC[i]<-12*(FinTA[i]-FoutTA[i]-DTAdt[i])/2; #the 12 makes it per day
-  }
-  return(NEC)
-  #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
-  #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
-  #biogeochemistry paper)
-  #NEC is in mmol m^-2 d-1
-  
-  #HeaderTA is TA from the header in umol/kg
-  #TankTAis TA from the tank in umol/kg
-  #Residence time is the residence time in hours
-  #Surface area is SA of the substrate in cm2
-  #TankVolume is the volume in cm3 = (default = 5678)
-  #SWDensity is density of seawater in kg/cm3 (default =1.023)
-  
-}  
-
-
-NCPCalc2<-function(HeaderDIC,TankDIC,flow,SurfaceArea, TankVolume=5.678,SWDensity=1.023, time=3, NEC){
-  
-  tankarea <- 0.2032*0.22225; #m length x width of the tank (m2)
-  #flow is in ml/min convert to L/hr
-  flow<-flow*60/1000;
-  
-  #time is time in between sampling points
-  #SA is in cm^3, convert to m^3
-  SurfaceArea<-SurfaceArea/(100^2);
-  
-  
-  #now convert flow rate to kg m-2 hr-1 so that I can use Andersson et al. 2009 eq 
-  flowrate<-flow*SWDensity/tankarea;
-  
-  #DeltaTA/dt total change in TA in the tank over sample times (mmol m-2 hr-1)
-  DTAdt<-NULL
-  FinTA<-NULL
-  FoutTA<-NULL
-  NCP1<-NULL
-  NCP<-NULL
-  for (i in 1:length(TankDIC)-1){
-    DTAdt[i]<-((TankDIC[i+1]-TankDIC[i])/(time*SurfaceArea[i])*TankVolume*SWDensity)/1000;
-    #F_in -How much TA in coming in from headers (mmol m-2 hr-1)
-    FinTA[i]<-((HeaderDIC[i+1]+ HeaderDIC[i]) *flowrate[i])/1000;
-    
-    #F_out-How much TA is leaving the tank (mmol m-2 hr-1)
-    FoutTA[i]<-((TankDIC[i+1]+TankDIC[i])*flowrate[i])/1000;
-    
-    #Net ecosystem calcification (mmol m-2 hr-1) due to the critters in tank
-    NCP1[i]<-12*(FinTA[i]-FoutTA[i]-DTAdt[i]); #the 12 makes it per day
-    NCP[i]<-NCP1[i]-NEC[i]
-    }
-  return(NCP)
-  #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
-  #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
-  #biogeochemistry paper)
-  #NEC is in mmol m^-2 d-1
-  
-  #HeaderTA is TA from the header in umol/kg
-  #TankTAis TA from the tank in umol/kg
-  #Residence time is the residence time in hours
-  #Surface area is SA of the substrate in cm2
-  #TankVolume is the volume in cm3 = (default = 5678)
-  #SWDensity is density of seawater in kg/cm3 (default =1.023)
-  
-}  
-
 
 # Load Data-----------------------------------------
 #Chem Data
@@ -375,21 +280,6 @@ sub<-unique(AllData$Substrate)
 
 AllData<-AllData[order(AllData$Aquarium),]
 
-#calculating NEC using eularian....I AM NOT USING THIS... WAS JUST A TEST
-#NEC2<-matrix(data=NA, nrow=6, ncol=3)
-NEC2 <- array(NA, dim=c(6,72))
-NCP2 <- array(NA, dim=c(6,72))
-
-for (i in 1:length(unique(AllData$Aquarium))){
-  NEC2[,i]<-NECCalc2(HeaderTA = AllData$HeaderTA.norm[AllData$Aquarium==i], 
-                       TankTA = AllData$TankTA.norm[AllData$Aquarium==i], 
-                       flow =  AllData$Flow.mean[AllData$Aquarium==i], 
-                       SurfaceArea = AllData$SA[AllData$Aquarium==i])
-  
-  
-}
-
-
 
 #NEC using lagrangian method with AFDW normalization--THIS IS WHAT I AM USING
   AllData$NEC.AFDW<-NECCalc(HeaderTA = AllData$HeaderTA.norm, 
@@ -475,6 +365,22 @@ for (i in 1:length(unique(AllData$Aquarium))){
   plot(AllData$NCP.Vol, AllData$NCP.SA, col=AllData$Substrate, xlab='Volume', ylab='SA')
   plot(AllData$NCP.DW, AllData$NCP.AFDW, col=AllData$Substrate, xlab='Dry Weight', ylab='AFDW')
   
+  ### Nutrient uptake ------------
+  #N
+  AllData$NUptake.AFDW<- NutCalc(HeaderN = AllData$HeaderN,
+                                   TankN = AllData$TankN,
+                                   ResidenceTime = AllData$ResTime.mean,
+                                   SurfaceArea = AllData$AFDW)
+  #P
+  AllData$PUptake.AFDW<- NutCalc(HeaderN = AllData$HeaderP,
+                                 TankN = AllData$TankP,
+                                 ResidenceTime = AllData$ResTime.mean,
+                                 SurfaceArea = AllData$AFDW)
+  
+  AllData$SiUptake.AFDW<- NutCalc(HeaderN = AllData$HeaderSi,
+                                 TankN = AllData$TankSi,
+                                 ResidenceTime = AllData$ResTime.mean,
+                                 SurfaceArea = AllData$AFDW)
   
   #### calculate means------------------
 
@@ -507,19 +413,53 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
   )
   
     
-par(mfrow=c(2,2))
+par(mfrow=c(3,2))
 for (i in 1:5){
 plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
 points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
 points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
 
-par(mfrow=c(2,2))
+par(mfrow=c(3,2))
 for (i in 1:5){
   plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
   points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
   points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NCP.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
 }
+
+par(mfrow=c(3,2))
+for (i in 1:5){
+  plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NUptake.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i], ylim=c(-2,5), 
+       ylab='N uptake (umol g AFDW-1 hr-1', xlab='')
+  points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$NUptake.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+  points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$NUptake.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+  abline(h=0)
+}
+legend('topleft', legend= c('Ambient','Med','High'), col=c('black','blue','red'), pch=20, bty = 'n')
+
+par(mfrow=c(3,2))
+for (i in 1:5){
+  plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$PUptake.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i], ylim=c(-1,1), 
+       ylab='P uptake (umol g AFDW-1 hr-1', xlab='')
+  points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$PUptake.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+  points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$PUptake.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+  abline(h=0)
+}
+
+par(mfrow=c(3,2))
+for (i in 1:5){
+  plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$SiUptake.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i], ylim=c(-1,1), 
+       ylab='Si uptake (umol g AFDW-1 hr-1', xlab='')
+  points(AllData$DateTime[AllData$NutLevel=='High'& AllData$Substrate==sub[i]],AllData$SiUptake.AFDW[AllData$NutLevel=='High'& AllData$Substrate==sub[i]], col='red')
+  points(AllData$DateTime[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]],AllData$SiUptake.AFDW[AllData$NutLevel=='Med'& AllData$Substrate==sub[i]], col='blue')
+  abline(h=0)
+}
+
+# plot the nutrient uptake rates against each other
+par(mfrow=c(1,3))
+plot(AllData$NUptake.AFDW, AllData$PUptake.AFDW, xlab='N Uptake', ylab='P Uptake')
+plot(AllData$NUptake.AFDW, AllData$SiUptake.AFDW, xlab='N Uptake', ylab='Si Uptake')
+plot(AllData$PUptake.AFDW, AllData$SiUptake.AFDW, xlab='P Uptake', ylab='Si Uptake')
 
 ##Plot NEC averages across time for each normalization-------------------------------------------------------
 ##NORMALIZED BY AFDW
@@ -841,7 +781,7 @@ legend('topright', legend=unique(NCP.mean$NutLevel), col=unique(NCP.mean$NutLeve
 time<-unique(NEC.mean$DateTime)
 NEC.mean$DayNight<-ifelse(NEC.mean$DateTime==time[1]|NEC.mean$DateTime==time[2]|NEC.mean$DateTime==time[3]|
                             NEC.mean$DateTime==time[7]|NEC.mean$DateTime==time[8]|
-                            NEC.mean$DateTime==time[9]|NEC.mean$DateTime==time[10]|NEC.mean$DateTime==time[11]|
+                            NEC.mean$DateTime==time[9]|NEC.mean$DateTime==time[10]|
                             NEC.mean$DateTime==time[14], 'Day', 'Night')
 NCP.mean$DayNight<-NEC.mean$DayNight
 
