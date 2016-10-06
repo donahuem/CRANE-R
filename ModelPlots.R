@@ -60,16 +60,21 @@ par(mar=c(1,4,3,1));
 #net NEC
 #coral net NEC
 y<-summary(model.NECNet.Coral)$coefficients[,1:2]
+a<-anova(model.NECNet.Coral)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]), main='Coral', ylim=c(0,max(abs(y))+5),
            ylab=expression(paste("Mean NEC")),
             cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+       text(x[3], max(y), '*', font=2, cex=2)
+}
 axis(2, cex.axis=1)
 
 #algae
 y<-summary(model.NECNet.algae)$coefficients[,1:2]
+a<-anova(model.NECNet.algae)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]), main='Algae', ylim=c(-2,max(abs(y))+1),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -77,9 +82,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #rubble
 y<-summary(model.NECNet.Rubble)$coefficients[,1:2]
+a<-anova(model.NECNet.Rubble)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]), main='Rubble', ylim=c(-1.5,1),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -87,28 +96,46 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
+
 
 #sand
 y<-summary(model.NECNet.Sand)$coefficients[,1:2]
+a<-anova(model.NECNet.Sand)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]), main='Sand', ylim=c(-4,max(abs(y))),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
+
 
 #mixed
 y<-summary(model.NECNet.Mixed)$coefficients[,1:2]
+a<-anova(model.NECNet.Mixed)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]), main='Mixed', ylim=c(-1,max(abs(y))+2),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
+
 
 ##-- 
 par(mar=c(2,4,1,1)); 
 #Day NEC
 #coral 
 y<-summary(model.NECDay.Coral)$coefficients[,1:2]
+a<-anova(model.NECDay.Coral)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,max(abs(y))+6),
            ylab=expression(paste("Mean Daytime NEC ")),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -116,9 +143,14 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
 
 #algae
 y<-summary(model.NECDay.algae)$coefficients[,1:2]
+a<-anova(model.NECDay.algae)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-3,max(abs(y))),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -126,9 +158,14 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
 
 #rubble
 y<-summary(model.NECDay.Rubble)$coefficients[,1:2]
+a<-anova(model.NECDay.Rubble)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-2,max(abs(y))+2),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -136,28 +173,42 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
 
 #sand
 y<-summary(model.NECDay.Sand)$coefficients[,1:2]
+a<-anova(model.NECDay.Sand)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-4,max(abs(y))+1),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
 
 #mixed
 y<-summary(model.NECDay.Mixed)$coefficients[,1:2]
+a<-anova(model.NECDay.Mixed)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-1,max(abs(y))+2),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
+axis(2, cex.axis=1)
 ##--- 
 #Night NEC
 par(mar=c(6,4,1,1)); 
 #coral 
 y<-summary(model.NECNight.Coral)$coefficients[,1:2]
+a<-anova(model.NECNight.Coral)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,max(abs(y))+4),
            ylab=expression(paste("Mean Nighttime NEC ")),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -166,10 +217,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #algae
 y<-summary(model.NECNight.algae)$coefficients[,1:2]
+a<-anova(model.NECNight.algae)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-3,max(abs(y))+2),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -180,44 +234,57 @@ text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #rubble
 y<-summary(model.NECNight.Rubble)$coefficients[,1:2]
+a<-anova(model.NECNight.Rubble)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-3,0),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 
 #sand
 y<-summary(model.NECNight.Sand)$coefficients[,1:2]
+a<-anova(model.NECNight.Sand)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-4,1),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] -0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y)-0.5, '*', font=2, cex=2)
+}
 
 #mixed
 y<-summary(model.NECNight.Mixed)$coefficients[,1:2]
+a<-anova(model.NECNight.Mixed)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-3,max(abs(y))),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 ##--- 
 par(mfrow=c(3,5))
 par(mar=c(1,4,3,1)); 
 #NCP
 #coral 
 y<-summary(model.NCPNet.Coral)$coefficients[,1:2]
+a<-anova(model.NCPNet.Coral)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,20), main = 'Coral',
            ylab=expression(paste("Mean NCP ")),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -225,9 +292,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #algae
 y<-summary(model.NCPNet.algae)$coefficients[,1:2]
+a<-anova(model.NCPNet.algae)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,20),main = 'Algae',
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -235,9 +306,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #rubble
 y<-summary(model.NCPNet.Rubble)$coefficients[,1:2]
+a<-anova(model.NCPNet.Rubble)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-5,5),main = 'Rubble',
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -245,22 +320,32 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #sand
 y<-summary(model.NCPNet.Sand)$coefficients[,1:2]
+a<-anova(model.NCPNet.Sand)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-5,6),main = 'Sand',
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
-
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 #mixed
 y<-summary(model.NCPNet.Mixed)$coefficients[,1:2]
+a<-anova(model.NCPNet.Mixed)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,15),main = 'Mixed',
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 ##--
 
 ##--- 
@@ -268,6 +353,7 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
 #coral 
 par(mar=c(2,4,2,1)); 
 y<-summary(model.GCP.Coral)$coefficients[,1:2]
+a<-anova(model.GCP.Coral)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,60),
            ylab=expression(paste("Mean GCP ")),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -275,9 +361,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #algae
 y<-summary(model.GCP.algae)$coefficients[,1:2]
+a<-anova(model.GCP.algae)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,40),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -285,9 +375,13 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #rubble
 y<-summary(model.GCP.Rubble)$coefficients[,1:2]
+a<-anova(model.GCP.Rubble)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,15),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -295,27 +389,39 @@ errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #sand
 y<-summary(model.GCP.Sand)$coefficients[,1:2]
+a<-anova(model.GCP.Sand)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,25),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 
 #mixed
 y<-summary(model.GCP.Mixed)$coefficients[,1:2]
+a<-anova(model.GCP.Mixed)
 x<-barplot(c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,30),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(y), '*', font=2, cex=2)
+}
 ##--
 #R
 par(mar=c(4,4,2,1)); 
 #coral 
 y<-summary(model.R.Coral)$coefficients[,1:2]
+a<-anova(model.R.Coral)
 x<-barplot(-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,25),
            ylab=expression(paste("Mean R ")),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -324,9 +430,13 @@ errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 2,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(abs(y)), '*', font=2, cex=2)
+}
 
 #algae
 y<-summary(model.R.algae)$coefficients[,1:2]
+a<-anova(model.R.algae)
 x<-barplot(-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,12),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -335,9 +445,13 @@ errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(abs(y)), '*', font=2, cex=2)
+}
 
 #rubble
 y<-summary(model.R.Rubble)$coefficients[,1:2]
+a<-anova(model.R.Rubble)
 x<-barplot(-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,12),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -346,18 +460,26 @@ errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(abs(y)), '*', font=2, cex=2)
+}
 
 #sand
 y<-summary(model.R.Sand)$coefficients[,1:2]
+a<-anova(model.R.Sand)
 x<-barplot(-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(-2,12),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
           col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(abs(y))-1, '*', font=2, cex=2)
+}
 
 #mixed
 y<-summary(model.R.Mixed)$coefficients[,1:2]
+a<-anova(model.R.Mixed)
 x<-barplot(-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),  ylim=c(0,12),
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
@@ -365,4 +487,7 @@ errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[
           col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE, srt=45)
+if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+  text(x[3], max(abs(y)), '*', font=2, cex=2)
+}
 dev.off()
