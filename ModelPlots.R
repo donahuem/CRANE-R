@@ -49,7 +49,7 @@ substrate<-c('Algae','Coral','Rubble','Sediment','Mixed')
 #layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
  #               3,3,3,3,3,0,4,4,4,4,4,
   #              0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
-pdf("MeanRates.pdf", width=8, height=8)
+pdf("plots/MSplots/MeanRates.pdf", width=8, height=8)
 j<-2
 par(bg=NA) 
 
@@ -80,7 +80,8 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-       text(x[3], par('usr')[4], '*', font=2, cex=2)
+      #  legend("top",'*', cex=2, bty="n")
+        legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -104,7 +105,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -126,7 +127,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -149,7 +150,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -172,7 +173,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -199,7 +200,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -222,7 +223,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -245,7 +246,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -266,7 +267,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 
@@ -287,7 +288,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 axis(2, cex.axis=1)
 ##--- 
@@ -313,7 +314,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -338,7 +339,7 @@ text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -360,7 +361,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -383,7 +384,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] -0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -404,7 +405,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--- 
 par(mfrow=c(3,5))
@@ -430,7 +431,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -453,7 +454,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -476,7 +477,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #sand
@@ -496,7 +497,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 #mixed
 y<-summary(model.NCPNet.Mixed)$coefficients[,1:2]
@@ -515,7 +516,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--
 
@@ -541,7 +542,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -563,7 +564,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -585,7 +586,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #sand
@@ -605,7 +606,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -625,7 +626,7 @@ x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper))
 arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
        col='black', lwd=3)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--
 #R
@@ -651,7 +652,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 2,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -674,7 +675,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -698,7 +699,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #sand
@@ -720,7 +721,7 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -743,6 +744,6 @@ arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE, srt=45)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 dev.off()
