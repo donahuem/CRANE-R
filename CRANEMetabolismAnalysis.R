@@ -18,6 +18,7 @@ library('lmerTest')
 library('reshape2')
 library('seacarb')
 library('MuMIn')
+library('effects')
 # Functions-----------------------------------------
 #easy errorbar barplots
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
@@ -1197,7 +1198,8 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLeve
 
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 
-pdf("NECvsOmega.pdf", width=6, height=8)
+## NEC vs Omegan plot-------------------------------------
+pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8)
 par(mfrow=c(3,2))
 cols <- c(unique(NEC.mean$NutLevel))
 y<-AllData$NEC.AFDW
@@ -1213,15 +1215,19 @@ for (i in 1:length(sub)){
          y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = cols[j],
          pch=21, type="p", xaxt='n', xlim=c(1.5,6), ylab='', xlab='',ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])))
     
-   model<-lm(y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]]~AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]])
-    lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3)
+    model<-lm(y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]]~AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]])
+    #if the p>0.05 make it a dashed line
+    p<-anova(model)$`Pr(>F)`[1]
+    if(p<=0.05){
+      lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3, lty=1)
+    }
   }
 }
-  legend('top', horiz = TRUE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+#empty plot to put the legend
+plot(NA, ylim=c(0,1), xlim=c(0,1), axes=FALSE,  ylab="", xlab="")
+legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
 dev.off()
-
-
 ## pH plots----------------------------------------------------------------
 deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarize,
                            pHMean = mean(TankpH-HeaderpH, na.rm = T),
