@@ -1228,12 +1228,48 @@ plot(NA, ylim=c(0,1), xlim=c(0,1), axes=FALSE,  ylab="", xlab="")
 legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
 dev.off()
+
+# calculate contribution of NEC and NCP to pH---------------------
+#function to calculate pH controbution that returns NEC and NCP contrinutions
+pHContributions<-function(pH.ctrl, pH.treat, TA.ctrl, TA.treat, DIC.ctrl, temp=25.5, sal=35.5){
+  #This function calculates the contributions of NEC and NCP to change in pH between the header tanks and the control tanks
+  #the formula is based on Page et al. 2016 Coral Reefs
+  
+  #NEC contribution to pH
+  #change in TA from calcification
+  TA.pHNEC<-TA.ctrl+(TA.treat-TA.ctrl)
+  #change in DIC from calcification
+  DIC.pHNEC<-DIC.ctrl+(0.5*(TA.treat-TA.ctrl))
+  #use TA and DIC to calculate pH from the seacarb function
+  
+  AllCO2<-carb(flag=15, TA.pHNEC/1000000, DIC.pHNEC/1000000, S=sal, T=temp, Patm=1, P=0, Pt=0, Sit=0,
+               k1k2="x", kf="x", ks="d", pHscale="T", b="u74", gas="potential")
+  #TA is divided by 1000 because all calculations are in mol/kg in the seacarb package
+  
+  pH.NEC<-AllCO2$pH## calculate pH at temp = 25.5 and salinity = 35.5
+  
+  #calculate change in pH due to calcification
+  pHNEC.treat<-pH.ctrl-pH.NEC
+  #NCP contribution to pH
+  # subtract the change in pH due to calcification from delta pH
+  pHNCP.treat<-pH.treat-pH.ctrl- pHNEC.treat
+  
+  
+  return(cbind(pHNEC.treat,pHNCP.treat))
+}
+
+#add NEC and NCP pH contronutions to ChemData
+AllData<-cbind(AllData,pHContributions(pH.ctrl=ChemData$HeaderpH, pH.treat = ChemData$TankpH, TA.ctrl = ChemData$HeaderTA, TA.treat = ChemData$TankTA, DIC.ctrl = ChemData$HeaderDIC))
+
 ## pH plots----------------------------------------------------------------
 deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarize,
                            pHMean = mean(TankpH-HeaderpH, na.rm = T),
                            N2=sum(!is.na(TankpH)),
-                           pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
-                           
+                           pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
+                           pH.NEC=mean(pHNEC.treat),
+                           pH.NECSE= sd(pHNEC.treat, na.rm = T)/sqrt(N2),
+                           pH.NCP=mean(pHNCP.treat),
+                           pH.NCPSE= sd(pHNCP.treat, na.rm = T)/sqrt(N2)
 )
 
 
@@ -1274,8 +1310,11 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   deltapHMeans.time <- ddply(AllData, c("Substrate","NutLevel", "DateTime"), summarize,
                         pHMean = mean(TankpH-HeaderpH, na.rm = T),
                         N2=sum(!is.na(TankpH)),
-                        pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
-                        
+                        pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
+                        pH.NEC=mean(pHNEC.treat),
+                        pH.NECSE= sd(pHNEC.treat, na.rm = T)/sqrt(N2),
+                        pH.NCP=mean(pHNCP.treat),
+                        pH.NCPSE= sd(pHNCP.treat, na.rm = T)/sqrt(N2)
   )
   
   #Delta pH across time
@@ -1336,7 +1375,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
   
-  ## DOC Analysis------------------------------------------
+## DOC Analysis------------------------------------------
   #DOC Data are from Craig from Day 14 and 28 from the long term experiment.  There are not DOC data for the mixed community
   #Input is from the header tanks, source is the ocean (I think?? need to double check)
   Data.DOC<-read.csv('Data/DOCforNyssa.csv')
@@ -1431,7 +1470,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- ###---------------
+###---------------
  #Same plot versus GPP
  #plot DOC versus NEC:NCP ratios
  par(mfrow=c(2,2))
@@ -1493,7 +1532,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- #Same plot versus R--------------------
+#Same plot versus R--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(0,15), xlab='DOC', ylab='R', main ='Algae')
@@ -1554,8 +1593,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- #-------------
- #Same plot versus NCP--------------------
+#Same plot versus NCP--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(0,20), xlab='DOC', ylab='NCP', main ='Algae')
@@ -1619,7 +1657,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  #-
  
  #-------------
- #Same plot versus NEC--------------------
+#Same plot versus NEC--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(-3,2), xlab='DOC', ylab='NEC', main ='Algae')
@@ -1681,7 +1719,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  }
  
  
- #Plot NEC versus NCP-----------------------
+#Plot NEC versus NCP-----------------------
  b<-matrix(nrow=5,ncol=3)
  for(i in 1:5){
    plot(0,type='n', xlim=c(-20,60), ylim=c(-10,20), xlab='NCP', ylab='NEC',main=sub[i])
@@ -1706,3 +1744,4 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
    }
    legend('topleft',legend=c('Ambient',"Medium","High"), col=cols, pch=19, bty = 'n')
  }
+ 
