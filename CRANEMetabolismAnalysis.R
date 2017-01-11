@@ -1193,9 +1193,13 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 
 ###Looking at feedbacks--------------------------------------------
 ##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
+pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6)
+par(mfrow=c(1,1), pty='s')
 plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
 legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+dev.off()
 
+par(pty=r)
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 
 ## NEC vs Omegan plot-------------------------------------
@@ -1220,6 +1224,9 @@ for (i in 1:length(sub)){
     p<-anova(model)$`Pr(>F)`[1]
     if(p<=0.05){
       lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3, lty=1)
+    }
+      else{
+      lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=0.5, lty=2)
     }
   }
 }
@@ -1318,6 +1325,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   )
   
   #Delta pH across time
+  pdf(file = 'Plots/MSplots/DeltapHTime.pdf', height = 8, width = 6)
   par(mfrow=c(3,2))
   rm(y)
   rm(yse)
@@ -1341,7 +1349,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
              + yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
              unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]
              - yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
-             angle=90, code=3, length = 0.1)
+             angle=90, code=3, length = 0.05)
       start<-ifelse(i<=4,c(1),c(8))
       stops<-ifelse(i<=4,c(7),c(14))
       
@@ -1355,6 +1363,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   }
   legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
   
+  dev.off()
   ##nutrient plots --- just for the headers.... 
   #calculate the mean nutrient conditions
   meanNuts<-ddply(AllData, 'NutLevel', summarize,
@@ -1362,9 +1371,9 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
         meanP=mean(HeaderP, na.rm=T),
         SEP=sd(HeaderP, na.rm=T)/sqrt(7))
-        
+  pdf(file = 'Plots/MSplots/NutrientsGrey.pdf', height = 5, width = 5)      
   par(mfrow=c(1,2)) #average nitrate for experiment
-  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NO'[2]^{'-'})), 
+  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'-'},'+ NO'[2]^{'-'})), 
              ylab=expression(paste(mu,'M')), ylim=c(0,10))
   errorbars(x,meanNuts$meanNN,0,meanNuts$SENN)
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
@@ -1374,7 +1383,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
              ylab='', ylim=c(0,3.0))
   errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
   axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
+  dev.off()
 ## DOC Analysis------------------------------------------
   #DOC Data are from Craig from Day 14 and 28 from the long term experiment.  There are not DOC data for the mixed community
   #Input is from the header tanks, source is the ocean (I think?? need to double check)

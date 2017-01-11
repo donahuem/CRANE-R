@@ -79,8 +79,10 @@ x<-barplot(ef$fit, main='Coral',
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-          col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #         col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -104,8 +106,11 @@ x<-barplot(ef$fit, main='Algae', ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$
           # ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -128,8 +133,11 @@ x<-barplot(ef$fit, main='Rubble', ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef
        #    ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
        yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -153,7 +161,9 @@ x<-barplot(ef$fit, main='Sand', ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$l
           # ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -177,7 +187,9 @@ x<-barplot(ef$fit, main='Mixed', ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$
          #  ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
          yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -199,13 +211,18 @@ a<-anova(model.NECDay.Coral)
  #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.Mixed))
-
-x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
-           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            ylab=expression(paste("Day NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -228,7 +245,10 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
           # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -252,8 +272,11 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
           # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -276,8 +299,11 @@ x<-barplot(ef$fit,ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceilin
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
@@ -298,7 +324,10 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
@@ -322,8 +351,11 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
             ylab=expression(paste("Night NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
@@ -346,8 +378,11 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
           # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
@@ -372,8 +407,11 @@ x<-barplot(ef$fit,ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceilin
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -397,8 +435,11 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] -0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
@@ -414,13 +455,17 @@ a<-anova(model.NECNight.Mixed)
  #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.Mixed))
-
-x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
-           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
@@ -444,8 +489,11 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Coral',
             ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
@@ -468,8 +516,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Algae',
          #  ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -492,8 +544,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Rubble',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -516,8 +572,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Sand',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
@@ -536,8 +596,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Mixed',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
@@ -561,8 +625,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+       #col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -584,8 +652,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -607,8 +679,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
@@ -630,8 +706,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
@@ -651,8 +731,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
@@ -675,13 +759,17 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),0)),
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),0), 5),
            ylab=expression(paste("R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 2,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-   legend("top",'*', cex=2, bty="n")
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #algae
@@ -699,13 +787,17 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-   legend("top",'*', cex=2, bty="n")
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -723,14 +815,18 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),0)),
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),0), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-   legend("top",'*', cex=2, bty="n")
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #sand
@@ -748,12 +844,16 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-   legend("top",'*', cex=2, bty="n")
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -771,8 +871,12 @@ x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceili
            yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE, srt=45)
