@@ -1,19 +1,19 @@
 # Look at changes in BW and WW over the 6 week press
 
 #Coral PERCENT CHANGE in BW
-# MC_pc <- aov(pcDeltaDens ~ Nuts + Tank, data=CoralSet,subset=(Species=="Montipora"))
+# MC_pc <- aov(pcDeltaBW ~ Nuts + Tank, data=CoralSet,subset=(Species=="Montipora"))
 # MC_pc
 # summary(MC_pc)
 # MC_pc_posthoc <- TukeyHSD(MC_pc,ordered=TRUE)
 # plot(TukeyHSD(MC_pc,"Nuts"))
 # 
-# PC_pc <- aov(pcDeltaDens ~ Nuts + Tank, data=CoralSet,subset=(Species=="Porites"))
+# PC_pc <- aov(pcDeltaBW ~ Nuts + Tank, data=CoralSet,subset=(Species=="Porites"))
 # PC_pc
 # summary(PC_pc)
 # PC_pc_posthoc <- TukeyHSD(PC_pc,"Nuts",ordered=FALSE)
 # plot(TukeyHSD(PC_pc,"Nuts"))
 
-# Coral_pc1 <- aov(pcDeltaDens ~ Nuts*Species + Tank, data=CoralSet)
+# Coral_pc1 <- aov(pcDeltaBW ~ Nuts*Species + Tank, data=CoralSet)
 # Coral_pc1
 # summary(Coral_pc1)
 # TukeyHSD(Coral_pc1,c("Nuts","Species"),ordered=FALSE)
@@ -21,15 +21,15 @@
 # plot(TukeyHSD(Coral_pc1,"Species"))
 
 # Block as fixed effect using AOV
-Coral_pc2 <- aov(pcDeltaDens ~ Nuts + Species + Tank, data=CoralSet)
+Coral_pc2 <- aov(pcDeltaBW ~ Nuts + Species + Tank, data=CoralSet)
 Coral_pc2
 summary(Coral_pc2)
 TukeyHSD(Coral_pc2,c("Nuts","Species"),ordered=FALSE)
 plot(TukeyHSD(Coral_pc2))
-Coral_output <-with(CoralSet,data.frame(SampleID,Species,Tank,Nuts,pcDeltaDens,pcOrg))
+Coral_output <-with(CoralSet,data.frame(SampleID,Species,Tank,Nuts,pcDeltaBW,pcAFDW))
 Coral_output$fitted.pc2 <- Coral_pc2$fitted.values
 
-Coralorg <- aov(pcOrg ~ Nuts + Species + Tank, data=CoralSet)
+Coralorg <- aov(pcAFDW ~ Nuts + Species + Tank, data=CoralSet)
 Coralorg
 summary(Coralorg)
 TukeyHSD(Coralorg,c("Nuts","Species"),ordered=FALSE)
@@ -38,14 +38,14 @@ Coral_output$fitted.org <- Coralorg$fitted.values
 
 #block as random effect using NLME
 load(nlme)
-Coral_BW_lme <- lme(pcDeltaDens ~ Nuts + Species, random=~1|Tank, data=CoralSet)
+Coral_BW_lme <- lme(pcDeltaBW ~ Nuts + Species, random=~1|Tank, data=CoralSet)
 Coral_BW_lme
 summary(Coral_BW_lme)
 
 #for Org, we have data by nubbin, and colony and tank are orthogonal (not nested) random effects
 #apparently, these are not available with the syntax in nlme
 load(lme4)
-Coral_org_lme <- lmer(pcOrg ~ Nuts + Species + (1|Tank) +(Species|Clone), data=CoralNubb)
+Coral_org_lme <- lmer(pcAFDW ~ Nuts + Species + (1|Tank) +(Species|Clone), data=CoralNubb)
 Coral_org_lme
 summary(Coral_org_lme)
 
@@ -58,19 +58,19 @@ Algae_pc_posthoc <- TukeyHSD(Algae_pc,ordered=TRUE)
 Algae_pc_posthoc
 plot(TukeyHSD(Algae_pc,"Nuts"))
 
-Algae_org <- aov(pcOrg ~ Nuts + Tank, data=Algae)
+Algae_org <- aov(pcAFDW ~ Nuts + Tank, data=Algae)
 Algae_org
 summary(Algae_org)
 Algae_org_posthoc <- TukeyHSD(Algae_org,ordered=TRUE)
 Algae_org_posthoc
 plot(TukeyHSD(Algae_org,"Nuts"))
-Algae_output <- with(Algae,data.frame(SampleID,Tank, Nuts,pcDeltaWW,pcOrg))
+Algae_output <- with(Algae,data.frame(SampleID,Tank, Nuts,pcDeltaWW,pcAFDW))
 Algae_output$fitted.org <-Algae_org$fitted.values
 Algae_output$fitted.pcgrowth <-Algae_pc$fitted.values
 
 Algae_pc_lme <- lme(pcDeltaWW ~ Nuts, random = ~1|Tank, data=Algae)
 summary(Algae_pc_lme)
-Algae_org_lme <- lme(pcOrg ~ Nuts, random = ~1|Tank, data=Algae)
+Algae_org_lme <- lme(pcAFDW ~ Nuts, random = ~1|Tank, data=Algae)
 summary(Algae_org_lme)
 
 ##Rubble PC in BW
@@ -81,20 +81,20 @@ Rubble_pc_posthoc <- TukeyHSD(Rubble_pc,ordered=TRUE)
 Rubble_pc_posthoc
 plot(TukeyHSD(Rubble_pc,"Nuts"))
 
-Rubble_org <- aov(pcOrg ~ Nuts + Tank, data=Rubble)
+Rubble_org <- aov(pcAFDW ~ Nuts + Tank, data=Rubble)
 Rubble_org
 summary(Rubble_org)
 Rubble_org_posthoc <- TukeyHSD(Rubble_org,ordered=TRUE)
 Rubble_org_posthoc
 plot(TukeyHSD(Rubble_org,"Nuts"))
 
-Rubble_org_lme <- lme(pcOrg ~ Nuts, random = ~1|Tank, data=Rubble)
+Rubble_org_lme <- lme(pcAFDW ~ Nuts, random = ~1|Tank, data=Rubble)
 summary(Rubble_org_lme)
 
 Rubble_pc_lme <- lme(pcDeltaBW ~ Nuts, random = ~1|Tank, data=Rubble)
 summary(Rubble_pc_lme)
 
-Rubble_output <- with(Rubble,data.frame(SampleID,Tank, Nuts,pcDeltaBW,pcOrg))
+Rubble_output <- with(Rubble,data.frame(SampleID,Tank, Nuts,pcDeltaBW,pcAFDW))
 Rubble_output$fitted.org <-Rubble_org$fitted.values
 Rubble_output$fitted.pcgrowth <-Rubble_pc$fitted.values
 
