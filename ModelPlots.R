@@ -88,7 +88,7 @@ abline(h=0)
  #         col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
       #  legend("top",'*', cex=2, bty="n")
         legend("top",'*', cex=2, bty="n")
 }
@@ -118,7 +118,7 @@ abline(h=0)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -145,7 +145,7 @@ arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble'],x, ef$f
 abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 ##axis(2, cex.axis=1)
@@ -172,7 +172,7 @@ x<-barplot(ef$fit, main='Sand',
 arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 abline(h=0)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -199,7 +199,7 @@ x<-barplot(ef$fit, main='Mixed', ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.
 arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 abline(h=0)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -232,7 +232,7 @@ arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral'
 abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 ##axis(2, cex.axis=1)
@@ -261,7 +261,7 @@ arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae'
 abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -290,7 +290,7 @@ abline(h=0)
  #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -317,7 +317,7 @@ arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' 
 abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -345,7 +345,7 @@ arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed'
        x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
 abline(h=0)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(2, cex.axis=1)
@@ -378,7 +378,7 @@ abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -410,7 +410,7 @@ text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -439,7 +439,7 @@ abline(h=0)
  #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
@@ -469,7 +469,7 @@ abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] -0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -496,7 +496,7 @@ abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 ##--- 
@@ -519,7 +519,7 @@ SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral']
 x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
            yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
-           cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
+           cex.main=2, cex.axis=1, cex.lab=1,  col='grey', main='Coral')
 arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'],
        x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
        col='black', lwd=2)
@@ -529,7 +529,7 @@ abline(h=0)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -558,7 +558,7 @@ abline(h=0)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -588,7 +588,7 @@ abline(h=0)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -615,7 +615,7 @@ arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand'],
 abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 #mixed
@@ -640,7 +640,7 @@ arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed'],
 abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 ##--
@@ -672,7 +672,7 @@ abline(h=0)
        #col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=1)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -701,7 +701,7 @@ abline(h=0)
  #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -730,7 +730,7 @@ abline(h=0)
  #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -757,7 +757,7 @@ arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand'],
 abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 
@@ -783,7 +783,7 @@ arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed'],
 abline(h=0)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #      col='black', lwd=2)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 ##--
@@ -815,7 +815,7 @@ abline(h=0)
 
 #axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 2,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("bottom",'*', cex=2, bty="n")
 }
 
@@ -844,7 +844,7 @@ abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("bottom",'*', cex=2, bty="n")
 }
 
@@ -874,7 +874,7 @@ abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("bottom",'*', cex=2, bty="n")
 }
 
@@ -902,7 +902,7 @@ abline(h=0)
  #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("bottom",'*', cex=2, bty="n")
 }
 
@@ -931,7 +931,7 @@ abline(h=0)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE, srt=45)
-if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
+if(a$`Pr(>F)`<=0.055){ #add a star to the graph if it is statistically significant
    legend("top",'*', cex=2, bty="n")
 }
 dev.off()
