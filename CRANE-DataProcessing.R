@@ -71,13 +71,13 @@ plot(CoralNubb$SA ~ CoralNubb$AFDW,col=CoralNubb$Species,type="n")
 text(x=CoralNubb$AFDW,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
 
 plot(CoralNubb$Vol ~ CoralNubb$AW,col=CoralNubb$Species,type="n")
-text(x=CoralNubb$Vol,y=CoralNubb$AFDW,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
+text(x=CoralNubb$Vol,y=CoralNubb$AW,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
 
 plot(CoralNubb$Vol ~ CoralNubb$AW,col=CoralNubb$Species,type="n")
-text(jitter(CoralNubb$Vol),y=CoralNubb$AFDW,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
+text(jitter(CoralNubb$Vol),y=CoralNubb$AW,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
 
-plot(CoralNubb$SA ~ CoralNubb$Volume,col=CoralNubb$Species,type="n")
-text(x=CoralNubb$Volume,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
+plot(CoralNubb$SA ~ CoralNubb$Vol,col=CoralNubb$Species,type="n")
+text(x=CoralNubb$Vol,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex=.5,col=as.numeric(CoralNubb$Species))
 
 CoralNubb$Check[CoralNubb$TrayNum==233]<- "Outlier in AFDW"
 CoralNubb$Check[CoralNubb$TrayNum==177]<- "Low outlier in SA"

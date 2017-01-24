@@ -383,6 +383,11 @@ AllData<-AllData[order(AllData$Aquarium),]
                                  ResidenceTime = AllData$ResTime.mean,
                                  SurfaceArea = AllData$AFDW)
   
+  #Bicarbonate uptake
+  AllData$HCO3Uptake.AFDW<- NutCalc(HeaderN = AllData$HeaderHCO3,
+                                  TankN = AllData$TankHCO3,
+                                  ResidenceTime = AllData$ResTime.mean,
+                                  SurfaceArea = AllData$AFDW)
   #### calculate means------------------
 
 #sub <- sub[sub!="Mixed"]
@@ -413,7 +418,21 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                     SE.Vol= sd(NCP.Vol, na.rm = T)/sqrt(N)
   )
   
-    
+  
+# Mean bicarbonate uptake
+                                 
+  HCO3.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
+                    HCO3Uptake = mean(HCO3Uptake.AFDW, na.rm = T),
+                    #N=sum(!is.na(HCO3Uptake)),
+                    N=3,
+                    SE= sd(HCO3Uptake.AFDW, na.rm = T)/sqrt(N),
+                    Mean.HCO3.Tank = mean(TankHCO3, na.rm = T),
+                    SE.Tank= sd(TankHCO3, na.rm = T)/sqrt(N),
+                    #this is only one because there is only one header per tank
+                    Mean.HCO3.Header = mean(HeaderHCO3, na.rm = T),
+                    SE.Header= sd(HeaderHCO3, na.rm = T)/sqrt(N)
+  )
+                    
 par(mfrow=c(3,2))
 for (i in 1:5){
 plot(AllData$DateTime[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]],AllData$NEC.AFDW[AllData$NutLevel=='Ambient'& AllData$Substrate==sub[i]], main=sub[i])
@@ -882,7 +901,7 @@ for (i in 1:length(sub)){
   x<-barplot(NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-5,15), 
              ylab=expression(paste("Net NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   lines(x,c(0,0,0))
 }
 
@@ -895,7 +914,7 @@ for (i in 1:length(sub)){
   x<-barplot(NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i] & NEC.mean.DayNight$DayNight==DN[j]], main=sub[i], ylim=c(-2,y2[j]), xlab = DN[j],
              ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NEC.mean.DayNight$Mean.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]],0,NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==sub[i]& NEC.mean.DayNight$DayNight==DN[j]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   lines(x,c(0,0,0))
 }  
 }
@@ -908,7 +927,7 @@ for (i in 1:length(sub)){
   x<-barplot(NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]], main=sub[i], ylim=c(-10,25),
              ylab=expression(paste("Net NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NCP.mean.Net$Mean.AFDW2[NCP.mean.Net$Substrate==sub[i]],0,NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   lines(x,c(0,0,0))
 }
 
@@ -921,7 +940,7 @@ for (j in 1:2){
     x<-barplot(NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i] & NCP.mean.DayNight$DayNight==DN[j]], main=sub[i], ylim=c(y1[j],y2[j]), xlab = DN[j],
                ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
     errorbars(x,NCP.mean.DayNight$Mean.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]],0,NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==sub[i]& NCP.mean.DayNight$DayNight==DN[j]])
-    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    axis(1, at=x, labels=c("Ambient","Medium","High"))
     lines(x,c(0,0,0))
   }  
 }
@@ -933,7 +952,7 @@ for (i in 1:length(sub)){
              ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})))
   errorbars(x,NCP.mean.PR$Mean.GPP[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate==sub[i]])
             
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   
 }
 
@@ -942,7 +961,7 @@ par(mfrow=c(3,2))
 for (i in 1:length(sub)){
   x<-barplot(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]], main=sub[i], ylim=c(0,max(NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]])+2), ylab = 'Mean P/R')
   errorbars(x,NCP.mean.PR$Mean.AFDW2[NCP.mean.PR$Substrate==sub[i]],0,NCP.mean.PR$SE.AFDW2[NCP.mean.PR$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   
 }
 
@@ -966,7 +985,7 @@ par(mfrow=c(3,2))
 for (i in 1:length(sub)){
   x<-barplot(PercentCalc.mean$Mean.PercentCalc[PercentCalc.mean$Substrate==sub[i]], main=sub[i], ylim=c(0,1), ylab = 'Mean % Calc')
   errorbars(x,PercentCalc.mean$Mean.PercentCalc[PercentCalc.mean$Substrate==sub[i]],0,PercentCalc.mean$SE.PercentCalc[PercentCalc.mean$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   
 }
 
@@ -974,7 +993,7 @@ par(mfrow=c(3,2))
 for (i in 1:length(sub)){
   x<-barplot(PercentCalc.mean$Mean.PercentDis[PercentCalc.mean$Substrate==sub[i]], main=sub[i], ylim=c(0,1), ylab = 'Mean % Dissolution')
   errorbars(x,PercentCalc.mean$Mean.PercentDis[PercentCalc.mean$Substrate==sub[i]],0,PercentCalc.mean$SE.PercentDis[PercentCalc.mean$Substrate==sub[i]])
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   
 }
 ## Stats-------------------------------------
@@ -1193,9 +1212,13 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 
 ###Looking at feedbacks--------------------------------------------
 ##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
+pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6)
+par(mfrow=c(1,1), pty='s')
 plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
 legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+dev.off()
 
+#par(pty='r')
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 
 ## NEC vs Omegan plot-------------------------------------
@@ -1221,6 +1244,9 @@ for (i in 1:length(sub)){
     if(p<=0.05){
       lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3, lty=1)
     }
+      else{
+      lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=0.5, lty=2)
+    }
   }
 }
 #empty plot to put the legend
@@ -1228,12 +1254,48 @@ plot(NA, ylim=c(0,1), xlim=c(0,1), axes=FALSE,  ylab="", xlab="")
 legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
 
 dev.off()
+
+# calculate contribution of NEC and NCP to pH---------------------
+#function to calculate pH controbution that returns NEC and NCP contrinutions
+pHContributions<-function(pH.ctrl, pH.treat, TA.ctrl, TA.treat, DIC.ctrl, temp=25.5, sal=35.5){
+  #This function calculates the contributions of NEC and NCP to change in pH between the header tanks and the control tanks
+  #the formula is based on Page et al. 2016 Coral Reefs
+  
+  #NEC contribution to pH
+  #change in TA from calcification
+  TA.pHNEC<-TA.ctrl+(TA.treat-TA.ctrl)
+  #change in DIC from calcification
+  DIC.pHNEC<-DIC.ctrl+(0.5*(TA.treat-TA.ctrl))
+  #use TA and DIC to calculate pH from the seacarb function
+  
+  AllCO2<-carb(flag=15, TA.pHNEC/1000000, DIC.pHNEC/1000000, S=sal, T=temp, Patm=1, P=0, Pt=0, Sit=0,
+               k1k2="x", kf="x", ks="d", pHscale="T", b="u74", gas="potential")
+  #TA is divided by 1000 because all calculations are in mol/kg in the seacarb package
+  
+  pH.NEC<-AllCO2$pH## calculate pH at temp = 25.5 and salinity = 35.5
+  
+  #calculate change in pH due to calcification
+  pHNEC.treat<-pH.ctrl-pH.NEC
+  #NCP contribution to pH
+  # subtract the change in pH due to calcification from delta pH
+  pHNCP.treat<-pH.treat-pH.ctrl- pHNEC.treat
+  
+  
+  return(cbind(pHNEC.treat,pHNCP.treat))
+}
+
+#add NEC and NCP pH contronutions to ChemData
+AllData<-cbind(AllData,pHContributions(pH.ctrl=ChemData$HeaderpH, pH.treat = ChemData$TankpH, TA.ctrl = ChemData$HeaderTA, TA.treat = ChemData$TankTA, DIC.ctrl = ChemData$HeaderDIC))
+
 ## pH plots----------------------------------------------------------------
 deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarize,
                            pHMean = mean(TankpH-HeaderpH, na.rm = T),
                            N2=sum(!is.na(TankpH)),
-                           pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
-                           
+                           pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
+                           pH.NEC=mean(pHNEC.treat),
+                           pH.NECSE= sd(pHNEC.treat, na.rm = T)/sqrt(N2),
+                           pH.NCP=mean(pHNCP.treat),
+                           pH.NCPSE= sd(pHNCP.treat, na.rm = T)/sqrt(N2)
 )
 
 
@@ -1246,7 +1308,7 @@ for (j in 1:2){
     x<-barplot(deltapHMeans$pHMean[deltapHMeans$Substrate==sub[i] & deltapHMeans$DayNight==DN[j]], main=sub[i], ylim=c(y1[j],y2[j]), xlab = DN[j],
                ylab=expression(paste(Delta,"pH")))
     errorbars(x,deltapHMeans$pHMean[deltapHMeans$Substrate==sub[i]& deltapHMeans$DayNight==DN[j]],0,deltapHMeans$pHSE[deltapHMeans$Substrate==sub[i]& deltapHMeans$DayNight==DN[j]])
-    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    axis(1, at=x, labels=c("Ambient","Medium","High"))
     lines(x,c(0,0,0))
   }  
 }
@@ -1265,7 +1327,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
     x<-barplot(deltapHMeans.net$pHMean[deltapHMeans.net$Substrate==sub[i] ], main=sub[i], ylim=c(0,0.2), 
                ylab=expression(paste('abs(',Delta,"pH)")))
     errorbars(x,deltapHMeans.net$pHMean[deltapHMeans.net$Substrate==sub[i]],0,deltapHMeans.net$pHSE[deltapHMeans.net$Substrate==sub[i]])
-    axis(1, at=x, labels=c("Ambeint","Medium","High"))
+    axis(1, at=x, labels=c("Ambient","Medium","High"))
     lines(x,c(0,0,0))
   }  
 
@@ -1274,11 +1336,15 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   deltapHMeans.time <- ddply(AllData, c("Substrate","NutLevel", "DateTime"), summarize,
                         pHMean = mean(TankpH-HeaderpH, na.rm = T),
                         N2=sum(!is.na(TankpH)),
-                        pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2)
-                        
+                        pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
+                        pH.NEC=mean(pHNEC.treat),
+                        pH.NECSE= sd(pHNEC.treat, na.rm = T)/sqrt(N2),
+                        pH.NCP=mean(pHNCP.treat),
+                        pH.NCPSE= sd(pHNCP.treat, na.rm = T)/sqrt(N2)
   )
   
   #Delta pH across time
+  pdf(file = 'Plots/MSplots/DeltapHTime.pdf', height = 8, width = 6)
   par(mfrow=c(3,2))
   rm(y)
   rm(yse)
@@ -1302,7 +1368,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
              + yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
              unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]
              - yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
-             angle=90, code=3, length = 0.1)
+             angle=90, code=3, length = 0.05)
       start<-ifelse(i<=4,c(1),c(8))
       stops<-ifelse(i<=4,c(7),c(14))
       
@@ -1316,6 +1382,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   }
   legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
   
+  dev.off()
   ##nutrient plots --- just for the headers.... 
   #calculate the mean nutrient conditions
   meanNuts<-ddply(AllData, 'NutLevel', summarize,
@@ -1323,20 +1390,20 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
         meanP=mean(HeaderP, na.rm=T),
         SEP=sd(HeaderP, na.rm=T)/sqrt(7))
-        
+  pdf(file = 'Plots/MSplots/NutrientsGrey.pdf', height = 5, width = 8)      
   par(mfrow=c(1,2)) #average nitrate for experiment
-  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'2-'},'+ NO'[2]^{'-'})), 
+  x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'-'},'+ NO'[2]^{'-'})), 
              ylab=expression(paste(mu,'M')), ylim=c(0,10))
   errorbars(x,meanNuts$meanNN,0,meanNuts$SENN)
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
   
   #average phosphate for experiment
   x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})), 
              ylab='', ylim=c(0,3.0))
   errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
-  axis(1, at=x, labels=c("Ambeint","Medium","High"))
-  
-  ## DOC Analysis------------------------------------------
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
+  dev.off()
+## DOC Analysis------------------------------------------
   #DOC Data are from Craig from Day 14 and 28 from the long term experiment.  There are not DOC data for the mixed community
   #Input is from the header tanks, source is the ocean (I think?? need to double check)
   Data.DOC<-read.csv('Data/DOCforNyssa.csv')
@@ -1431,7 +1498,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- ###---------------
+###---------------
  #Same plot versus GPP
  #plot DOC versus NEC:NCP ratios
  par(mfrow=c(2,2))
@@ -1493,7 +1560,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- #Same plot versus R--------------------
+#Same plot versus R--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(0,15), xlab='DOC', ylab='R', main ='Algae')
@@ -1554,8 +1621,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
           angle=90, code=3, length = 0.1)
  }
  
- #-------------
- #Same plot versus NCP--------------------
+#Same plot versus NCP--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(0,20), xlab='DOC', ylab='NCP', main ='Algae')
@@ -1619,7 +1685,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  #-
  
  #-------------
- #Same plot versus NEC--------------------
+#Same plot versus NEC--------------------
  
  par(mfrow=c(2,2))
  plot(0,type='n', xlim=c(60,90), ylim=c(-3,2), xlab='DOC', ylab='NEC', main ='Algae')
@@ -1681,7 +1747,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  }
  
  
- #Plot NEC versus NCP-----------------------
+#Plot NEC versus NCP-----------------------
  b<-matrix(nrow=5,ncol=3)
  for(i in 1:5){
    plot(0,type='n', xlim=c(-20,60), ylim=c(-10,20), xlab='NCP', ylab='NEC',main=sub[i])
@@ -1706,3 +1772,54 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
    }
    legend('topleft',legend=c('Ambient',"Medium","High"), col=cols, pch=19, bty = 'n')
  }
+ 
+##-----
+ 
+ # plot the amount of bicarbonate in each tank over time
+ par(mfrow=c(3,2))
+ cols <- c(unique(HCO3.mean$NutLevel))
+ #y<-HCO3.mean$HCO3Uptake
+ #yse<-HCO3.mean$SE
+ y<-HCO3.mean$Mean.HCO3.Tank
+ yse<-HCO3.mean$SE.Tank
+ for (i in 1:length(sub)){
+   plot(NA, xaxt='n', xlab="Time",ylim=c(min(y), max(y)+5), ylab=expression(paste("HCO3")), main = sub[i])
+   
+   abline(h=0)
+   par(new = TRUE)
+   
+   #
+   for (j in 1:length(Nuts)){
+     par(new = TRUE)
+     
+     plot(as.numeric(HCO3.mean$DateTime [HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]),
+          y[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], col = cols[j],
+          pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+5))
+     
+     arrows(unique(HCO3.mean$DateTime), y[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]
+            + yse[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], 
+            unique(HCO3.mean$DateTime), y[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]
+            - yse[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], 
+            angle=90, code=3, length = 0.1)
+     lines(as.numeric(HCO3.mean$DateTime [HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]),
+          HCO3.mean$Mean.HCO3.Header[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], col = 'yellow',
+          pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+5))
+     arrows(unique(HCO3.mean$DateTime), HCO3.mean$Mean.HCO3.Header[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]
+            + HCO3.mean$SE.Header[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], 
+            unique(HCO3.mean$DateTime), HCO3.mean$Mean.HCO3.Header[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]]
+            - HCO3.mean$SE.Header[HCO3.mean$Substrate==sub[i] & HCO3.mean$NutLevel==Nuts[j]], 
+            angle=90, code=3, length = 0.1)
+     
+     start<-ifelse(i<=4,c(1),c(8))
+     stops<-ifelse(i<=4,c(7),c(14))
+     
+   }
+   axis(1, at=unique(HCO3.mean$DateTime)[start:stops], labels=c('10:00',"14:00","18:00","22:00","02:00","06:00","10:00"))
+   
+   #shaded area for night
+   a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
+   b<-ifelse(i<=4,6,13)
+   rect(unique(HCO3.mean$DateTime)[a],min(y),unique(HCO3.mean$DateTime)[b],max(y)+5,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+ }
+ legend('topright', legend=unique(HCO3.mean$NutLevel), col=unique(HCO3.mean$NutLevel), pch=19, bty = 'n')
+ 

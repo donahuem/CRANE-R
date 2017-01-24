@@ -49,10 +49,12 @@ substrate<-c('Algae','Coral','Rubble','Sediment','Mixed')
 #layout(matrix(c(1,1,1,1,1,0,2,2,2,2,2,
  #               3,3,3,3,3,0,4,4,4,4,4,
   #              0,0,0,5,5,5,5,5,0,0,0), 3, 11, byrow = TRUE))
-pdf("MeanRates.pdf", width=8, height=8)
+
+
+pdf("plots/MSplots/MeanRates.pdf", width=8, height=8)
 j<-2
 par(bg=NA) 
-
+par(pty="m")
 ## massive plot of all metabolic rates by substrate
 par(mfrow=c(3,5))
 par(oma=c(.1,.1,.1,.1)); 
@@ -67,22 +69,30 @@ a<-anova(model.NECNet.Coral)
  #          ylab=expression(paste("Mean NEC")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 #calculate 95%CI using effects
 ef<-as.data.frame(effect("NutLevel", model.NECNet.Coral))
 par(lwd = 2) 
-x<-barplot(ef$fit, main='Coral', ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-           ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral']
+SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral']
+x<-barplot(ef$fit, main='Coral', 
+           ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-          col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #         col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-       text(x[3], par('usr')[4], '*', font=2, cex=2)
+      #  legend("top",'*', cex=2, bty="n")
+        legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 #algae
 y<-summary(model.NECNet.algae)$coefficients[,1:2]
@@ -91,20 +101,25 @@ a<-anova(model.NECNet.algae)
  #          #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNet.algae))
-
-x<-barplot(ef$fit, main='Algae', ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-          # ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae']
+SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae']
+x<-barplot(ef$fit, main='Algae', 
+           ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Algae'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -114,21 +129,26 @@ a<-anova(model.NECNet.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNet.Rubble))
-
-x<-barplot(ef$fit, main='Rubble', ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-       #    ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble']
+SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble']
+x<-barplot(ef$fit, main='Rubble', 
+           ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Rubble'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+##axis(2, cex.axis=1)
 
 
 #sand
@@ -138,20 +158,24 @@ a<-anova(model.NECNet.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNet.Sand))
-
-x<-barplot(ef$fit, main='Sand', ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-          # ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand']
+SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand']
+x<-barplot(ef$fit, main='Sand', 
+           ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
-
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Sand'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 
 #mixed
@@ -161,20 +185,24 @@ a<-anova(model.NECNet.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNet.Mixed))
-
-x<-barplot(ef$fit, main='Mixed', ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed']
+SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed']
+x<-barplot(ef$fit, main='Mixed', ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
          #  ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+         yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
-
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Mixed'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 
 ##-- 
@@ -187,21 +215,27 @@ a<-anova(model.NECDay.Coral)
  #          ylab=expression(paste("Mean Daytime NEC ")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.Mixed))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-           ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("Day NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+##axis(2, cex.axis=1)
 
 #algae
 y<-summary(model.NECDay.algae)$coefficients[,1:2]
@@ -210,21 +244,27 @@ a<-anova(model.NECDay.algae)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.algae))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-          # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+          # ylab=expression(paste("Day NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 #rubble
 y<-summary(model.NECDay.Rubble)$coefficients[,1:2]
@@ -233,21 +273,27 @@ a<-anova(model.NECDay.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.Rubble))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
           # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 #sand
 y<-summary(model.NECDay.Sand)$coefficients[,1:2]
@@ -256,19 +302,25 @@ a<-anova(model.NECDay.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.Sand))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 
 #mixed
 y<-summary(model.NECDay.Mixed)$coefficients[,1:2]
@@ -277,19 +329,26 @@ a<-anova(model.NECDay.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECDay.Mixed))
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day']
 
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            # ylab=expression(paste("Mean Daytime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+  #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Day'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 ##--- 
 #Night NEC
 par(mar=c(6,4,1,1)); 
@@ -300,20 +359,27 @@ a<-anova(model.NECNight.Coral)
  #          ylab=expression(paste("Mean Nighttime NEC ")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.Coral))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-            ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night']
+           
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
+            ylab=expression(paste("Night NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Coral' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -323,22 +389,29 @@ a<-anova(model.NECNight.algae)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.algae))
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night']
 
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
           # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Algae' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 0.5,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -348,19 +421,26 @@ a<-anova(model.NECNight.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.Rubble))
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night']
 
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),0),
-           # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
+            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Rubble' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
@@ -372,18 +452,25 @@ a<-anova(model.NECNight.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.Sand))
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night']
 
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),
            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Sand' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] -0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -393,18 +480,24 @@ a<-anova(model.NECNight.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NECNight.Mixed))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            # ylab=expression(paste("Mean Nighttime NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate=='Mixed' & NEC.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 text(x = x-0.5, par("usr")[3] - 0.25,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--- 
 par(mfrow=c(3,5))
@@ -417,20 +510,27 @@ a<-anova(model.NCPNet.Coral)
  #          ylab=expression(paste("Mean NCP ")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NCPNet.Coral))
+SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral']
+SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral']
 
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),main='Coral',
-            ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -440,20 +540,26 @@ a<-anova(model.NCPNet.algae)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NCPNet.algae))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),main='Algae',
+SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae']
+SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),main='Algae',
          #  ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Algae'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -463,20 +569,27 @@ a<-anova(model.NCPNet.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NCPNet.Rubble))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),main='Rubble',
+SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble']
+SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper)))),
+           yaxp=c(c(ifelse(min(ef$lower)>0,0,floor(min(ef$lower))),ceiling(max(ef$upper))), 5),main='Rubble',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Rubble'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #sand
@@ -486,17 +599,24 @@ a<-anova(model.NCPNet.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NCPNet.Sand))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),main='Sand',
+SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand']
+SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           main='Sand',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Sand'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 #mixed
 y<-summary(model.NCPNet.Mixed)$coefficients[,1:2]
@@ -505,17 +625,23 @@ a<-anova(model.NCPNet.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
 #           cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.NCPNet.Mixed))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),main='Mixed',
+SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed']
+SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),main='Mixed',
            #ylab=expression(paste("Mean NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed'],
+       x, ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate=='Mixed'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--
 
@@ -529,19 +655,25 @@ a<-anova(model.GCP.Coral)
  #          ylab=expression(paste("Mean GCP ")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.GCP.Coral))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
-           ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral']
+SE.lower<-ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Coral'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+       #col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #algae
@@ -551,19 +683,26 @@ a<-anova(model.GCP.algae)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.GCP.algae))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae']
+SE.lower<-ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Algae'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -573,19 +712,26 @@ a<-anova(model.GCP.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.GCP.Rubble))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble']
+SE.lower<-ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Rubble'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #sand
@@ -595,17 +741,24 @@ a<-anova(model.GCP.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.GCP.Sand))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand']
+SE.lower<-ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+           ylab=expression(paste("GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Sand'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -615,17 +768,23 @@ a<-anova(model.GCP.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.GCP.Mixed))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed']
+SE.lower<-ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed']  
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            #ylab=expression(paste("Mean GCP ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed'],
+       x, ef$fit-NCP.mean.PR$SE.GPP[NCP.mean.PR$Substrate=='Mixed'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 ##--
 #R
@@ -637,21 +796,27 @@ a<-anova(model.R.Coral)
  #          ylab=expression(paste("Mean R ")),
   #         cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 
 ef<-as.data.frame(effect("NutLevel", model.R.Coral))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),0),
-           ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral' & NCP.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral' & NCP.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0)),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0), 5),
+           ylab=expression(paste("R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Coral'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
-axis(2, cex.axis=1)
+#axis(2, cex.axis=1)
 text(x = x-0.5, par("usr")[3] - 2,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #algae
@@ -661,20 +826,26 @@ a<-anova(model.R.algae)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.R.algae))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae' & NCP.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae' & NCP.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0)),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Algae'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #rubble
@@ -684,21 +855,27 @@ a<-anova(model.R.Rubble)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.R.Rubble))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),0),
+SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble' & NCP.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble' & NCP.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0)),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Rubble'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE)
 #axis(2, cex.axis=2)
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #sand
@@ -708,19 +885,25 @@ a<-anova(model.R.Sand)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.R.Sand))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand' & NCP.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand' & NCP.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0)),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Sand'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("bottom",'*', cex=2, bty="n")
 }
 
 #mixed
@@ -730,19 +913,25 @@ a<-anova(model.R.Mixed)
            #ylab=expression(paste("mean NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
  #          cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
 #errorbars(x,-1*c(y[1,1], y[1,1]+y[2,1], y[1,1]+y[3,1]),0,-1*c(y[1,2], y[2,2], y[3,2]),
- #         col='black', lwd=3)
+ #         col='black', lwd=2)
 
 ef<-as.data.frame(effect("NutLevel", model.R.Mixed))
-
-x<-barplot(ef$fit, ylim=c(ifelse(min(ef$lower)>0,0,min(ef$lower)),max(ef$upper)),
+SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed' & NCP.mean.DayNight$DayNight=='Night']
+SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed' & NCP.mean.DayNight$DayNight=='Night']
+x<-barplot(ef$fit, ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0)),
+           yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),0), 5),
            #ylab=expression(paste("Mean R ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
            cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
-       col='black', lwd=3)
+arrows(x, ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed' & NCP.mean.DayNight$DayNight=='Night'],
+       x, ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate=='Mixed'& NCP.mean.DayNight$DayNight=='Night'], length=0.05, angle=90, code=3,
+       col='black', lwd=2)
+abline(h=0)
+#arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
+ #      col='black', lwd=2)
 
 text(x = x-0.5, par("usr")[3] - 1,  labels = c("Ambient","Medium","High"), srt = 45, pos = 1, xpd = TRUE)
 #axis(1, at=x, labels=c("Ambient","Medium","High"), cex.axis=2, tick=FALSE, srt=45)
 if(a$`Pr(>F)`<=0.05){ #add a star to the graph if it is statistically significant
-  text(x[3], par('usr')[4], '*', font=2, cex=2)
+   legend("top",'*', cex=2, bty="n")
 }
 dev.off()
