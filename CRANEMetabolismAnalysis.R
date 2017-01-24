@@ -38,15 +38,15 @@ NECCalc<-function(HeaderTA,TankTA,ResidenceTime,SurfaceArea, TankVolume=5678,SWD
   #NEC calc calculated the net ecosystem calcification of a flow through mesocosm system at a given time point
   #this uses residence time (lagrangian) rather than change in TA over time (Eulerian-- this is what I used for the 
   #biogeochemistry paper)
-  #NEC is in umol cm^-2 hr-1  (or umol g-1 hr-1 if using one of the other measurements)
+  #NEC is in mmol cm^-2 hr-1  (or umol g-1 hr-1 if using one of the other measurements)
   
   #HeaderTA is TA from the header in umol/kg
   #TankTAis TA from the tank in umol/kg
   #Residence time is the residence time in hours
   #Surface area is SA of the substrate in cm2
   #TankVolume is the volume in cm3 = (default = 5678)
-  #SWDensity is density of seawater in kg/cm3 (default =1.023)
-# 
+  #SWDensity is density of seawater in g/cm3 (default =1.023)
+# divide by 1000 to make umol g-1 h-1
    
 }  
 
