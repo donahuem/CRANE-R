@@ -1,5 +1,10 @@
 #CHAIN & CRANE Light data
 
+##Feb 2, 2017
+#     Odyssey data normalized to logger B is called dfAnorm, dfBnorm, dfCnorm
+#     Normalization based on common garden from 12/19 - 12/24
+#     Normalized Odyssey data restricted to experimental period of 12/3-12/6 is called dfAexp,dfBexp,dfCexp
+
 # LiCor collected data from CHAIN 10/29/15 - 11/18/15, logging every 5 min 6am to 7pm
 # LiCor deployments
 # df1: 10.29.15 - 11.9.15
@@ -40,16 +45,80 @@ df4$par <- as.numeric(as.character(df4$par))
 df4 <- df4[!is.na(df4[,3]),2:3]
 
 dfA <- read.csv2("data/light/20151224_ODY4806_A.CSV", sep=",",skip=1,nrows=2192,col.names=c("na","date","time","par","na"))
-dfA$datetime <- dmy_hms(paste(dfA$date,dfA$time))
-dfA <- dfA[,c(4,6)]
+dfA$datetime <- paste(dfA$date,dfA$time,sep=" ")
+dfA$datetime <- strptime(dfA$datetime,tz="",format="%d/%m/%Y %H:%M:%S")
+dfA <- dfA[dfA$datetime ,c(4,6)]
 
 dfB <- read.csv2("data/light/20151224_ODY4802_B.CSV", sep=",",skip=1,nrows=2192,col.names=c("na","date","time","par","na"))
-dfB$datetime <- dmy_hms(paste(dfB$date,dfB$time))
+dfB$datetime <- paste(dfB$date,dfB$time,sep=" ")
+dfB$datetime <- strptime(dfB$datetime,tz="",format="%d/%m/%Y %H:%M:%S")
 dfB <- dfB[,c(4,6)]
 
 dfC <- read.csv2("data/light/20151224_ODY2483_C.CSV", sep=",",skip=1,nrows=2192,col.names=c("na","date","time","par","na"))
-dfC$datetime <- dmy_hms(paste(dfC$date,dfC$time))
+dfC$datetime <- paste(dfC$date,dfC$time,sep=" ")
+dfC$datetime <- strptime(dfC$datetime,tz="",format="%d/%m/%Y %H:%M:%S")
 dfC <- dfC[,c(4,6)]
 
 dfpar <- read.csv2("data/light/PAR_HIMB_MFox.csv", sep=",")
+
+#For now, ignore LiCor data, and simply adjust Odyssey loggers to one another
+
+#normalization period: daylight hours Dec 19-24
+dfAn <- subset(dfA,(format(dfA$datetime,'%m/%d') > '12/18' & format(dfA$datetime,'%H:%M') >= '07:00' & format(dfA$datetime,'%H:%M') <= '18:00'))
+dfBn <- subset(dfB,(format(dfB$datetime,'%m-%d')> '12-18' & format(dfB$datetime,'%H:%M') >= '07:00' & format(dfB$datetime,'%H:%M') <= '18:00'))
+dfCn <- subset(dfC,(format(dfC$datetime,'%m-%d')> '12-18' & format(dfC$datetime,'%H:%M') >= '07:00' & format(dfC$datetime,'%H:%M') <= '18:00'))
+
+AB <- lm(dfAn$par ~ dfBn$par)
+AC <- lm(dfAn$par ~ dfCn$par)
+BC <- lm(dfBn$par ~ dfCn$par)
+
+plot(dfAn$par ~ dfBn$par)
+abline(AB$coefficients[1],AB$coefficients[2])
+plot(dfAn$par ~ dfCn$par)
+abline(AC$coefficients[1],AC$coefficients[2])
+plot(dfBn$par ~ dfCn$par)
+abline(BC$coefficients[1],BC$coefficients[2])
+
+plot(dfAn$par ~ dfBn$par)
+points(dfAn$par ~ dfCn$par,col="blue")
+abline(0,1)
+
+# A and B are similar; C is further off
+# B is in the middle, so normalize A and C to B
+
+CB <- lm(dfCn$par ~ dfBn$par)
+
+#plot normalization to check
+plot(dfBn$par,(dfAn$par - AB$coefficients[1])/AB$coefficients[2])
+points(dfBn$par,(dfCn$par - CB$coefficients[1])/CB$coefficients[2],col="blue")
+
+#subset time series to experimental period: Dec 3-6
+dfAexp <- subset(dfA,(format(dfA$datetime,'%m/%d') >= '12/03' 
+                         & format(dfA$datetime,'%m/%d') <= '12/06'
+                         & format(dfA$datetime,'%H:%M') >= '07:00' 
+                         & format(dfA$datetime,'%H:%M') <= '18:00'))
+dfBexp <- subset(dfB,(format(dfB$datetime,'%m/%d') >= '12/03' 
+                      & format(dfB$datetime,'%m/%d') <= '12/06'
+                      & format(dfB$datetime,'%H:%M') >= '07:00' 
+                      & format(dfB$datetime,'%H:%M') <= '18:00'))
+dfCexp <- subset(dfC,(format(dfC$datetime,'%m/%d') >= '12/03' 
+                      & format(dfC$datetime,'%m/%d') <= '12/06'
+                      & format(dfC$datetime,'%H:%M') >= '07:00' 
+                      & format(dfC$datetime,'%H:%M') <= '18:00'))
+
+#apply normalization
+dfAexp$par <- (dfAexp$par - AB$coefficients[1])/AB$coefficients[2]
+dfCexp$par <- (dfCexp$par - CB$coefficients[1])/CB$coefficients[2]
+
+#plot experimental period with normalized data
+plot(dfAexp$datetime,dfAexp$par)
+points(dfBexp$datetime,dfBexp$par,col="blue")
+points(dfCexp$datetime,dfCexp$par,col="red")
+
+#apply normalization to full timeseries
+dfAnorm <- dfA
+dfBnorm <- dfB
+dfCnorm <- dfC
+dfAnorm$par <- (dfAnorm$par - AB$coefficients[1])/AB$coefficients[2]
+dfCnorm$par <- (dfCnorm$par - CB$coefficients[1])/CB$coefficients[2]
 
