@@ -1396,6 +1396,32 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   
   ## test for differences in pH due to species, nutrients, and an interaction (repeated measures for time and Tank)
   pHModel<-lmer(TankpH-HeaderpH ~ Substrate*NutLevel +  (1|Tank) + (1|DateTime), data = AllData)
+  # this does not show the substrate by nutrient interaction... might need to do some timeseries analysis
+  
+  # across substrates within Nuts
+  #ambient
+  pHModelA<-lmer(TankpH-HeaderpH ~ Substrate +  (1|Tank) + (1|DateTime), data = AllData, subset= NutLevel == 'Ambient')
+  #med
+  pHModelM<-lmer(TankpH-HeaderpH ~ Substrate +  (1|Tank) + (1|DateTime), data = AllData, subset= NutLevel == 'Med')
+  #high
+  pHModelH<-lmer(TankpH-HeaderpH ~ Substrate +  (1|Tank) + (1|DateTime), data = AllData, subset= NutLevel == 'High')
+  
+  #across Nuts within Sub
+  #coral
+  pHModelC<-lmer(TankpH-HeaderpH ~ NutLevel +  (1|Tank) + (1|DateTime), data = AllData, subset= Substrate == 'Coral')
+  #Rubble
+  pHModelR<-lmer(TankpH-HeaderpH ~ NutLevel +  (1|Tank) + (1|DateTime), data = AllData, subset= Substrate == 'Rubble')
+  #Sand
+  pHModelS<-lmer(TankpH-HeaderpH ~ NutLevel +  (1|Tank) + (1|DateTime), data = AllData, subset= Substrate == 'Sand')
+  #Algae
+  pHModelAl<-lmer(TankpH-HeaderpH ~ NutLevel +  (1|Tank) + (1|DateTime), data = AllData, subset= Substrate == 'Algae')
+  #Mixed
+  pHModelMix<-lmer(TankpH-HeaderpH ~ NutLevel +  (1|Tank) + (1|DateTime), data = AllData, subset= Substrate == 'Mixed')
+  
+  #Trying to calculate a sin wave function and test of amplitudes are different
+  #t<-as.numeric(AllData$DateTime[AllData$Substrate=='Rubble' & AllData$NutLevel=='Ambient' & AllData$Tank==1])
+  #d<-AllData$TankpH[AllData$Substrate=='Rubble' & AllData$NutLevel=='Ambient'& AllData$Tank==1]-AllData$HeaderpH[AllData$Substrate=='Rubble' & AllData$NutLevel=='Ambient'& AllData$Tank==1]
+  #nls.mod <-nls(d ~ a + b*sin(2*pi*c*t), start=list(a = .1, b = .1, c=.1))
   
   ##nutrient plots --- just for the headers.... 
   #calculate the mean nutrient conditions
