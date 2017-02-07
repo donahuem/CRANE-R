@@ -1,7 +1,9 @@
 #Data Processing for Weights, Volumes, and Surface Areas
 
 #location for writing processed files
-fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+#fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+fileloc <- "C:/Users/Nyssa/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+
 
 library(googlesheets)
 suppressMessages(library(dplyr))
@@ -82,7 +84,7 @@ text(x=CoralNubb$Vol,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex=.5
 CoralNubb$Check[CoralNubb$TrayNum==233]<- "Outlier in AFDW"
 CoralNubb$Check[CoralNubb$TrayNum==177]<- "Low outlier in SA"
 
-write.table(CoralNubb,file=paste(fileloc,"CoralNubbins_Rprocessed.csv",sep=""),sep = " ,", col.names = NA)
+#write.table(CoralNubb,file=paste(fileloc,"CoralNubbins_Rprocessed.csv",sep=""),sep = " ,", col.names = NA)
 
 
 #Create dataframe for set-scale measures (coral set = 3 colonies mounted together)
@@ -120,7 +122,7 @@ CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==22] <- "low in A
 CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==14] <- "outlier in AFDW?"
 CoralSet$Check[CoralSet$Species=="Montipora" & CoralSet$SampleID==15] <- "outlier in AFDW?"
 
-write.table(CoralSet, file=paste(fileloc,"CoralSets_Rprocessed.csv",sep=""), sep=",", col.names = NA)
+#write.table(CoralSet, file=paste(fileloc,"CoralSets_Rprocessed.csv",sep=""), sep=",", col.names = NA)
 
 #Assemble Rubble Data
 #Rubble BWs
@@ -166,7 +168,7 @@ Rubble$Aq_Ex2 <- rubbleIDex2$Aquarium[match(Rubble$SampleID,rubbleIDex2$SampleID
 plot(DW~AW,data=Rubble)
 #points(x=Rubble$AW[Rubble$TrayNum==120],y=Rubble$DW[Rubble$TrayNum==120],col="red")
 
-write.table(Rubble,file=paste(fileloc,"Rubble_Rprocessed.csv",sep=""),sep=",", col.names = NA)
+#write.table(Rubble,file=paste(fileloc,"Rubble_Rprocessed.csv",sep=""),sep=",", col.names = NA)
 
 #Algae Data
 CRANE_algae <- gs_read(CRANE_sheet,ws="ALGAE")
@@ -208,7 +210,7 @@ Algae$BitsSA <- 2*Algae$BitsVol/AlgRadius
 plot(DW~AW,type="n",data=Algae)
 text(x=Algae$AW,y=Algae$DW,labels=Algae$SampleID,cex=0.7)
 
-write.table(Algae,file=paste(fileloc,"Algae_Rprocessed.csv",sep=""),sep=",", col.names = NA)
+#write.table(Algae,file=paste(fileloc,"Algae_Rprocessed.csv",sep=""),sep=",", col.names = NA)
 
 #Sand
 CRANE_sand <- gs_read(CRANE_sheet,ws="SAND")
@@ -233,7 +235,7 @@ Sand$Tank <- SandIDex1$BlackTank[match(Sand$SampleID,SandIDex1$SampleID)]
 Sand$Aq_Ex1 <- SandIDex1$Aquarium[match(Sand$SampleID,SandIDex1$SampleID)]
 Sand$Aq_Ex2 <- SandIDex2$Aquarium[match(Sand$SampleID,SandIDex2$SampleID)]
 
-write.table(Sand,file=paste(fileloc,"Sand_Rprocessed.csv",sep=""), sep=",", col.names = NA)
+#write.table(Sand,file=paste(fileloc,"Sand_Rprocessed.csv",sep=""), sep=",", col.names = NA)
 
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed

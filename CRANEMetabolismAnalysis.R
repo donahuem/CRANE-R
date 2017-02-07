@@ -872,11 +872,11 @@ NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summ
 
 NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank", "Aquarium"), summarize,
                            #Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
-                           Mean.AFDW2.p = mean(NCP.AFDW[DayNight=='Day'], na.rm=T),
-                           Mean.AFDW2.r =mean(abs(NCP.AFDW[DayNight=='Night']), na.rm = T),       
-                           Mean.AFDW2.NCP = mean(NCP.AFDW, na.rm=T),
-                           GPP=Mean.AFDW2.p+Mean.AFDW2.r,
-                           PR.AFDW2=GPP/Mean.AFDW2.r,
+                           Mean.AFDW2.p = mean(NCP.AFDW[DayNight=='Day'], na.rm=T), # photosynthesis
+                           Mean.AFDW2.r =mean(abs(NCP.AFDW[DayNight=='Night']), na.rm = T),   #respiration    
+                           Mean.AFDW2.NCP = mean(NCP.AFDW, na.rm=T), #NCP
+                           GPP=Mean.AFDW2.p+Mean.AFDW2.r, #GPP
+                           PR.AFDW2=GPP/Mean.AFDW2.r, # P/R ratio
                            Mean.AFDW2.Day = mean(NEC.AFDW[DayNight=='Day'], na.rm=T), #day NEC
                            Mean.AFDW2.Night = mean(NEC.AFDW[DayNight=='Night'], na.rm=T), #Night NEC
                            Mean.AFDW2.NEC = mean(NEC.AFDW, na.rm=T) #Night NEC
@@ -1001,7 +1001,7 @@ for (i in 1:length(sub)){
 
 #NEC net
 
-#Take the average of everytihng across aquariums so its easier to code in the model.  I need to drop the factors for that to work
+#Take the average of everything across aquariums so its easier to code in the model.  I need to drop the factors for that to work
 AllData2<-AllData
 levels(AllData2$Substrate)<-c(1:5)
 AllData2$Substrate<-as.numeric(droplevels(AllData2$Substrate))
@@ -1214,9 +1214,19 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 ##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
 pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6)
 par(mfrow=c(1,1), pty='s')
-plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
-legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+plot(AllData$NCP.AFDW, AllData$TankpH, col='black', xlab='NCP', ylab='pH', pch=19, xlim=c(-30,100), ylim=c(7.6,8.4))
+#plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
+#legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+model.NCPpH<-lm(AllData$TankpH~poly(AllData$NCP.AFDW,2))
+pred<-predict(model.NCPpH, se=TRUE, interval = 'confidence') #calculate predicted values
+ind<-order(pred$fit[,1])
+lines(AllData$NCP.AFDW[ind],pred$fit[ind,1], lwd=2)
+lines(AllData$NCP.AFDW[ind],pred$fit[ind,2], lty=2, col='grey45')
+lines(AllData$NCP.AFDW[ind],pred$fit[ind,3], lty=2, col='grey45')
 dev.off()
+
+# linear model for pH ~ NCP (2nd order polynomial because it levels off a bit on top)
+model.NCPpH<-lm(AllData$TankpH~poly(AllData$NCP.AFDW,2))
 
 #par(pty='r')
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
@@ -1383,6 +1393,10 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
   
   dev.off()
+  
+  ## test for differences in pH due to species, nutrients, and an interaction (repeated measures for time and Tank)
+  pHModel<-lmer(TankpH-HeaderpH ~ Substrate*NutLevel +  (1|Tank) + (1|DateTime), data = AllData)
+  
   ##nutrient plots --- just for the headers.... 
   #calculate the mean nutrient conditions
   meanNuts<-ddply(AllData, 'NutLevel', summarize,
