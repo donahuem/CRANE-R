@@ -2,6 +2,8 @@
 
 #location for writing processed files
 fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+#fileloc <- "C:/Users/Nyssa/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+
 
 library(googlesheets)
 suppressMessages(library(dplyr))
