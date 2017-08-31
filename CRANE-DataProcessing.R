@@ -1,14 +1,18 @@
 #Data Processing for Weights, Volumes, and Surface Areas
 
+##NOTE: "pc" data is proptional, not percent change
+
 #location for writing processed files
-fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+#fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
 #fileloc <- "C:/Users/Nyssa/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+fileloc <- "C:/Users/nsilbiger/Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/"
 
 
 library(googlesheets)
 suppressMessages(library(dplyr))
 library(plyr)
 library(gdata)
+library(Hmisc)
 
 #authorize access to google sheets
 gs_auth(token=NULL, new_user=FALSE,key = getOption("googlesheets.client_id"),secret = getOption("googlesheets.client_secret"),

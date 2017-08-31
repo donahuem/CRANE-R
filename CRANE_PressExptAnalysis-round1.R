@@ -37,14 +37,14 @@ plot(TukeyHSD(Coralorg))
 Coral_output$fitted.org <- Coralorg$fitted.values
 
 #block as random effect using NLME
-load(nlme)
+library(nlme)
 Coral_BW_lme <- lme(pcDeltaBW ~ Nuts + Species, random=~1|Tank, data=CoralSet)
 Coral_BW_lme
 summary(Coral_BW_lme)
 
 #for Org, we have data by nubbin, and colony and tank are orthogonal (not nested) random effects
 #apparently, these are not available with the syntax in nlme
-load(lme4)
+library(lme4)
 Coral_org_lme <- lmer(pcAFDW ~ Nuts + Species + (1|Tank) +(Species|Clone), data=CoralNubb)
 Coral_org_lme
 summary(Coral_org_lme)

@@ -387,7 +387,7 @@ Nutplot.R<-function(species, Main = TRUE, YLAB = TRUE, tx = FALSE){
   plot(1:3,ef$fit, main=ifelse(Main ==TRUE, species,NA), pch=19,
        ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
        yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
-       ylab=ifelse(YLAB==TRUE, expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), NA),
+       ylab=ifelse(YLAB==TRUE, expression(paste("R ",mu,"mol g AFDW"^{-1}," hr"^{-1})), NA),
        cex.main=2, cex.axis=1, cex.lab=1,  col=mypalette, xaxt='n', xlim=c(0,4), xlab="", cex=1.5)
   lines(1:3,ef$fit, col = 'black', type = 'c' )
   

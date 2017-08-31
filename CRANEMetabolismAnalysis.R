@@ -1406,16 +1406,16 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
         meanP=mean(HeaderP, na.rm=T),
         SEP=sd(HeaderP, na.rm=T)/sqrt(7))
-  pdf(file = 'Plots/MSplots/NutrientsGrey.pdf', height = 5, width = 8)      
+  pdf(file = 'Plots/MSplots/NutrientsColor.pdf', height = 5, width = 8)      
   par(mfrow=c(1,2)) #average nitrate for experiment
   x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'-'},'+ NO'[2]^{'-'})), 
-             ylab=expression(paste(mu,'M')), ylim=c(0,10))
+             ylab=expression(paste(mu,'M')), ylim=c(0,10), col = mypalette)
   errorbars(x,meanNuts$meanNN,0,meanNuts$SENN)
   axis(1, at=x, labels=c("Ambient","Medium","High"))
   
   #average phosphate for experiment
   x<-barplot(meanNuts$meanP, main=expression(paste('PO'[4]^{'3-'})), 
-             ylab='', ylim=c(0,3.0))
+             ylab='', ylim=c(0,3.0), col= mypalette)
   errorbars(x,meanNuts$meanP,0,meanNuts$SEP)
   axis(1, at=x, labels=c("Ambient","Medium","High"))
   dev.off()
@@ -1839,3 +1839,95 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  }
  legend('topright', legend=unique(HCO3.mean$NutLevel), col=unique(HCO3.mean$NutLevel), pch=19, bty = 'n')
  
+ ##### Mixed effects models for the change in BW for algae, rubble, coral 
+ #coral
+ # NOTE THE pc DATA IS PROPORTIONAL, NOT PERCENT SO MULTUPLY EVERYTHING BY 100
+ Coral$pcDeltaBW<-Coral$pcDeltaBW*100
+ Algae$pcDeltaWW<-Algae$pcDeltaWW*100
+ Rubble$pcDeltaBW<-Rubble$pcDeltaBW*100
+ 
+ CoralBW.mod<-lmer(pcDeltaBW ~ Nuts+Species + (1|Tank), data= Coral) # I looked for an interaction, but found none
+ #CoralBW.mod<-lmer(pcDeltaBW ~ Nuts + (1|Tank/Species), data= Coral) # this puts species nested within tank as a random effect
+ 
+ # order the nutrient levels
+  Coral$Nuts<-ordered(Coral$Nuts, levels =c('Ambient','Medium','High') )
+ # calculate means and SE for plotting
+ Coral.mean<-ddply(Coral, c("Species","Nuts"), summarize,
+       pcBW.mean = mean(pcDeltaBW, na.rm=TRUE),
+       n = sum(!is.na(pcDeltaBW)),
+       pcBW.se = sd(pcDeltaBW, na.rm=TRUE)/sqrt(n))
+ 
+ #algae
+ AlgaeBW.mod<-lmer(pcDeltaWW ~ Nuts + (1|Tank), data= Algae) # I looked for an interaction, but found none
+ Algae$Nuts<-ordered(Algae$Nuts, levels =c('Ambient','Medium','High') )
+ Algae.mean<-ddply(Algae, c("Nuts"), summarize,
+                   pcBW.mean = mean(pcDeltaWW, na.rm=TRUE),
+                   n = sum(!is.na(pcDeltaWW)),
+                   pcBW.se = sd(pcDeltaWW, na.rm=TRUE)/sqrt(n))
+ 
+ # rubble
+RubbleBW.mod<-lmer(pcDeltaBW ~ Nuts + (1|Tank), data= Rubble) # I looked for an interaction, but found none
+Rubble$Nuts<-ordered(Rubble$Nuts, levels =c('Ambient','Medium','High') )
+Rubble.mean<-ddply(Rubble, c("Nuts"), summarize,
+                  pcBW.mean = mean(pcDeltaBW, na.rm=TRUE),
+                  n = sum(!is.na(pcDeltaBW)),
+                  pcBW.se = sd(pcDeltaBW, na.rm=TRUE)/sqrt(n))
+
+pdf('plots/MSplots/BuoyantWeight.pdf', width = 4, height = 8.5)
+par(mfrow=c(3,1))
+# create a matrix for the coral data
+m<-t(matrix(Coral.mean$pcBW.mean,3,2))
+mse<-t(matrix(Coral.mean$pcBW.se,3,2))
+x<-barplot(m,beside=TRUE,  ylim=c(0, 5), ylab = 'Coral % change BW',
+           legend.text = c(expression(italic('M. capitata')), expression(italic('P. compressa'))), args.legend = list(bty='n'))
+arrows(x, m + mse,  # x , mean + SE
+       x, m - mse,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+
+# algae
+x<-barplot(Algae.mean$pcBW.mean,   ylim = c(0,300), ylab = 'Algae % change WW')
+arrows(x, Algae.mean$pcBW.mean + Algae.mean$pcBW.se,  # x , mean + SE
+       x, Algae.mean$pcBW.mean - Algae.mean$pcBW.se,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+
+#Rubble
+x<-barplot(Rubble.mean$pcBW.mean, names.arg = c('Ambient', 'Medium','High'),  ylab = 'Rubble % change BW', ylim=c(-0.6,0.6))
+arrows(x, Rubble.mean$pcBW.mean + Rubble.mean$pcBW.se,  # x , mean + SE
+       x, Rubble.mean$pcBW.mean - Rubble.mean$pcBW.se,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+abline(h=0)
+dev.off()
+
+pdf('plots/MSplots/BuoyantWeight_dot.pdf', width = 4, height = 8.5)
+par(mfrow=c(3,1))
+# create a matrix for the coral data
+plot(c(1:3), Coral.mean$pcBW.mean[1:3], pch=19, ylim=c(0, 5), xlab="", xaxt='n', ylab = 'Coral % change BW', col = mypalette, cex=1.5)
+lines(c(1:3), Coral.mean$pcBW.mean[1:3], col = 'black', type = "c")
+arrows(c(1:3), Coral.mean$pcBW.mean + Coral.mean$pcBW.se,  # x , mean + SE
+       c(1:3), Coral.mean$pcBW.mean - Coral.mean$pcBW.se,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+points(c(1:3), Coral.mean$pcBW.mean[4:6], pch=15, ylim=c(0, 5), col = mypalette, cex=1.5)
+lines(c(1:3), Coral.mean$pcBW.mean[4:6], col = 'black', type = "c")
+legend('topright',legend = c(expression(italic('M. capitata')), expression(italic('P. compressa'))), bty='n',
+       pch = c(19,15), col = 'black')
+
+  
+# algae
+plot(1:3,Algae.mean$pcBW.mean,   ylim = c(200,300), xlab="",xaxt='n',ylab = 'Algae % change WW', pch = 19, col = mypalette, cex=1.5)
+lines(c(1:3), Algae.mean$pcBW.mean, col = 'black', type = "c")
+arrows(1:3, Algae.mean$pcBW.mean + Algae.mean$pcBW.se,  # x , mean + SE
+       1:3, Algae.mean$pcBW.mean - Algae.mean$pcBW.se,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+       
+
+#Rubble
+plot(Rubble.mean$pcBW.mean, xaxt='n',  ylab = 'Rubble % change BW',xlab="",
+     pch = 19, col = mypalette, cex=1.5, ylim=c(-0.6,0.6))
+arrows(1:3, Rubble.mean$pcBW.mean + Rubble.mean$pcBW.se,  # x , mean + SE
+       1:3, Rubble.mean$pcBW.mean - Rubble.mean$pcBW.se,  # x, mean - SE
+       angle=90, code=3, length = 0.05)
+abline(h=0, lty=2)
+lines(c(1:3), Rubble.mean$pcBW.mean, col = 'black', type = "c")
+text(x = 1:3, par("usr")[3] ,  labels = c("Ambient","Medium","High"), pos = 1, xpd = TRUE)
+
+dev.off()
