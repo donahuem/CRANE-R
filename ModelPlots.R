@@ -76,14 +76,25 @@ ef<-as.data.frame(effect("NutLevel", model.NECNet.Coral))
 par(lwd = 2) 
 SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral']
 SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral']
-x<-barplot(ef$fit, main='Coral', 
+# x<-barplot(ef$fit, main='Coral', 
+#            ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
+#            yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
+#            ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
+#            cex.main=2, cex.axis=1, cex.lab=1,  col=mypalette)
+# arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
+#        col='black', lwd=2)
+
+plot(1:3,ef$fit, main='Coral', pch=19,
            ylim=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper)))),
            yaxp=c(c(ifelse(min(SE.lower)>0,0,floor(min(SE.lower))),ceiling(max(SE.upper))), 5),
            ylab=expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})),
-           cex.main=2, cex.axis=1, cex.lab=1,  col='grey')
-arrows(x, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'],x, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
-       col='black', lwd=2)
-abline(h=0)
+           cex.main=2, cex.axis=1, cex.lab=1,  col=mypalette, xaxt='n', xlim=c(0,4))
+lines(1:3,ef$fit, col = 'black', type = 'c' )
+
+arrows(1:3, ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'],1:3, ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate=='Coral'], length=0.05, angle=90, code=3,
+       col=mypalette, lwd=2)
+
+abline(h=0, lty=2)
 #arrows(x,ef$lower,x,ef$upper, length=0.05, angle=90, code=3,
  #         col='black', lwd=2)
 

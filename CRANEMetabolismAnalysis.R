@@ -19,6 +19,7 @@ library('reshape2')
 library('seacarb')
 library('MuMIn')
 library('effects')
+library('RColorBrewer')
 # Functions-----------------------------------------
 #easy errorbar barplots
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
@@ -97,16 +98,16 @@ ChemData<-ChemData[,-c(24,25)]
 #source('CRANE-DataProcessing.R')
 
 #Coral
-Coral <- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv",header=TRUE)
+Coral <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv",header=TRUE)
 
 #Rubble
-Rubble <- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",header=TRUE)
+Rubble <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",header=TRUE)
 
 #Algae
-Algae <- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",header=TRUE)
+Algae <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",header=TRUE)
 
 #Sand
-Sand<- read.csv("../../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv",header=TRUE)
+Sand<- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv",header=TRUE)
 
 
 #I did not use the TA corrected to CRM because it made the data messier.... something was off
@@ -1210,12 +1211,25 @@ legend('topleft',legend=c('Ambient',"Medium","High"), col=c('blue','magenta','wh
 }
 
 
+#### Change color for pub quality figures
+mypalette<-brewer.pal(9,"Blues") # light pink to purple for ambient to high nutrients
+mypalette<-mypalette[c(3,6,9)] # pull out 3 contrasting colors for ambient, med, and high
+
+#add the colors to AllData
+AllData$colors<-NA
+  for (i in 1:length(Nuts)){
+AllData$colors[AllData$NutLevel ==Nuts[i]]<-mypalette[i] 
+  }
+
 ###Looking at feedbacks--------------------------------------------
 ##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
 pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6)
 par(mfrow=c(1,1), pty='s')
-plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
-legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+#plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
+#legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
+plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$colors, xlab='NCP', ylab='pH', pch=19)
+legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$colors), pch=19, bty = 'n')
+
 dev.off()
 
 #par(pty='r')
@@ -1224,7 +1238,8 @@ plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 ## NEC vs Omegan plot-------------------------------------
 pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8)
 par(mfrow=c(3,2))
-cols <- c(unique(NEC.mean$NutLevel))
+#cols <- c(unique(NEC.mean$NutLevel))
+cols <- mypalette
 y<-AllData$NEC.AFDW
 yse<-NEC.mean$SE.AFDW
 for (i in 1:length(sub)){
@@ -1234,24 +1249,25 @@ for (i in 1:length(sub)){
   abline(h=0, lty=2)
   for (j in 1:length(Nuts)){
     par(new = TRUE)
-    plot(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]],
-         y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = cols[j],
-         pch=21, type="p", xaxt='n', xlim=c(1.5,6), ylab='', xlab='',ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])))
+    plot(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], yaxt='n',
+         y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = adjustcolor( cols[j], alpha.f = 0.5),
+         pch=19, type="p", xaxt='n', xlim=c(1.5,6), ylab='', xlab='',ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])))
+   
     
     model<-lm(y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]]~AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]])
-    #if the p>0.05 make it a dashed line
+    #if the p>0.05 make it a dashed line (or don't include)
     p<-anova(model)$`Pr(>F)`[1]
     if(p<=0.05){
       lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=3, lty=1)
     }
-      else{
-      lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=0.5, lty=2)
-    }
+     # else{
+      #lines(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], model$fitted.values, col=cols[j], lwd=0.5, lty=2)
+    #}
   }
 }
 #empty plot to put the legend
 plot(NA, ylim=c(0,1), xlim=c(0,1), axes=FALSE,  ylab="", xlab="")
-legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=unique(NEC.mean$NutLevel), pch=19, bty = 'n')
+legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=mypalette, pch=19, bty = 'n')
 
 dev.off()
 
@@ -1359,16 +1375,16 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
     #
     for (j in 1:length(Nuts)){
       par(new = TRUE)
-      
+        
       plot(as.numeric(deltapHMeans.time$DateTime [deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]),
            y[deltapHMeans.time$Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]], col = cols[j],
-           pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.1))
+           pch=19, type="b", xaxt='n', ylab='', xlab='',ylim=c(min(y), max(y)+.1), yaxt='n')
       
       arrows(unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]]
              + yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
              unique(deltapHMeans.time $DateTime), y[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time$NutLevel==Nuts[j]]
              - yse[deltapHMeans.time $Substrate==sub[i] & deltapHMeans.time $NutLevel==Nuts[j]], 
-             angle=90, code=3, length = 0.05)
+             angle=90, code=3, length = 0.05, col = cols[j])
       start<-ifelse(i<=4,c(1),c(8))
       stops<-ifelse(i<=4,c(7),c(14))
       
@@ -1378,9 +1394,9 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
     #shaded area for night
     a<-ifelse(i<=4,3,10) #because mixed has different dates than the rest of the substrats
     b<-ifelse(i<=4,6,13)
-    rect(unique(deltapHMeans.time $DateTime)[a],min(y),unique(deltapHMeans.time $DateTime)[b],max(y)+.1,col = rgb(0.5,0.5,0.5,1/4), border = NA)
+    rect(unique(deltapHMeans.time $DateTime)[a]+3600,min(y),unique(deltapHMeans.time $DateTime)[b]+3600,max(y)+.1,col = rgb(0.5,0.5,0.5,1/4), border = NA)
   }
-  legend('topright', legend=unique(deltapHMeans.time $NutLevel), col=unique(deltapHMeans.time $NutLevel), pch=19, bty = 'n')
+  legend('bottomleft', legend=unique(deltapHMeans.time $NutLevel), col=mypalette, pch=19, bty = 'n')
   
   dev.off()
   ##nutrient plots --- just for the headers.... 
