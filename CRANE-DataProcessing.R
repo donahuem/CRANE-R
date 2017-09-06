@@ -1,12 +1,12 @@
 #Data Processing for Weights, Volumes, and Surface Areas
 
-##NOTE: "pc" data is proptional, not percent change
+#Do you want to write out the Rprocessed files? If yes, WriteOutData=1; if not (ie just for sourcing), =0
+WriteOutData = 0
 
 #location for writing processed files
-#fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
 #fileloc <- "C:/Users/Nyssa/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
-fileloc <- "C:/Users/nsilbiger/Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/"
-
+#fileloc <- "C:/Users/nsilbiger/Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/"
 
 library(googlesheets)
 suppressMessages(library(dplyr))
@@ -92,7 +92,7 @@ CoralNubb.labels <- c(SampleID = "Sample Identifier for each set of coral nubbin
                       DW = "Dry Weight (g) is the nubbin dry weight after oven-drying (60deg C for >=72 hrs)",
                       AW = "Weight (g) of nubbin after combustion at 550C  for 4 hours",
                       AFDW = "AFDW = DW - AW; Weight (g) of organic matter lost on combustion",
-                      pcAFDW = "Percent Ash Free Dry Weight = AFDW/DW; this is the percent of the total dry weight that is organic matter",
+                      pcAFDW = "Proportion Ash Free Dry Weight = AFDW/DW; this is the proportion of the total dry weight that is organic matter",
                       SA = "Surface Area (cm3); surface area of nubbin based on wax dipping",
                       Check = "Flag if measurement appears to be outlier",
                       Compromised = "Flags all colonies categorized as Compromised by HPC",
@@ -119,8 +119,10 @@ text(x=CoralNubb$Vol,y=CoralNubb$SA,label=as.character(CoralNubb$TrayNum),cex=.5
 CoralNubb$Check[CoralNubb$TrayNum==233]<- "Outlier in AFDW"
 CoralNubb$Check[CoralNubb$TrayNum==177]<- "Low outlier in SA"
 
-write.table(CoralNubb,file=paste(fileloc,"CoralNubbins_Rprocessed.csv",sep=""),sep = " ,", col.names = NA)
-write.table(CoralNubb.labels,file=paste(fileloc,"CoralNubbins_metadata.csv",sep=""),sep=" ,")
+if (WriteOutData==1) {
+  write.table(CoralNubb,file=paste(fileloc,"CoralNubbins_Rprocessed.csv",sep=""),sep = " ,", col.names = NA)
+  write.table(CoralNubb.labels,file=paste(fileloc,"CoralNubbins_metadata.csv",sep=""),sep=" ,")
+}
 
 #Create dataframe for set-scale measures (coral set = 3 colonies mounted together)
 CoralSet <- with(CRANE_coralset, data.frame(SampleID,Species,InitialBW,InitialTemp,InitialDate,FinalBW,FinalTemp,FinalDate))
@@ -159,13 +161,13 @@ CoralSet.labels <- c(SampleID = "Sample Identifier; single identifier for set of
                      InitBWcorr =  "Initial Dry Weight of coral set based on buoyant wt; calculated from InitialBW and InitialTemp based on Davies (1989) and a coral density of 2.93 g/cm3",
                      FinalBWcorr ="Final Dry Weight of coral set based on buoyant wt; calculated from FinalBW and FinalTemp based on Davies (1989) and a coral density of 2.93 g/cm3",
                      DeltaBW = "DeltaBW = FinalBWcorr - InitBWcorr; this is the change in dry weight over the 6 wk experiment based on buoyant weights",
-                     pcDeltaBW = "pcDeltaBW = DeltaBW/InitBWcorr; this is the percent change in dry weight based on buoyant weight",
-                     Volume = "Total volume (cm3) of 3 nubbins based on displacement; from dataframe CoralNubb",
-                     SA = "Total surface area (cm2) of 3 nubbins based on displacement; summed from dataframe CoralNubb",
-                     AW = "Total ashed weight (g) of 3 nubbins based on displacement; summed from dataframe CoralNubb",
-                     DW= "Total dry weight (g) of 3 nubbins based on displacement; summed from dataframe CoralNubb",
-                     AFDW = "Total ash-free dry weight (g) of 3 nubbins based on displacement; summed from dataframe CoralNubb",
-                     pcAFDW = "AFDW/DW; organic matter as a percent of total dry weight",
+                     pcDeltaBW = "pcDeltaBW = DeltaBW/InitBWcorr; this is the proportion change in dry weight based on buoyant weight",
+                     Volume = "Summed volume (cm3) of 3 nubbins based on displacement; from dataframe CoralNubb",
+                     SA = "Total surface area (cm2) of 3 nubbins based on wax dipping; summed from dataframe CoralNubb",
+                     AW = "Total ashed weight (g) of 3 nubbins  after combustion at 550C  for 4 hours; summed from dataframe CoralNubb",
+                     DW= "Summed dry weight (g) of 3 nubbins after oven-drying (60deg C for >=72 hrs); summed from dataframe CoralNubb",
+                     AFDW = "Weight (g) of organic matter lost on combustion; summed from dataframe CoralNubb",
+                     pcAFDW = "AFDW/DW; organic matter as a proportion of total dry weight",
                      Nuts = "Nutrient level assigned to the aquarium: Ambient/Medium/High",
                      Tank = "Tank Identifier; each aquarium was assigned to one of 3 tanks",
                      Aq_Ex1 = "Aquarium Identifier for Experiment 1; nine aquaria held coral nubbins in expt 1",
@@ -182,8 +184,10 @@ CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==22] <- "low in A
 CoralSet$Check[CoralSet$Species=="Porites" & CoralSet$SampleID==14] <- "outlier in AFDW?"
 CoralSet$Check[CoralSet$Species=="Montipora" & CoralSet$SampleID==15] <- "outlier in AFDW?"
 
-write.table(CoralSet, file=paste(fileloc,"CoralSets_Rprocessed.csv",sep=""), sep=",", col.names = NA)
-write.table(CoralSet.labels,file=paste(fileloc,"CoralSets_metadata.csv",sep=""),sep=" ,")
+if (WriteOutData==1) {
+  write.table(CoralSet, file=paste(fileloc,"CoralSets_Rprocessed.csv",sep=""), sep=",", col.names = NA)
+  write.table(CoralSet.labels,file=paste(fileloc,"CoralSets_metadata.csv",sep=""),sep=" ,")
+}
 
 #Assemble Rubble Data
 #Rubble BWs
@@ -240,20 +244,22 @@ Rubble.labels <- c(SampleID = "Sample Identifier",
                    FinalBW = "Final Dry Weight (g) based on buoyant wt; calculated from the final buoyant weight and temperature based on Davies (1989) and a coral density of 2.93 g/cm3",
                    DeltaBW = "DeltaBW_all with three outliers removed",
                    DeltaBW_all = "DeltaBW = FinalBW - InitialBW (g); change in dry weight during experiment based on wet weight",
-                   pcDeltaBW = "Percent Change in Dry Weight = DeltaBW/InitBW",
+                   pcDeltaBW = "proportion Change in Dry Weight = DeltaBW/InitBW",
                    TrayWt = "Weight (g) of tray associate with the sample",
                    DW = "Dry Weight (g) of sample at end of experiment after oven drying at 60C for >48 hours",
                    AW = "Ashed Weight (g) of sample at end of experiment after combusting at 550C for 4 hours",
                    AFDW = "Ash Free Dry Weight (g) = DW - AW; organic matter lost during combustion",
-                   pcAFDW = "Percent Ash Free Dry Weight; organic matter as a percent of dry weight",
+                   pcAFDW = "proportion Ash Free Dry Weight; organic matter as a proportion of dry weight",
                    SA = "Surface Area of Rubble (cm2) based on wax dipping",
                    Nuts = "Nutrient level assigned to the aquarium: Ambient/Medium/High",
                    Tank = "Tank Identifier; each aquarium was assigned to one of 3 tanks",
                    Aq_Ex1 = "Aquarium Identifier for Experiment 1; nine aquaria held coral nubbins in expt 1",
                    Aq_Ex2 = "Aquarium Identifier for Experiment 2; all aquaria had coral nubbins in expt 2")
 
-write.table(Rubble,file=paste(fileloc,"Rubble_Rprocessed.csv",sep=""),sep=",", col.names = NA)
-write.table(Rubble.labels, file=paste(fileloc,"Rubble_metatdata.csv",sep=""),sep=",", col.names = NA)
+if (WriteOutData==1) {
+  write.table(Rubble,file=paste(fileloc,"Rubble_Rprocessed.csv",sep=""),sep=",", col.names = NA)
+  write.table(Rubble.labels, file=paste(fileloc,"Rubble_metatdata.csv",sep=""),sep=",", col.names = NA)
+}
 
 #Algae Data
 CRANE_algae <- gs_read(CRANE_sheet,ws="ALGAE")
@@ -300,7 +306,7 @@ Algae.labels <- c(SampleID = "Sample Identifier",
                   TrayNum1 = "Tray Number associated with the algae sample",
                   TrayNumBits = "Tray Number associated with the algae bits",
                   DeltaWW = "DeltaWW = FinalWW - InitialWW; change in wet weight (g) over the 6 week experiment",
-                  pcDeltaWW = "pcDeltaWW = DeltaWW/InitialWW; percent change in wet weight over 6 week experiment",
+                  pcDeltaWW = "pcDeltaWW = DeltaWW/InitialWW; proportion change in wet weight over 6 week experiment",
                   Nuts = "Nutrient level assigned to the aquarium: Ambient/Medium/High",
                   Tank = "Tank Identifier; each aquarium was assigned to one of 3 tanks",
                   Aq_Ex1 = "Aquarium Identifier for Experiment 1; nine aquaria held coral nubbins in expt 1",
@@ -309,12 +315,12 @@ Algae.labels <- c(SampleID = "Sample Identifier",
                   DW = "Dry Weight (g) of algal sample after drying at 60C for >48 hours",
                   AW = "Ash Weight (g) of algal sample after combusting at 550C for 4 hours",
                   AFDW = "AFDW = DW - AW; Weight (g) of organic matter lost on combustion",
-                  pcAFDW = "Percent Ash Free Dry Weight = AFDW/DW; this is the percent of the total dry weight that is organic matter",
+                  pcAFDW = "proportion Ash Free Dry Weight = AFDW/DW; this is the proportion of the total dry weight that is organic matter",
                   TrayWtBits = "Tray Weight Associated with algae bits",
                   DWbits = "Dry Weight (g) of algae bits after drying at 60C for >48 hours",
                   AWbits = "Ash Weights (g) of algal bits after combusting at 550C for 4 hours",
                   AFDWbits = "AFDWbits = DWbits - AWbits; Weight (g) of organic matter lost on combustion",
-                  pcAFDWbits = "AFDW/DW; percent ash free dry weight for algae bits",
+                  pcAFDWbits = "AFDW/DW; proportion ash free dry weight for algae bits",
                   FinalVol = "Final Volume (cm3) of algae based on regression of volume vs wet weight of 6 samples, Rsq = 0.998",
                   BitsVol = "Final Volume (cm3) of algal bits based on regression of volume vs wet weight",
                   FinalSA = "Final Surface Area (cm2) of algae based on volume, average diameter of Gracilaria salicornia (2.31 mm +/- .087mm se, n=11), and the assumption that Graciliaria salicornia is made up of cylinders",
@@ -323,8 +329,10 @@ Algae.labels <- c(SampleID = "Sample Identifier",
 plot(DW~AW,type="n",data=Algae)
 text(x=Algae$AW,y=Algae$DW,labels=Algae$SampleID,cex=0.7)
 
-write.table(Algae,file=paste(fileloc,"Algae_Rprocessed.csv",sep=""),sep=",", col.names = NA)
-write.table(Algae.labels,file=paste(fileloc,"Algae_metadata.csv",sep=""),sep=" ,")
+if (WriteOutData==1){
+  write.table(Algae,file=paste(fileloc,"Algae_Rprocessed.csv",sep=""),sep=",", col.names = NA)
+  write.table(Algae.labels,file=paste(fileloc,"Algae_metadata.csv",sep=""),sep=" ,")
+}
 
 #Sand
 CRANE_sand <- gs_read(CRANE_sheet,ws="SAND")
@@ -360,14 +368,16 @@ Sand.labels <- c(SampleID = "Sample Identifier",
                  Vol = "Estimated Final volume (cm3) of Sand based on regression between measured volume vs dry weight (n=8,Rsq=0.999)",
                  AW = "Ashed weight (g) of Sand after combustion at 550C for 4 hours",
                  AFDW = "Ash Free Dry Weight (g) = DW - AW; weight (g) of organic matter lost on combustion",
-                 pcAFDW = "Percent Ash Free Dry Weight = AFDW/DW; percent of dry weight that is organic matter",
+                 pcAFDW = "proportion Ash Free Dry Weight = AFDW/DW; proportion of dry weight that is organic matter",
                  Nuts = "Nutrient level assigned to the aquarium: Ambient/Medium/High",
                  Tank = "Tank Identifier; each aquarium was assigned to one of 3 tanks",
                  Aq_Ex1 = "Aquarium Identifier for Experiment 1; nine aquaria held coral nubbins in expt 1",
                  Aq_Ex2 = "Aquarium Identifier for Experiment 2; all aquaria had coral nubbins in expt 2")
 
-write.table(Sand,file=paste(fileloc,"Sand_Rprocessed.csv",sep=""), sep=",", col.names = NA)
-write.table(Sand.labels,file=paste(fileloc,"Sand_metadata.csv",sep=""), sep=",", col.names = NA)
+if (WriteOutData==1) {
+  write.table(Sand,file=paste(fileloc,"Sand_Rprocessed.csv",sep=""), sep=",", col.names = NA)
+  write.table(Sand.labels,file=paste(fileloc,"Sand_metadata.csv",sep=""), sep=",", col.names = NA)
+}
 
 # #Aquarium dataframe for Expts 1 & 2; these is the list of columns needed
 # AquaEx1 <- data.frame(Aqua = c(1:36))
