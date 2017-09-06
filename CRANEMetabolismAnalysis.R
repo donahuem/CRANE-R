@@ -2157,3 +2157,10 @@ for(i in 1:5){
 legend('topright', legend = c('GCP','R','NCP'), pch = c(2,17,19), col = mypalette, bty='n', cex=1.5)
 dev.off()
 
+# write the stats to a csv
+write.csv(NEC.day.stats, 'stats/NEC.day.stats.csv')
+write.csv(NEC.night.stats, 'stats/NEC.night.stats.csv')
+write.csv(NEC.net.stats, 'stats/NEC.net.stats.csv')
+write.csv(NCP.day.stats, 'stats/NCP.day.stats.csv')
+write.csv(NCP.night.stats, 'stats/NCP.night.stats.csv')
+write.csv(NCP.net.stats, 'stats/NCP.net.stats.csv')
