@@ -2158,9 +2158,20 @@ legend('topright', legend = c('GCP','R','NCP'), pch = c(2,17,19), col = mypalett
 dev.off()
 
 # write the stats to a csv
+# NEC and NCP as a function of nutrients models
 write.csv(NEC.day.stats, 'stats/NEC.day.stats.csv')
 write.csv(NEC.night.stats, 'stats/NEC.night.stats.csv')
 write.csv(NEC.net.stats, 'stats/NEC.net.stats.csv')
 write.csv(NCP.day.stats, 'stats/NCP.day.stats.csv')
 write.csv(NCP.night.stats, 'stats/NCP.night.stats.csv')
 write.csv(NCP.net.stats, 'stats/NCP.net.stats.csv')
+
+# pH as a function of species
+write.csv(data.frame(summary(model.pH.NCP)$coefficients), 'stats/pH.NCP.stats.csv')
+
+# NEC, omega, nutrient ancova
+write.csv(data.frame(summary(model.NECOmega.Algae)$coefficients),'stats/algae.omega.stats.csv')
+write.csv(data.frame(summary(model.NECOmega.Coral)$coefficients),'stats/coral.omega.stats.csv')
+write.csv(data.frame(summary(model.NECOmega.Rubble)$coefficients),'stats/rubble.omega.stats.csv')
+write.csv(data.frame(summary(model.NECOmega.Sand)$coefficients),'stats/sand.omega.stats.csv')
+write.csv(data.frame(summary(model.NECOmega.Mixed)$coefficients),'stats/mixed.omega.stats.csv')
