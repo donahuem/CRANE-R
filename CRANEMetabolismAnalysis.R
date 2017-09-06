@@ -98,16 +98,17 @@ ChemData<-ChemData[,-c(24,25)]
 #source('CRANE-DataProcessing.R')
 
 #Coral
-Coral <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/CoralSets_Rprocessed.csv",header=TRUE)
+# old file location ~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs
+Coral <- read.csv("data/CoralSets_Rprocessed.csv",header=TRUE)
 
 #Rubble
-Rubble <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Rubble_Rprocessed.csv",header=TRUE)
+Rubble <- read.csv("data/Rubble_Rprocessed.csv",header=TRUE)
 
 #Algae
-Algae <- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Algae_Rprocessed.csv",header=TRUE)
+Algae <- read.csv("data/Algae_Rprocessed.csv",header=TRUE)
 
 #Sand
-Sand<- read.csv("~/../Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/Sand_Rprocessed.csv",header=TRUE)
+Sand<- read.csv("data/Sand_Rprocessed.csv",header=TRUE)
 
 
 #I did not use the TA corrected to CRM because it made the data messier.... something was off
@@ -1938,3 +1939,221 @@ lines(c(1:3), Rubble.mean$pcBW.mean, col = 'black', type = "c")
 text(x = 1:3, par("usr")[3] ,  labels = c("Ambient","Medium","High"), pos = 1, xpd = TRUE)
 
 dev.off()
+
+
+### NEC and NCP plots and stats file #####
+substrate<-c('Coral','Algae','Rubble','Sand','Mixed')
+
+# create a list of all the models
+mods.NEC<-list(model.NECNet.Coral,model.NECNet.algae, model.NECNet.Rubble,model.NECNet.Sand,model.NECNet.Mixed)
+mods.NECD<-list(model.NECDay.Coral, model.NECDay.algae, model.NECDay.Rubble, model.NECDay.Sand,model.NECDay.Mixed)            
+mods.NECN<-list(model.NECNight.Coral, model.NECNight.algae, model.NECNight.Rubble, model.NECNight.Sand,model.NECNight.Mixed)            
+
+#  create a dataframe of the stats to report in a the paper
+NEC.net.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+NEC.day.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+NEC.night.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+
+# Make a function so I can minimize errors
+Nutplot.NEC<-function(species,i, Main = TRUE, YLAB = 'NEC'){
+  
+  #Day
+  y<-summary(mods.NECD[[i]])$coefficients[,1:2]
+  a<-anova(mods.NECD[[i]])
+  ef<-as.data.frame(effect("NutLevel", mods.NECD[[i]]))
+  
+  SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==species & NEC.mean.DayNight$DayNight=='Day']
+  SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==species& NEC.mean.DayNight$DayNight=='Day']
+  
+  # make plotting y axis beter
+  ef2<-as.data.frame(effect("NutLevel", mods.NECN[[i]]))
+  SE.low<-ef2$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==species& NEC.mean.DayNight$DayNight=='Night']
+  
+  #plot
+  plot(1:3-0.2,ef$fit, pch = 2,  cex = 3, main=ifelse(Main ==TRUE, species,NA),
+       ylim=c(c(ifelse(min(SE.low)>0,0,floor(min(SE.low))),ceiling(max(SE.upper)))),
+       yaxp=c(c(ifelse(min(SE.low)>0,0,floor(min(SE.low))),ceiling(max(SE.upper))), 5),
+       ylab=ifelse(YLAB=='NEC', expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), 
+                   expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1}))),
+       cex.main=2, cex.axis=1.5, cex.lab=1.5, xlab = "", col=mypalette, xaxt='n', xlim=c(0.25,3.75))
+  
+  lines(1:3-0.2,ef$fit, col = 'black', type = 'c' )
+  arrows(1:3-0.2, SE.upper,1:3-0.2, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  
+  # add star or NS for significance
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+ 
+  #calculate 95%CI using effects
+  y<-summary(mods.NEC[[i]])$coefficients[,1:2]
+  a<-anova(mods.NEC[[i]])
+  #calculate 95%CI using effects
+  ef<-as.data.frame(effect("NutLevel", mods.NEC[[i]]))
+  
+  SE.upper<-ef$fit+NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==species]
+  SE.lower<-ef$fit-NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==species]
+  
+  points(1:3,ef$fit, main=ifelse(Main ==TRUE, species,NA), pch=19,
+         col=mypalette, xaxt='n', cex=3)
+  lines(1:3,ef$fit, col = 'black', type = 'c' )
+  
+  arrows(1:3, SE.upper,1:3, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  
+  abline(h=0, lty=2, col='grey')
+ 
+  #add a star to the graph if it is statistically significant
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+  
+  # night
+  y<-summary(mods.NECN[[i]])$coefficients[,1:2]
+  a<-anova(mods.NECN[[i]])
+  ef<-as.data.frame(effect("NutLevel", mods.NECN[[i]]))
+  
+  SE.upper<-ef$fit+NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==species& NEC.mean.DayNight$DayNight=='Night']
+  SE.lower<-ef$fit-NEC.mean.DayNight$SE.AFDW2[NEC.mean.DayNight$Substrate==species& NEC.mean.DayNight$DayNight=='Night']
+  
+  points(1:3+0.2,ef$fit, cex=3, pch = 17, col = mypalette)
+  lines(1:3+0.2,ef$fit, col = 'black', type = 'c' )
+  arrows(1:3+0.2, SE.upper,1:3+0.2, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+  
+  axis(1, at=1:3, labels = c("Ambient","Medium","High"), las = 2, cex.lab=1.5,cex.axis=1.5)
+  
+}
+
+pdf("plots/MSplots/MeanRates_NEC.pdf", width=18, height=5)
+j<-2
+par(bg=NA) 
+par(pty="m")
+##  plot of all metabolic rates by substrate
+par(mfrow=c(1,5))
+par(mar=c(6.2,6.1,4.1,1.5))
+par(lwd = 2) 
+for(i in 1:5){
+  Nutplot.NEC(substrate[i],i,'TRUE','NEC')
+  # save the stats
+  #day
+  a<-anova(mods.NECD[[i]])
+  NEC.day.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+  #night
+  a<-anova(mods.NECN[[i]])
+  NEC.night.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+  #net
+  a<-anova(mods.NEC[[i]])
+  NEC.net.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+  
+}
+legend('topright', legend = c('Day','Night','Net'), pch = c(2,17,19), col = mypalette, bty='n', cex=1.5)
+dev.off()
+###############
+
+## NCP
+#  create a dataframe of the stats to report in a the paper
+NCP.net.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+NCP.day.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+NCP.night.stats<-data.frame(matrix(NA,nrow=5,ncol=7, dimnames = list(c(1:5),c('Substrate','SS','MS','NumDF','DenDF','F','P'))))
+
+Nutplot.NCP<-function(species,i, Main = TRUE, YLAB = 'NCP'){
+  
+  #Day
+  y<-summary(mods.NECD[[i]])$coefficients[,1:2]
+  a<-anova(mods.NECD[[i]])
+  ef<-as.data.frame(effect("NutLevel", mods.NECD[[i]]))
+  
+  SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==species & NCP.mean.DayNight$DayNight=='Day']
+  SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==species& NCP.mean.DayNight$DayNight=='Day']
+  
+  # make plotting y axis beter
+  ef2<-as.data.frame(effect("NutLevel", mods.NECN[[i]]))
+  SE.low<-ef2$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==species& NCP.mean.DayNight$DayNight=='Night']
+  
+  #plot
+  plot(1:3-0.2,ef$fit, pch = 2,  cex = 3, main=ifelse(Main ==TRUE, species,NA),
+       ylim=c(c(ifelse(min(SE.low)>0,0,floor(min(SE.low))),ceiling(max(SE.upper)))),
+       yaxp=c(c(ifelse(min(SE.low)>0,0,floor(min(SE.low))),ceiling(max(SE.upper))), 5),
+       ylab=ifelse(YLAB=='NEC', expression(paste("NEC ",mu,"mol g AFDW"^{-1}," hr"^{-1})), 
+                   expression(paste("NCP ",mu,"mol g AFDW"^{-1}," hr"^{-1}))),
+       cex.main=2, cex.axis=1.5, cex.lab=1.5, xlab = "", col=mypalette, xaxt='n', xlim=c(0.25,3.75))
+  
+  lines(1:3-0.2,ef$fit, col = 'black', type = 'c' )
+  arrows(1:3-0.2, SE.upper,1:3-0.2, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  
+  # add star or NS for significance
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+  
+  #calculate 95%CI using effects
+  y<-summary(mods.NEC[[i]])$coefficients[,1:2]
+  a<-anova(mods.NEC[[i]])
+  #calculate 95%CI using effects
+  ef<-as.data.frame(effect("NutLevel", mods.NEC[[i]]))
+  
+  SE.upper<-ef$fit+NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate==species]
+  SE.lower<-ef$fit-NCP.mean.Net$SE.AFDW2[NCP.mean.Net$Substrate==species]
+  
+  points(1:3,ef$fit, main=ifelse(Main ==TRUE, species,NA), pch=19,
+         col=mypalette, xaxt='n', cex=3)
+  lines(1:3,ef$fit, col = 'black', type = 'c' )
+  
+  arrows(1:3, SE.upper,1:3, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  
+  abline(h=0, lty=2, col='grey')
+ 
+  #add a star to the graph if it is statistically significant
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+  
+  # night
+  y<-summary(mods.NECN[[i]])$coefficients[,1:2]
+  a<-anova(mods.NECN[[i]])
+  ef<-as.data.frame(effect("NutLevel", mods.NECN[[i]]))
+  
+  SE.upper<-ef$fit+NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==species& NCP.mean.DayNight$DayNight=='Night']
+  SE.lower<-ef$fit-NCP.mean.DayNight$SE.AFDW2[NCP.mean.DayNight$Substrate==species& NCP.mean.DayNight$DayNight=='Night']
+  
+  points(1:3+0.2,ef$fit, cex=3, pch = 17, col = mypalette)
+  lines(1:3+0.2,ef$fit, col = 'black', type = 'c' )
+  arrows(1:3+0.2, SE.upper,1:3+0.2, SE.lower, length=0.05, angle=90, code=3,
+         col=mypalette, lwd=2)
+  if(a$`Pr(>F)`<=0.055){text(3+0.6,ef$fit[3],'*', cex=3)}   #  legend("top",'*', cex=2, bty="n")
+  if(a$`Pr(>F)`>=0.055){text(3+0.6,ef$fit[3],'NS')}
+  
+  axis(1, at=1:3, labels = c("Ambient","Medium","High"), las = 2, cex.lab=1.5,cex.axis=1.5)
+  
+}
+
+pdf("plots/MSplots/MeanRates_NCP.pdf", width=18, height=5)
+j<-2
+par(bg=NA) 
+par(pty="m")
+##  plot of all metabolic rates by substrate
+par(mfrow=c(1,5))
+par(mar=c(6.2,6.1,4.1,1.5))
+par(lwd = 2) 
+
+# create a list of all the NCP models
+mods.NEC<-list(model.NCPNet.Coral,model.NCPNet.algae, model.NCPNet.Rubble,model.NCPNet.Sand,model.NCPNet.Mixed)
+mods.NECD<-list(model.GCP.Coral, model.GCP.algae, model.GCP.Rubble, model.GCP.Sand,model.GCP.Mixed)            
+mods.NECN<-list(model.R.Coral, model.R.algae, model.R.Rubble, model.R.Sand,model.R.Mixed)            
+
+for(i in 1:5){
+  Nutplot.NCP(substrate[i],i, 'TRUE', 'NCP')
+  a<-anova(mods.NECD[[i]])
+  NCP.day.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+  #night
+  a<-anova(mods.NECN[[i]])
+  NCP.night.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+  #net
+  a<-anova(mods.NEC[[i]])
+  NCP.net.stats[i,1:7]<-t(matrix(c(substrate[i],a[1:6])))
+}
+legend('topright', legend = c('GCP','R','NCP'), pch = c(2,17,19), col = mypalette, bty='n', cex=1.5)
+dev.off()
+
