@@ -1127,7 +1127,14 @@ model.NECOmega.Rubble<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+ (1|Tank/Aquarium),
 model.NECOmega.Mixed<-lmer(NEC.AFDW~ TankOmegaArag*NutLevel+(1|Tank/Aquarium), data=AllData[AllData$Substrate=='Mixed',])
 
 # models for pH vs NCP
- model.pH.NCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
+# model.pH.NCP<-lm(AllData$TankpH~AllData$NCP.AFDW)
+#Ranef to account for repeated measures of aquarium within tank and time  
+model.pH.NCP<-lmer(TankpH~NCP.AFDW*NutLevel*Substrate+ (1|Tank/Aquarium) , data=AllData)
+ 
+# modelfor pH as a function of species, nutrients and day night
+#model.pH.sp.nut<-lmer(TankpH~Substrate*NutLevel*DayNight + (1|DateTime) + (1|Tank/Aquarium), data=AllData)
+
+ 
 ##TA vs DIC plots--------------------------------------------
 b<-matrix(nrow=5,ncol=3)
 b0<-matrix(nrow=5,ncol=3)
