@@ -1231,7 +1231,7 @@ AllData$colors[AllData$NutLevel ==Nuts[i]]<-mypalette[i]
 
 ###Looking at feedbacks--------------------------------------------
 ##plot for the NEC versus aragonite saturation state relationships by substrate and treatment
-pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6)
+pdf(file = 'Plots/MSplots/NCPvspH.pdf', height = 6, width = 6, useDingbats = FALSE)
 par(mfrow=c(1,1), pty='s')
 #plot(AllData$NCP.AFDW, AllData$TankpH, col=AllData$NutLevel, xlab='NCP', ylab='pH')
 #legend('topleft',legend=c('Ambient',"Medium","High"), col=unique(AllData$NutLevel), pch=19, bty = 'n')
@@ -1249,7 +1249,7 @@ dev.off()
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 
 ## NEC vs Omegan plot-------------------------------------
-pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8)
+pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8.5, useDingbats = FALSE)
 par(mfrow=c(3,2))
 #cols <- c(unique(NEC.mean$NutLevel))
 cols <- mypalette
@@ -1373,7 +1373,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   )
   
   #Delta pH across time
-  pdf(file = 'Plots/MSplots/DeltapHTime.pdf', height = 8, width = 6)
+  pdf(file = 'Plots/MSplots/DeltapHTime.pdf', height = 8, width = 6, useDingbats = FALSE)
   par(mfrow=c(3,2))
   rm(y)
   rm(yse)
@@ -1419,7 +1419,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
         meanP=mean(HeaderP, na.rm=T),
         SEP=sd(HeaderP, na.rm=T)/sqrt(7))
-  pdf(file = 'Plots/MSplots/NutrientsColor.pdf', height = 5, width = 8)      
+  pdf(file = 'Plots/MSplots/NutrientsColor.pdf', height = 5, width = 8, useDingbats = FALSE)      
   par(mfrow=c(1,2)) #average nitrate for experiment
   x<-barplot(meanNuts$meanNN, main=expression(paste('NO'[3]^{'-'},'+ NO'[2]^{'-'})), 
              ylab=expression(paste(mu,'M')), ylim=c(0,10), col = mypalette)
@@ -1886,7 +1886,7 @@ Rubble.mean<-ddply(Rubble, c("Nuts"), summarize,
                   n = sum(!is.na(pcDeltaBW)),
                   pcBW.se = sd(pcDeltaBW, na.rm=TRUE)/sqrt(n))
 
-pdf('plots/MSplots/BuoyantWeight.pdf', width = 4, height = 8.5)
+pdf('plots/MSplots/BuoyantWeight.pdf', width = 4, height = 8.5, useDingbats = FALSE)
 par(mfrow=c(3,1))
 # create a matrix for the coral data
 m<-t(matrix(Coral.mean$pcBW.mean,3,2))
@@ -1911,7 +1911,7 @@ arrows(x, Rubble.mean$pcBW.mean + Rubble.mean$pcBW.se,  # x , mean + SE
 abline(h=0)
 dev.off()
 
-pdf('plots/MSplots/BuoyantWeight_dot.pdf', width = 4, height = 8.5)
+pdf('plots/MSplots/BuoyantWeight_dot.pdf', width = 4, height = 8.5, useDingbats = FALSE)
 par(mfrow=c(3,1))
 # create a matrix for the coral data
 plot(c(1:3), Coral.mean$pcBW.mean[1:3], pch=19, ylim=c(0, 5), xlab="", xaxt='n', ylab = 'Coral % change BW', col = mypalette, cex=1.5)
@@ -2031,7 +2031,7 @@ Nutplot.NEC<-function(species,i, Main = TRUE, YLAB = 'NEC'){
   
 }
 
-pdf("plots/MSplots/MeanRates_NEC.pdf", width=18, height=5)
+pdf("plots/MSplots/MeanRates_NEC.pdf", width=18, height=5, useDingbats = FALSE)
 j<-2
 par(bg=NA) 
 par(pty="m")
@@ -2134,7 +2134,7 @@ Nutplot.NCP<-function(species,i, Main = TRUE, YLAB = 'NCP'){
   
 }
 
-pdf("plots/MSplots/MeanRates_NCP.pdf", width=18, height=5)
+pdf("plots/MSplots/MeanRates_NCP.pdf", width=18, height=5, useDingbats = FALSE)
 j<-2
 par(bg=NA) 
 par(pty="m")
@@ -2180,3 +2180,13 @@ write.csv(data.frame(summary(model.NECOmega.Coral)$coefficients),'stats/coral.om
 write.csv(data.frame(summary(model.NECOmega.Rubble)$coefficients),'stats/rubble.omega.stats.csv')
 write.csv(data.frame(summary(model.NECOmega.Sand)$coefficients),'stats/sand.omega.stats.csv')
 write.csv(data.frame(summary(model.NECOmega.Mixed)$coefficients),'stats/mixed.omega.stats.csv')
+
+#pH means
+m<-aggregate(AllData$TankpH-AllData$HeaderpH, list(AllData$Substrate, AllData$DayNight, AllData$NutLevel), FUN=mean )
+s<-aggregate(AllData$TankpH-AllData$HeaderpH, list(AllData$Substrate, AllData$DayNight, AllData$NutLevel), FUN=sd)
+s$x/sqrt(3)
+# variance 
+v<-aggregate(AllData$TankpH-AllData$HeaderpH, list(AllData$Substrate, AllData$NutLevel), FUN=var)
+# how much did the variance proportionally change between ambient and high
+(v$x[11:15]-v$x[1:5])/v$x[1:5]
+
