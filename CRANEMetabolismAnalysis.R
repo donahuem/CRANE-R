@@ -1249,7 +1249,9 @@ dev.off()
 plot(AllData$TankOmegaArag, AllData$NEC.AFDW, col=AllData$NutLevel)
 
 ## NEC vs Omegan plot-------------------------------------
-pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8.5, useDingbats = FALSE)
+#setEPS()
+#postscript("plots/MSplots/NECvsOmega.eps", width=6, height=8.5)
+pdf("plots/MSplots/NECvsOmega.pdf", width=6, height=8.5, useDingbats = FALSE )
 par(mfrow=c(3,2))
 #cols <- c(unique(NEC.mean$NutLevel))
 cols <- mypalette
@@ -1263,9 +1265,9 @@ for (i in 1:length(sub)){
   for (j in 1:length(Nuts)){
     par(new = TRUE)
     plot(AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], yaxt='n',
-         y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = adjustcolor( cols[j], alpha.f = 0.5),
+         y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]], col = cols[j],
          pch=19, type="p", xaxt='n', xlim=c(1.5,6), ylab='', xlab='',ylim=c(min(y[AllData$Substrate==sub[i]]), max(y[AllData$Substrate==sub[i]])))
-   
+   #adjustcolor( cols[j], alpha.f = 0.5)
     
     model<-lm(y[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]]~AllData$TankOmegaArag[AllData$Substrate==sub[i] & AllData$NutLevel==Nuts[j]])
     #if the p>0.05 make it a dashed line (or don't include)
@@ -1283,7 +1285,6 @@ plot(NA, ylim=c(0,1), xlim=c(0,1), axes=FALSE,  ylab="", xlab="")
 legend('center', horiz = FALSE, legend=unique(NEC.mean$NutLevel), col=mypalette, pch=19, bty = 'n')
 
 dev.off()
-
 # calculate contribution of NEC and NCP to pH---------------------
 #function to calculate pH controbution that returns NEC and NCP contrinutions
 pHContributions<-function(pH.ctrl, pH.treat, TA.ctrl, TA.treat, DIC.ctrl, temp=25.5, sal=35.5){
