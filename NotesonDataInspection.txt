@@ -1,0 +1,11 @@
+#Notes on data inspection
+
+In aggregated coral data, MC15 and PC14 are outliers in Org; PC22 may be low in AFDW
+In coral nubbin data, Trays 233, 239,283 are extreme outliers in Org; 177 may be an outlier
+
+Tray 177: MJD - this one needs to be checked (PC25clone1,IMG_0447-0450)
+Tray 233: MJD - high outlier in Org
+Tray 239: MJD - low outlier in Org
+Tray 283: MJD - high outlier in Org
+Tray 340b:  possibly an overestimate; MJD - doesn't stand out in scatterplot, but note that 340a is not here; compare w photos (MC7clone1,IMG_0617)
+Tray 342b: 'b' was marked in sharpie, but there was only one piece; MJD - let's check the photos on this (MC#7clone3 - IMG_0617)
