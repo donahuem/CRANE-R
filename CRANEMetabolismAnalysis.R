@@ -162,14 +162,14 @@ Algae$DW<-Algae$DW+Algae$DWbits
 
 
 #calculate the average residence time by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
-ResTime.mean <- ddply(ChemData, c("Aquarium"), summarize,
+ResTime.mean <- ddply(ChemData, c("Aquarium"), summarise,
                           ResTime.mean = mean(ResTime, na.rm = T)
                         #  N=sum(!is.na(ResTime)),
                          # SE= sd(ResTime, na.rm = T)/sqrt(N)
                            )
 
 #calculate the average flow rate by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
-Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
+Flow.mean <- ddply(ChemData, c("Aquarium"), summarise,
                       Flow.mean = mean(Flow, na.rm = T)
                       #  N=sum(!is.na(ResTime)),
                       # SE= sd(ResTime, na.rm = T)/sqrt(N)
@@ -177,14 +177,14 @@ Flow.mean <- ddply(ChemData, c("Aquarium"), summarize,
 
 
 ## Sum up all the biological data by aquarium for each experiment
-Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarize,
+Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarise,
                           SA = sum(SA, na.rm = T), #the SA for coral and algae are in mm2 while Sand is in cm2
                           AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
                           Volume = sum(Volume, na.rm = T)
 )
 
-Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
+Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarise,
                            SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
@@ -192,42 +192,42 @@ Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarize,
 )
 
 
-Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarize,
+Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarise,
                           SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Volume, na.rm = T)
 )
 
-Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarize,
+Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarise,
                             SA = sum(SA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(Volume, na.rm = T)
 )
 
-Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarize,
+Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarise,
                             SA = sum(FinalSA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
                             Volume = sum(FinalVol, na.rm = T)
 )
 
-Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarize,
+Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarise,
                            SA = sum(FinalSA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(FinalVol, na.rm = T)
 )
 
-Sand.Exp1Summary <- ddply(Sand, c("Aq_Ex1"), summarize,
+Sand.Exp1Summary <- ddply(Sand, c("Aq_Ex1"), summarise,
                            SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
                            Volume = sum(Vol, na.rm = T)
 )
 
-Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2"), summarize,
+Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2"), summarise,
                           SA = sum(SA, na.rm = T),
                           AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
@@ -239,7 +239,7 @@ biology<-rbind(Rubble.Exp1Summary,Coral.Exp1Summary, Algae.Exp1Summary,Sand.Exp1
 biology2<-rbind(Rubble.Exp2Summary,Coral.Exp2Summary, Algae.Exp2Summary,Sand.Exp2Summary) #exp2
 
 #this sums up all 4 parts for each aquarium for total biomass etc per aquarium
-Exp2biology <- ddply(biology2, c("Aq_Ex2"), summarize,
+Exp2biology <- ddply(biology2, c("Aq_Ex2"), summarise,
                             SA = sum(SA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
@@ -396,7 +396,7 @@ AllData<-AllData[order(AllData$Aquarium),]
 #sub<-droplevels(sub)
 
   #calcification mean by substrate, treatment, and sampling time--- this just takes the means over the replicate aquaria
-NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
+NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarise,
                      Mean.AFDW = mean(NEC.AFDW, na.rm = T),
                      N=sum(!is.na(NEC.AFDW)),
                      SE.AFDW= sd(NEC.AFDW, na.rm = T)/sqrt(N),
@@ -408,7 +408,7 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
                      SE.Vol= sd(NEC.Vol, na.rm = T)/sqrt(N)
 )
 #production
-  NCP.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
+  NCP.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarise,
                     Mean.AFDW = mean(NCP.AFDW, na.rm = T),
                     N=sum(!is.na(NCP.AFDW)),
                     SE.AFDW= sd(NCP.AFDW, na.rm = T)/sqrt(N),
@@ -423,7 +423,7 @@ NEC.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
   
 # Mean bicarbonate uptake
                                  
-  HCO3.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarize,
+  HCO3.mean <- ddply(AllData, c("Substrate","NutLevel","DateTime"), summarise,
                     HCO3Uptake = mean(HCO3Uptake.AFDW, na.rm = T),
                     #N=sum(!is.na(HCO3Uptake)),
                     N=3,
@@ -807,8 +807,8 @@ NEC.mean$DayNight<-ifelse(NEC.mean$DateTime==time[1]|NEC.mean$DateTime==time[2]|
                             NEC.mean$DateTime==time[14], 'Day', 'Night')
 NCP.mean$DayNight<-NEC.mean$DayNight
 
-#summarize across all the different times
-NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
+#summarise across all the different times
+NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarise,
                   Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                   N2=sum(!is.na(Mean.AFDW)),
                   SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
@@ -820,7 +820,7 @@ NEC.mean.Net <- ddply(NEC.mean, c("Substrate","NutLevel"), summarize,
                   SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
 )
 
-NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
+NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarise,
                       Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                       N2=sum(!is.na(Mean.AFDW)),
                       SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
@@ -831,7 +831,7 @@ NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
                       Mean.Vol2 = mean(Mean.Vol, na.rm = T),
                       SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
 )
-#NEC.mean.Net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+#NEC.mean.Net <- ddply(AllData, c("Substrate","NutLevel"), summarise,
  #                     Mean.AFDW2 = mean(NEC.AFDW, na.rm = T),
   #                    N2=sum(!is.na(NEC.AFDW)),
   #                    SE.AFDW2= sd(NEC.AFDW, na.rm = T)/sqrt(N2),
@@ -845,7 +845,7 @@ NCP.mean.Net <- ddply(NCP.mean, c("Substrate","NutLevel"), summarize,
 
 
 #calculate averages for day and night
-NEC.mean.DayNight <- ddply(NEC.mean, c("Substrate","NutLevel", "DayNight"), summarize,
+NEC.mean.DayNight <- ddply(NEC.mean, c("Substrate","NutLevel", "DayNight"), summarise,
                       Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                       N2=sum(!is.na(Mean.AFDW)),
                       SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
@@ -857,7 +857,7 @@ NEC.mean.DayNight <- ddply(NEC.mean, c("Substrate","NutLevel", "DayNight"), summ
                       SE.Vol2= sd(Mean.Vol, na.rm = T)/sqrt(N2)
 )
 
-NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summarize,
+NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summarise,
                       Mean.AFDW2 = mean(Mean.AFDW, na.rm = T),
                       N2=sum(!is.na(Mean.AFDW)),
                       SE.AFDW2= sd(Mean.AFDW, na.rm = T)/sqrt(N2),
@@ -872,7 +872,7 @@ NCP.mean.DayNight <- ddply(NCP.mean, c("Substrate","NutLevel", "DayNight"), summ
 
 
 
-NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank", "Aquarium"), summarize,
+NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank", "Aquarium"), summarise,
                            #Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
                            Mean.AFDW2.p = mean(NCP.AFDW[DayNight=='Day'], na.rm=T),
                            Mean.AFDW2.r =mean(abs(NCP.AFDW[DayNight=='Night']), na.rm = T),       
@@ -888,7 +888,7 @@ NCP.mean.PRbyTank <- ddply(AllData, c("Substrate","NutLevel", "Tank", "Aquarium"
 
 #NCP.mean.PRbyTank[is.na(NCP.mean.PRbyTank)]<-0 #replace the NAs with 0
 
-NCP.mean.PR<-ddply(NCP.mean.PRbyTank, c("Substrate","NutLevel"), summarize,
+NCP.mean.PR<-ddply(NCP.mean.PRbyTank, c("Substrate","NutLevel"), summarise,
                 Mean.AFDW2=mean(PR.AFDW2, na.rm=T),
                 Mean.GPP=mean(GPP, na.rm=T),
                 N2=3,
@@ -971,12 +971,12 @@ for (i in 1:length(sub)){
 #put a 1 next to times that are calcifying and a 0 for times dissolving
 AllData$CD<-ifelse(AllData$NEC.AFDW>0,1,0)
 
-PercentCalc<-ddply(AllData, c("Substrate","NutLevel", "Tank"), summarize,
+PercentCalc<-ddply(AllData, c("Substrate","NutLevel", "Tank"), summarise,
                    N = sum(!is.na(CD)),
                    PercentCalc = sum(CD)/N, #percent of the time calcifying
                    PercentDis = 1-PercentCalc) #percent of the time dissolving
 #average across tanks
-PercentCalc.mean<-ddply(PercentCalc, c("Substrate","NutLevel"), summarize,
+PercentCalc.mean<-ddply(PercentCalc, c("Substrate","NutLevel"), summarise,
                         Mean.PercentCalc = mean(PercentCalc, na.rm = T),
                         N2=sum(!is.na(PercentCalc)),
                         SE.PercentCalc= sd(PercentCalc, na.rm = T)/sqrt(N2),
@@ -1318,7 +1318,7 @@ pHContributions<-function(pH.ctrl, pH.treat, TA.ctrl, TA.treat, DIC.ctrl, temp=2
 AllData<-cbind(AllData,pHContributions(pH.ctrl=ChemData$HeaderpH, pH.treat = ChemData$TankpH, TA.ctrl = ChemData$HeaderTA, TA.treat = ChemData$TankTA, DIC.ctrl = ChemData$HeaderDIC))
 
 ## pH plots----------------------------------------------------------------
-deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarize,
+deltapHMeans <- ddply(AllData, c("Substrate","NutLevel", "DayNight"), summarise,
                            pHMean = mean(TankpH-HeaderpH, na.rm = T),
                            N2=sum(!is.na(TankpH)),
                            pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
@@ -1344,7 +1344,7 @@ for (j in 1:2){
 }
 
 #absolute change in pH
-deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
+deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarise,
                       pHMean = mean(abs(TankpH-HeaderpH), na.rm = T),
                       N2=sum(!is.na(TankpH)),
                       pHSE= sd(abs(TankpH-HeaderpH), na.rm = T)/sqrt(N2)
@@ -1363,7 +1363,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
 
 #pH across time by substrate
   
-  deltapHMeans.time <- ddply(AllData, c("Substrate","NutLevel", "DateTime"), summarize,
+  deltapHMeans.time <- ddply(AllData, c("Substrate","NutLevel", "DateTime"), summarise,
                         pHMean = mean(TankpH-HeaderpH, na.rm = T),
                         N2=sum(!is.na(TankpH)),
                         pHSE= sd(TankpH-HeaderpH, na.rm = T)/sqrt(N2),
@@ -1415,7 +1415,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   dev.off()
   ##nutrient plots --- just for the headers.... 
   #calculate the mean nutrient conditions
-  meanNuts<-ddply(AllData, 'NutLevel', summarize,
+  meanNuts<-ddply(AllData, 'NutLevel', summarise,
         meanNN=mean(HeaderN, na.rm=T),
         SENN=sd(HeaderN, na.rm=T)/sqrt(7),
         meanP=mean(HeaderP, na.rm=T),
@@ -1444,7 +1444,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
   
   #Take the averages by substrate, nutrients, and day for plotting
   
-  DOC.means <- ddply(AllDOC, c("Substrate","NutLevel", "Days"), summarize,
+  DOC.means <- ddply(AllDOC, c("Substrate","NutLevel", "Days"), summarise,
                              #Mean.AFDW2.p = mean(NCP.AFDW[NCP.AFDW>0], na.rm=T),
                              N=sum(!is.na(DOC)),
                              r =mean(Mean.AFDW2.r, na.rm = T),
@@ -1866,7 +1866,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  # order the nutrient levels
   Coral$Nuts<-ordered(Coral$Nuts, levels =c('Ambient','Medium','High') )
  # calculate means and SE for plotting
- Coral.mean<-ddply(Coral, c("Species","Nuts"), summarize,
+ Coral.mean<-ddply(Coral, c("Species","Nuts"), summarise,
        pcBW.mean = mean(pcDeltaBW, na.rm=TRUE),
        n = sum(!is.na(pcDeltaBW)),
        pcBW.se = sd(pcDeltaBW, na.rm=TRUE)/sqrt(n))
@@ -1874,7 +1874,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  #algae
  AlgaeBW.mod<-lmer(pcDeltaWW ~ Nuts + (1|Tank), data= Algae) # I looked for an interaction, but found none
  Algae$Nuts<-ordered(Algae$Nuts, levels =c('Ambient','Medium','High') )
- Algae.mean<-ddply(Algae, c("Nuts"), summarize,
+ Algae.mean<-ddply(Algae, c("Nuts"), summarise,
                    pcBW.mean = mean(pcDeltaWW, na.rm=TRUE),
                    n = sum(!is.na(pcDeltaWW)),
                    pcBW.se = sd(pcDeltaWW, na.rm=TRUE)/sqrt(n))
@@ -1882,7 +1882,7 @@ deltapHMeans.net <- ddply(AllData, c("Substrate","NutLevel"), summarize,
  # rubble
 RubbleBW.mod<-lmer(pcDeltaBW ~ Nuts + (1|Tank), data= Rubble) # I looked for an interaction, but found none
 Rubble$Nuts<-ordered(Rubble$Nuts, levels =c('Ambient','Medium','High') )
-Rubble.mean<-ddply(Rubble, c("Nuts"), summarize,
+Rubble.mean<-ddply(Rubble, c("Nuts"), summarise,
                   pcBW.mean = mean(pcDeltaBW, na.rm=TRUE),
                   n = sum(!is.na(pcDeltaBW)),
                   pcBW.se = sd(pcDeltaBW, na.rm=TRUE)/sqrt(n))
