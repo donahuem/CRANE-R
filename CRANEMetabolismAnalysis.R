@@ -2191,3 +2191,39 @@ v<-aggregate(AllData$TankpH-AllData$HeaderpH, list(AllData$Substrate, AllData$Nu
 # how much did the variance proportionally change between ambient and high
 (v$x[11:15]-v$x[1:5])/v$x[1:5]
 
+#### make plot of temperature and light for supplement
+# read in the data and convert the date
+TempData<-read.csv('data/Temperature/20151224_Crane_Tank_1_A.csv',stringsAsFactors=FALSE, header=TRUE)
+TempData$Date.Time<-as.POSIXct(TempData$Date.Time, format="%m/%d/%Y %H:%M")
+#convert all the columns to numeric since excel put in some funky things
+#TempData[,c(2:7)] <- lapply(TempData[,c(2:7)], function(x) as.numeric(x))
+
+# plot the temperature and light across time for each tank
+pdf('plots/MSplots/TempLight.pdf', width = 8, height = 8, useDingbats = FALSE)
+par(mfrow=c(2,2))
+#Temp
+# Time-series
+plot(TempData$Date.Time, TempData[,2], col = 'black', type = 'l', xlab = 'Date', ylab = expression(paste('Temperature (',~degree~C, ')')), ylim = c(24,30))
+lines(TempData$Date.Time, TempData[,3], col = 'blue', type = 'l')
+lines(TempData$Date.Time, TempData[,4], col = 'green', type = 'l')
+legend('topright', legend = c('Incubation Tank A','Incubation Tank B','Incubation Tank C'), lty=1, col=c('black','blue','green'), bty='n')
+# average
+#means
+M<-colMeans(TempData[,c(2:4)])
+#SDs
+S<-apply(TempData[,c(2:4)], 2, sd)
+x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,30), ylab = expression(paste('Mean Temperature (',~degree~C, ')')))
+arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+
+# light
+plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', ylab = 'Light Intensity (Lux)')
+lines(TempData$Date.Time, TempData[,6], col = 'blue', type = 'l')
+lines(TempData$Date.Time, TempData[,7], col = 'green', type = 'l')
+
+#means
+M<-apply(TempData[,c(5:7)], 2, max) # max light intensity
+#SDs
+S<-apply(TempData[,c(5:7)], 2, sd)
+x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
+arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+dev.off()
