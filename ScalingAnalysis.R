@@ -4,6 +4,8 @@
 
 
 source("CRANEMetabolismAnalysis.R")
+library("sjPlot")
+library("dplyr")
 
 #Add columns to substrate data frames that calculate each sample's proportion of the total (AFDW, DW, Vol, SA) per aquarium
 
@@ -74,7 +76,7 @@ ScalDat_Aqua <- ddply(ScalDat,c("Aq_Ex2","DateTime","NutLevel"),summarise,
                                  NCP.SA.pred = sum(NCP.SA.wtd))
 ScalDat_Aqua<- mutate(ScalDat_Aqua, DateTimeEx2 = DateTime+60*60*48)
 
-DataEx2 <- join(DataEx2,ScalDat_Aqua,by=c("Aq_Ex2","DateTimeEx2"),"left")
+DataEx2 <- join(DataEx2,ScalDat_Aqua,by=c("Aq_Ex2","DateTimeEx2","NutLevel"),"left")
 levels(DataEx2$DateTimeEx2)<- c(1:7)
 DataEx2 <- mutate(DataEx2,NEC.AFDW.diff = NEC.AFDW - NEC.AFDW.pred,
                           NEC.DW.diff = NEC.DW - NEC.DW.pred,
@@ -85,6 +87,10 @@ DataEx2 <- mutate(DataEx2,NEC.AFDW.diff = NEC.AFDW - NEC.AFDW.pred,
                           NCP.Vol.diff = NCP.Vol - NCP.Vol.pred,
                           NCP.SA.diff = NCP.SA - NCP.SA.pred)
 
+DataEx2$DateTimeEx2<- as.factor(DataEx2$DateTimeEx2)
+DataEx2$DayNight<- as.factor(DataEx2$DayNight)
+
+rvs <- c("NEC","NCP")
 ##Basic Plotting 
 for (i in (1:length(rvs))){
   par(mfrow=c(2,2))
@@ -112,23 +118,23 @@ for (i in (1:length(rvs))){
 }
 
 #Plotting Deviation by nutrients and by time
+par(mfrow=c(2,1))
 for (i in (1:length(rvs))){
-  par(mfrow=c(2,2))
   for (j in (1:length(sandvarlist))){
     nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
     print(nmy)
-    plot(DataEx2$NutLevel,DataEx2[[nmy]], ylab=nmy)
+    plot(DataEx2[[nmy]]~DataEx2$NutLevel, ylab=nmy)
     abline(0,0,col="blue")
   }
 }
 
 #Plotting Deviation by nutrients and by time
+par(mfrow=c(2,1))
 for (i in (1:length(rvs))){
-  par(mfrow=c(2,2))
   for (j in (1:length(sandvarlist))){
     nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
     print(nmy)
-    plot(DataEx2$DateTimeEx2,DataEx2[[nmy]], ylab=nmy)
+    plot(DataEx2[[nmy]]~as.factor(DataEx2$DayNight), ylab=nmy)
     abline(0,0,col="blue")
   }
 }
@@ -136,15 +142,20 @@ for (i in (1:length(rvs))){
 ###Should scale all the data for analysis
 
 #Loop over all rvs for basic models
-for (i in (1:length(rvs))){
-  for (j in (1:length(sandvarlist))){
-    nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
-    mod1 <- lm(DataEx2[[nmy]]~DataEx2$DateTimeEx2*DataEx2$NutLevel)
-    print(nmy)
+sandvarlist <- ("AFDW")
+#for (i in (1:length(rvs))){
+#  for (j in (1:length(sandvarlist))){
+#    nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
+    mod1 <- lmer(NCP.AFDW.diff ~ DayNight*NutLevel
+                 + (1|Tank) 
+                 + (1|DateTimeEx2),data=DataEx2)
+#    print(nmy)
     print(anova(mod1))
-  }
-}
-
+#  }
+#}
+sjp.lmer(mod1,type="fe")
+    
+    
 #Histograms
 for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){
