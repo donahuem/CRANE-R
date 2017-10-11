@@ -41,5 +41,5 @@ convergence code: 0
 Model is nearly unidentifiable: large eigenvalue ratio
  - Rescale variables?
 
-null device 
-          1 
+RStudioGD 
+        2 

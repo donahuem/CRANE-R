@@ -8,8 +8,7 @@ DayNight:NutLevel 0.165802 0.082901     2 241.001  8.9540 0.0001774 ***
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 Linear mixed model fit by REML t-tests use Satterthwaite approximations to degrees of
   freedom [lmerMod]
-Formula: NCP.AFDW.diff.rs ~ DayNight * NutLevel + (1 | Tank) + (DayNight |  
-    DateTimeEx2)
+Formula: NCP.AFDW.diff.rs ~ DayNight * NutLevel + (DayNight | DateTimeEx2)
    Data: DataEx2
 
 REML criterion at convergence: -412.9
@@ -21,10 +20,9 @@ Scaled residuals:
 Random effects:
  Groups      Name          Variance Std.Dev. Corr 
  DateTimeEx2 (Intercept)   0.012211 0.11050       
-             DayNightNight 0.038299 0.19570  -1.00
- Tank        (Intercept)   0.000000 0.00000       
+             DayNightNight 0.004767 0.06904  -0.64
  Residual                  0.009259 0.09622       
-Number of obs: 252, groups:  DateTimeEx2, 7; Tank, 3
+Number of obs: 252, groups:  DateTimeEx2, 7
 
 Fixed effects:
                              Estimate Std. Error         df t value Pr(>|t|)    

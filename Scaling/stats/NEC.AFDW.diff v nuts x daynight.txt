@@ -47,5 +47,5 @@ convergence code: 0
 unable to evaluate scaled gradient
 Model failed to converge: degenerate  Hessian with 1 negative eigenvalues
 
-null device 
-          1 
+RStudioGD 
+        2 
