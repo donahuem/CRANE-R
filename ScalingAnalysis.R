@@ -90,16 +90,16 @@ DataEx2 <- mutate(DataEx2,NEC.AFDW.diff = NEC.AFDW - NEC.AFDW.pred,
 DataEx2$DateTimeEx2<- as.factor(DataEx2$DateTimeEx2)
 DataEx2$DayNight<- as.factor(DataEx2$DayNight)
 
-rvs <- c("NEC","NCP")
+rvs <- c("NEC","NCP") #,"deltapH")
 ##Basic Plotting 
 for (i in (1:length(rvs))){
   par(mfrow=c(2,2))
   for (j in (1:length(sandvarlist))){
     nmx <- paste0(rvs[i],".",sandvarlist[j])
     nmy <- paste0(rvs[i],".",sandvarlist[j],".pred")
-    plot(DataEx2[[nmx]],DataEx2[[nmy]],col=as.numeric(DataEx2$NutLevel),
+    plot(DataEx2[[nmx]],DataEx2[[nmy]],col=as.numeric(unique(DataEx2$NutLevel)),
          xlab=nmx,ylab=nmy)
-    legend("topleft",legend=levels(DataEx2$NutLevel),col=unique(as.numeric(DataEx2$NutLevel)),pch=1,bty="n")
+    legend("topleft",legend=levels(DataEx2$NutLevel),col=as.numeric(unique(DataEx2$NutLevel)),pch=1,bty="n")
     abline(0,1)
   }
 }
@@ -109,16 +109,16 @@ for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){
     nmx <- paste0(rvs[i],".",sandvarlist[j])
     nmy <- paste0(rvs[i],".",sandvarlist[j],".pred")
-    plot(DataEx2[[nmx]],DataEx2[[nmy]],col=levels(DataEx2$DateTimeEx2),
+    plot(DataEx2[[nmx]],DataEx2[[nmy]],col=as.numeric(unique(DataEx2$DayNight)),
          xlab=nmx,ylab=nmy)
-    legend("topleft",legend=unique(DataEx2$Time),col=unique(levels(DataEx2$DateTimeEx2)),pch=1,bty="n")
+    legend("topleft",legend=unique(DataEx2$Time),col=as.numeric(unique(DataEx2$DayNight)),pch=1,bty="n")
     abline(0,1)
     
   }
 }
 
 #Plotting Deviation by nutrients and by time
-par(mfrow=c(2,1))
+par(mfrow=c(2,2))
 for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){
     nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
@@ -129,7 +129,7 @@ for (i in (1:length(rvs))){
 }
 
 #Plotting Deviation by nutrients and by time
-par(mfrow=c(2,1))
+par(mfrow=c(2,2))
 for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){
     nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
@@ -139,28 +139,20 @@ for (i in (1:length(rvs))){
   }
 }
 
-###Should scale all the data for analysis
 
-#Loop over all rvs for basic models
-sandvarlist <- ("AFDW")
-#for (i in (1:length(rvs))){
-#  for (j in (1:length(sandvarlist))){
-#    nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
-    mod1 <- lmer(NCP.AFDW.diff ~ DayNight*NutLevel
+#Run basic mixed model for rvs normalized to AFDW
+mod1.NEC.AFDW.diff <- lmer(NEC.AFDW.diff ~ DayNight*NutLevel
                  + (1|Tank) 
-                 + (1|DateTimeEx2),data=DataEx2)
-#    print(nmy)
-    print(anova(mod1))
-#  }
-#}
-sjp.lmer(mod1,type="fe")
-    
+                 + (1|DateTimeEx2/DayNight),data=DataEx2)
+print(anova(mod1.NEC.AFDW.diff))
+sjp.lmer(mod1.NEC.AFDW.diff,type="fe")
+sjp.lmer(mod1.NEC.AFDW.diff,type="re")    
     
 #Histograms
 for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){
     nmy <- paste0(rvs[i],".",sandvarlist[j],".diff")
-    hist(DataEx2[[nmy]])
+    hist(DataEx2[[nmy]], xlab=paste0(nmy),main="")
   }
 }
 

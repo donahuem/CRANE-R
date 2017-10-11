@@ -1,0 +1,45 @@
+Analysis of Variance Table
+                  Df Sum Sq Mean Sq F value
+DayNight           1   0.61   0.613  0.0227
+NutLevel           2  97.68  48.838  1.8099
+DayNight:NutLevel  2 483.24 241.618  8.9540
+Linear mixed model fit by REML ['lmerMod']
+Formula: NCP.AFDW.diff ~ DayNight * NutLevel + (1 | Tank) + (DayNight |      DateTimeEx2)
+   Data: DataEx2
+
+REML criterion at convergence: 1549.5
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.5143 -0.5232 -0.0076  0.4859  4.8887 
+
+Random effects:
+ Groups      Name          Variance Std.Dev. Corr 
+ DateTimeEx2 (Intercept)    35.59    5.966        
+             DayNightNight 111.62   10.565   -1.00
+ Tank        (Intercept)     0.00    0.000        
+ Residual                   26.98    5.195        
+Number of obs: 252, groups:  DateTimeEx2, 7; Tank, 3
+
+Fixed effects:
+                           Estimate Std. Error t value
+(Intercept)                  2.1198     3.0756   0.689
+DayNightNight               -2.3331     4.1550  -0.562
+NutLevelMed                  0.3637     1.0604   0.343
+NutLevelHigh                -1.5109     1.0604  -1.425
+DayNightNight:NutLevelMed    2.1237     1.6197   1.311
+DayNightNight:NutLevelHigh   6.7057     1.6197   4.140
+
+Correlation of Fixed Effects:
+            (Intr) DyNghN NtLvlM NtLvlH DNN:NLM
+DayNghtNght -0.740                             
+NutLevelMed -0.172  0.128                      
+NutLevelHgh -0.172  0.128  0.500               
+DyNghtN:NLM  0.113 -0.195 -0.655 -0.327        
+DyNghtN:NLH  0.113 -0.195 -0.327 -0.655  0.500 
+convergence code: 0
+Model is nearly unidentifiable: large eigenvalue ratio
+ - Rescale variables?
+
+null device 
+          1 

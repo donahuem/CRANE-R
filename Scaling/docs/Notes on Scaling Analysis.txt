@@ -1,0 +1,19 @@
+CRANE Scaling Analysis
+
+10/11/2017
+RVs:  Diff(Observed - Expected) of NEC, NCP, deltapH,(carbon spp?) based on normalizations to AFDW (priority), DW, Volume, SA, %Cover
+Factors:  Nuts, Day v Night (or Time?)
+Mixed effect model
+diffRV ~ nuts*daynight + (1|Tank) + (DayNight|DateTimeEx2)
+
+Plot of RV.diff v nuts(3 levels)
+Plot of RVdiff v time or daynight
+Plot of RVObs and RVexp v nuts in day (panel1) and night(panel2)
+
+
+Questions:
+Do I need to scale the RVs?  These are all differences.
+
+First pass - look at AFDW only
+
+For ME model, including Tank as an RE does not get any variance associated with it.  regardless of which rv.  why is this?  bc this is experiment 2, where there are replicates by tank, there shoud be variability attributed to this level, right?  
