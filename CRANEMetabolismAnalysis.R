@@ -2198,9 +2198,10 @@ TempData$Date.Time<-as.POSIXct(TempData$Date.Time, format="%m/%d/%Y %H:%M")
 #convert all the columns to numeric since excel put in some funky things
 #TempData[,c(2:7)] <- lapply(TempData[,c(2:7)], function(x) as.numeric(x))
 
+
 # plot the temperature and light across time for each tank
 pdf('plots/MSplots/TempLight.pdf', width = 8, height = 8, useDingbats = FALSE)
-par(mfrow=c(2,2))
+par(mfrow=c(2,1))
 #Temp
 # Time-series
 plot(TempData$Date.Time, TempData[,2], col = 'black', type = 'l', xlab = 'Date', ylab = expression(paste('Temperature (',~degree~C, ')')), ylim = c(24,30))
@@ -2212,11 +2213,24 @@ legend('topright', legend = c('Incubation Tank A','Incubation Tank B','Incubatio
 M<-colMeans(TempData[,c(2:4)])
 #SDs
 S<-apply(TempData[,c(2:4)], 2, sd)
-x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,30), ylab = expression(paste('Mean Temperature (',~degree~C, ')')))
-arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+#x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,30), ylab = expression(paste('Mean Temperature (',~degree~C, ')')))
+#arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 
 # light
-plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', ylab = 'Light Intensity (Lux)')
+#convert lux to PAR using long et al. 2012 equation
+# convert the light data from lumes/ft2 to m2
+TempData[,5:7]<-TempData[,5:7]*0.092903
+
+#Now convert to PAR based on Long 2012
+#parameters from Long 2012
+A1 = -8165.9
+t1 = 1776.4
+y0 =  8398.2
+
+TempData[,5:7] = A1*exp(-TempData[,5:7]/t1) + y0
+
+plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', 
+     ylab = expression(paste('PAR (',mu,'mol m'^{-2},'s'^{-1},')')))
 lines(TempData$Date.Time, TempData[,6], col = 'blue', type = 'l')
 lines(TempData$Date.Time, TempData[,7], col = 'green', type = 'l')
 
@@ -2224,6 +2238,6 @@ lines(TempData$Date.Time, TempData[,7], col = 'green', type = 'l')
 M<-apply(TempData[,c(5:7)], 2, max) # max light intensity
 #SDs
 S<-apply(TempData[,c(5:7)], 2, sd)
-x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
-arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+#x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
+#arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 dev.off()
