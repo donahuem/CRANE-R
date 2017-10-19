@@ -2219,7 +2219,7 @@ points(TotalLight$IntensityB, predict(mod, list(IntensityB = TotalLight$Intensit
 
 # calibrate the light intensities to PAR based on this fit
 m<-summary(mod)$coefficients[,1] # pull out the coefficients from the model
-
+TempData[,5:7]<-m[1]*exp(-TempData[,5:7]/m[2]) +m[3] #convert data to PAR
 
 # plot the temperature and light across time for each tank
 pdf('plots/MSplots/TempLight.pdf', width = 8, height = 8, useDingbats = FALSE)
@@ -2239,28 +2239,6 @@ S<-apply(TempData[,c(2:4)], 2, sd)
 #arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 
 # light
-#convert lux to PAR using long et al. 2012 equation
-# convert the light data from lumes/ft2 to m2
-#TempData[,5:7]<-TempData[,5:7]*0.092903
-
-#Now convert to PAR based on Long 2012
-#parameters from Long 2012
-A1 = -8165.9
-t1 = 1776.4
-y0 =  8398.2
-
-A1= -22022.5
-t1=26855.2
-y0=2037.8
-T2<-A1*exp(-TempData[,5]/t1) + y0
-
-A1<- -4924.7
-t1 = 20992.9
-y0 = 4929
-T2<-A1*exp(-LightData$CALIBRATED.VALUE/t1) + y0
-
-
-TempData[,5:7] = A1*exp(-TempData[,5:7]/t1) + y0
 
 plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', 
      ylab = expression(paste('PAR (',mu,'mol m'^{-2},'s'^{-1},')')))
@@ -2274,3 +2252,5 @@ S<-apply(TempData[,c(5:7)], 2, sd)
 #x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
 #arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 dev.off()
+
+
