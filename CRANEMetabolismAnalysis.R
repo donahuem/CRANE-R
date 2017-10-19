@@ -2198,6 +2198,28 @@ TempData$Date.Time<-as.POSIXct(TempData$Date.Time, format="%m/%d/%Y %H:%M")
 #convert all the columns to numeric since excel put in some funky things
 #TempData[,c(2:7)] <- lapply(TempData[,c(2:7)], function(x) as.numeric(x))
 
+#LightData<-read.csv('data/light/20151224_ODY4806_A.CSv')
+#LightData$DateTime<-as.POSIXct(paste(LightData$Date, LightData$Time), format="%d/%m/%Y %H:%M:%S")
+
+# bring in the LiCOR data from Mike to convert LUX to uMol m-2 s-1
+G<-read.csv('data/light/PAR_HIMB_MFox.csv')
+G$Date.Time<-as.POSIXct(paste(G$Date, G$Time), format="%m/%d/%y %H:%M:%S")
+
+#merge the files so that I can calibrate
+TotalLight<-merge(TempData,G, by = 'Date.Time')
+
+#plot Ave quantum yeild by light intensity
+plot(TotalLight$IntensityB,TotalLight$Avg.Quantum..uE.sec.m2.)
+
+#fit an exponetial function following Long et al. 2012
+mod <- nls(Avg.Quantum..uE.sec.m2. ~ A1*exp(-IntensityB/t1) +y0, 
+           data = TotalLight, start = list(A1 = -100, t1 = 100, y0 = 100))
+
+points(TotalLight$IntensityB, predict(mod, list(IntensityB = TotalLight$IntensityB)), col = 'red', pch =19)
+
+# calibrate the light intensities to PAR based on this fit
+m<-summary(mod)$coefficients[,1] # pull out the coefficients from the model
+
 
 # plot the temperature and light across time for each tank
 pdf('plots/MSplots/TempLight.pdf', width = 8, height = 8, useDingbats = FALSE)
@@ -2219,13 +2241,24 @@ S<-apply(TempData[,c(2:4)], 2, sd)
 # light
 #convert lux to PAR using long et al. 2012 equation
 # convert the light data from lumes/ft2 to m2
-TempData[,5:7]<-TempData[,5:7]*0.092903
+#TempData[,5:7]<-TempData[,5:7]*0.092903
 
 #Now convert to PAR based on Long 2012
 #parameters from Long 2012
 A1 = -8165.9
 t1 = 1776.4
 y0 =  8398.2
+
+A1= -22022.5
+t1=26855.2
+y0=2037.8
+T2<-A1*exp(-TempData[,5]/t1) + y0
+
+A1<- -4924.7
+t1 = 20992.9
+y0 = 4929
+T2<-A1*exp(-LightData$CALIBRATED.VALUE/t1) + y0
+
 
 TempData[,5:7] = A1*exp(-TempData[,5:7]/t1) + y0
 
