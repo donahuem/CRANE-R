@@ -2255,5 +2255,3 @@ S<-apply(TempData[,c(5:7)], 2, sd)
 #arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 dev.off()
 
-
-
