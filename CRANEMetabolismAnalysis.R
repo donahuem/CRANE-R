@@ -1045,7 +1045,7 @@ model.NECNight.algae<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllDat
 model.NCPNet.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' ,]) 
 model.R.algae<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Night',]) 
 model.GCP.algae<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Algae' & AllData$DayNight=='Day',]) 
-
+model.PR.algae<-lmer(PR.AFDW2~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Algae',])
 
 #Coral
 #CoralMean<-Mean.Time[Mean.Time$Substrate=='Coral',]
@@ -1062,7 +1062,7 @@ model.NECNight.Coral<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllDat
 model.NCPNet.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' ,]) 
 model.R.Coral<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Night',]) 
 model.GCP.Coral<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Coral' & AllData$DayNight=='Day',]) 
-
+model.PR.Coral<-lmer(PR.AFDW2~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Coral',])
 
 
 #Rubble
@@ -1081,6 +1081,7 @@ model.NECNight.Rubble<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllDa
 model.NCPNet.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' ,]) 
 model.R.Rubble<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Night',]) 
 model.GCP.Rubble<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Rubble' & AllData$DayNight=='Day',]) 
+model.PR.Rubble<-lmer(PR.AFDW2~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Rubble',])
 
 #Sand
 #SandMean<-Mean.Time[Mean.Time$Substrate=='Sand',]
@@ -1097,7 +1098,7 @@ model.NECNight.Sand<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData
 model.NCPNet.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' ,]) 
 model.R.Sand<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Night',]) 
 model.GCP.Sand<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Sand' & AllData$DayNight=='Day',]) 
-
+model.PR.Sand<-lmer(PR.AFDW2~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Sand',])
 
 #Mixed
 #model.NECNet.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank), data=Mean.Time[Mean.Time$Substrate=='Mixed',])
@@ -1113,6 +1114,7 @@ model.NECNight.Mixed<-lmer(NEC.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllDat
 model.NCPNet.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' ,]) 
 model.R.Mixed<-lmer(NCP.AFDW~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Night',]) 
 model.GCP.Mixed<-lmer(GPP~NutLevel +(1|Tank)+(1|DateTime), data=AllData[AllData$Substrate=='Mixed' & AllData$DayNight=='Day',]) 
+model.PR.Mixed<-lmer(PR.AFDW2~NutLevel +(1|Tank), data=NCP.mean.PRbyTank[NCP.mean.PRbyTank$Substrate=='Mixed',])
 
 #omega vs NEC------------------- varying intercepts for aquarium within black tank and varying slopes (and intercept) by nutrient level
 
@@ -2198,9 +2200,32 @@ TempData$Date.Time<-as.POSIXct(TempData$Date.Time, format="%m/%d/%Y %H:%M")
 #convert all the columns to numeric since excel put in some funky things
 #TempData[,c(2:7)] <- lapply(TempData[,c(2:7)], function(x) as.numeric(x))
 
+#LightData<-read.csv('data/light/20151224_ODY4806_A.CSv')
+#LightData$DateTime<-as.POSIXct(paste(LightData$Date, LightData$Time), format="%d/%m/%Y %H:%M:%S")
+
+# bring in the LiCOR data from Mike to convert LUX to uMol m-2 s-1
+G<-read.csv('data/light/PAR_HIMB_MFox.csv')
+G$Date.Time<-as.POSIXct(paste(G$Date, G$Time), format="%m/%d/%y %H:%M:%S")
+
+#merge the files so that I can calibrate
+TotalLight<-merge(TempData,G, by = 'Date.Time')
+
+#plot Ave quantum yeild by light intensity
+plot(TotalLight$IntensityB,TotalLight$Avg.Quantum..uE.sec.m2.)
+
+#fit an exponetial function following Long et al. 2012
+mod <- nls(Avg.Quantum..uE.sec.m2. ~ A1*exp(-IntensityB/t1) +y0, 
+           data = TotalLight, start = list(A1 = -100, t1 = 100, y0 = 100))
+
+points(TotalLight$IntensityB, predict(mod, list(IntensityB = TotalLight$IntensityB)), col = 'red', pch =19)
+
+# calibrate the light intensities to PAR based on this fit
+m<-summary(mod)$coefficients[,1] # pull out the coefficients from the model
+TempData[,5:7]<-m[1]*exp(-TempData[,5:7]/m[2]) +m[3] #convert data to PAR
+
 # plot the temperature and light across time for each tank
 pdf('plots/MSplots/TempLight.pdf', width = 8, height = 8, useDingbats = FALSE)
-par(mfrow=c(2,2))
+par(mfrow=c(2,1))
 #Temp
 # Time-series
 plot(TempData$Date.Time, TempData[,2], col = 'black', type = 'l', xlab = 'Date', ylab = expression(paste('Temperature (',~degree~C, ')')), ylim = c(24,30))
@@ -2212,11 +2237,13 @@ legend('topright', legend = c('Incubation Tank A','Incubation Tank B','Incubatio
 M<-colMeans(TempData[,c(2:4)])
 #SDs
 S<-apply(TempData[,c(2:4)], 2, sd)
-x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,30), ylab = expression(paste('Mean Temperature (',~degree~C, ')')))
-arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+#x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,30), ylab = expression(paste('Mean Temperature (',~degree~C, ')')))
+#arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 
 # light
-plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', ylab = 'Light Intensity (Lux)')
+
+plot(TempData$Date.Time, TempData[,5], col = 'black', type = 'l', xlab = 'Date', 
+     ylab = expression(paste('PAR (',mu,'mol m'^{-2},'s'^{-1},')')))
 lines(TempData$Date.Time, TempData[,6], col = 'blue', type = 'l')
 lines(TempData$Date.Time, TempData[,7], col = 'green', type = 'l')
 
@@ -2224,6 +2251,7 @@ lines(TempData$Date.Time, TempData[,7], col = 'green', type = 'l')
 M<-apply(TempData[,c(5:7)], 2, max) # max light intensity
 #SDs
 S<-apply(TempData[,c(5:7)], 2, sd)
-x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
-arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
+#x<-barplot(M, names.arg = c('Tank A','Tank B','Tank C'), col = c('black','blue','green'), ylim = c(0,80000), ylab = 'Max Light Intensity (Lux)')
+#arrows(x, M+S, x,M-S, length = 0.05, angle = 90, code = 3)
 dev.off()
+
