@@ -4,7 +4,8 @@
 WriteOutData = 0
 
 #location for writing processed files
-fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+#fileloc <- "C:/Users/Megan/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
+fileloc <- "G:/My Drive/Projects/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
 #fileloc <- "C:/Users/Nyssa/Google Drive/CRANE/CRANE shared folder/Data/Weights, Volumes & SAs/"
 #fileloc <- "C:/Users/nsilbiger/Google Drive/CRANE shared folder/Data/Weights, Volumes & SAs/"
 
