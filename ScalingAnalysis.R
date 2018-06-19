@@ -91,6 +91,82 @@ DataEx2$DateTimeEx2<- as.factor(DataEx2$DateTimeEx2)
 DataEx2$DayNight<- as.factor(DataEx2$DayNight)
 
 rvs <- c("NEC","NCP") #,"deltapH")
+
+#Run models for NEC and NCP differences normalized for AFDW:
+#  rv ~ Nutrients * DayNight +(1|Tank) + (DayNight|DateTimeEx2)
+
+#Run basic mixed model for NEC normalized to AFDW
+pdf('Scaling/plots/NEC.AFDW.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+sink('Scaling/stats/NEC.AFDW.diff v nuts x daynight.txt')
+mod1.NEC.AFDW.diff <- lmer(NEC.AFDW.diff ~ DayNight*NutLevel
+                           + (1|Tank) 
+                           + (DayNight|DateTimeEx2),data=DataEx2)
+print(anova(mod1.NEC.AFDW.diff))
+print(summary(mod1.NEC.AFDW.diff))
+sjp.lmer(mod1.NEC.AFDW.diff,type="fe")
+sjp.lmer(mod1.NEC.AFDW.diff,type="re")  
+dev.off()
+sink()
+
+#Run basic mixed model for NCP normalized to AFDW
+pdf('Scaling/plots/NCP.AFDW.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+sink('Scaling/stats/NCP.AFDW.diff v nuts x daynight.txt')
+mod1.NCP.AFDW.diff <- lmer(NCP.AFDW.diff ~ DayNight*NutLevel
+#                           + (1|Tank) 
+                           + (DayNight|DateTimeEx2),data=DataEx2)
+print(anova(mod1.NCP.AFDW.diff))
+print(summary(mod1.NCP.AFDW.diff))
+sjp.lmer(mod1.NCP.AFDW.diff,type="fe")
+sjp.lmer(mod1.NCP.AFDW.diff,type="re")  
+dev.off()
+sink()
+
+#SCALED: Run basic mixed model for NEC normalized to AFDW
+DataEx2$NEC.AFDW.diff.rs <- rescale(DataEx2$NEC.AFDW.diff)
+pdf('Scaling/plots/NEC.AFDW.diff.rs v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+sink('Scaling/stats/NEC.AFDW.diff.rs v nuts x daynight.txt')
+mod1.NEC.AFDW.diff.rs <- lmer(NEC.AFDW.diff ~ DayNight*NutLevel
+                           + (1|Tank)
+                           + (DayNight|DateTimeEx2),data=DataEx2)
+print(anova(mod1.NEC.AFDW.diff.rs))
+print(summary(mod1.NEC.AFDW.diff.rs))
+sjp.lmer(mod1.NEC.AFDW.diff.rs,type="fe")
+sjp.lmer(mod1.NEC.AFDW.diff.rs,type="re")
+dev.off()
+sink()
+
+#SCALED: Run basic mixed model for NCP normalized to AFDW
+DataEx2$NCP.AFDW.diff.rs <- rescale(DataEx2$NCP.AFDW.diff)
+pdf('Scaling/plots/NCP.AFDW.diff.rs v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+sink('Scaling/stats/NCP.AFDW.diff.rs v nuts x daynight.txt')
+mod2.NCP.AFDW.diff.rs <- lmer(NCP.AFDW.diff.rs ~ DayNight*NutLevel
+                           + (1|Tank)
+                           + (DayNight|DateTimeEx2),data=DataEx2)
+print(anova(mod2.NCP.AFDW.diff.rs))
+print(summary(mod2.NCP.AFDW.diff.rs))
+sjp.lmer(mod2.NCP.AFDW.diff.rs,type="fe")
+sjp.lmer(mod2.NCP.AFDW.diff.rs,type="re")
+dev.off()
+sink()
+
+RV.diff.means<-ddply(DataEx2, c("DayNight","NutLevel"), summarise,
+                   Mean.NCP.AFDW.diff=mean(NCP.AFDW.diff, na.rm=T),
+                   Mean.NEC.AFDW.diff=mean(NEC.AFDW.diff, na.rm=T),
+                   reps=12,
+                   SE.NCP.AFDW.diff=sd(NCP.AFDW.diff)/sqrt(reps),
+                   SE.NEC.AFDW.diff=sd(NEC.AFDW.diff)/sqrt(reps)
+)
+
+
+#NEC plots net
+  x<-barplot(matrix(RV.diff.means$Mean.NCP.AFDW.diff,nrow=3,ncol=2),beside=TRUE,
+             ylab=("Exp(NCP) - Obs(NCP), AFDW normalized")
+  errorbars(x,NEC.mean.Net$Mean.AFDW2[NEC.mean.Net$Substrate==sub[i]],0,NEC.mean.Net$SE.AFDW2[NEC.mean.Net$Substrate==sub[i]])
+  axis(1, at=x, labels=c("Ambient","Medium","High"))
+  lines(x,c(0,0,0))
+}
+
+
 ##Basic Plotting 
 for (i in (1:length(rvs))){
   par(mfrow=c(2,2))
@@ -140,14 +216,7 @@ for (i in (1:length(rvs))){
 }
 
 
-#Run basic mixed model for rvs normalized to AFDW
-mod1.NEC.AFDW.diff <- lmer(NEC.AFDW.diff ~ DayNight*NutLevel
-                 + (1|Tank) 
-                 + (1|DateTimeEx2/DayNight),data=DataEx2)
-print(anova(mod1.NEC.AFDW.diff))
-sjp.lmer(mod1.NEC.AFDW.diff,type="fe")
-sjp.lmer(mod1.NEC.AFDW.diff,type="re")    
-    
+
 #Histograms
 for (i in (1:length(rvs))){
   for (j in (1:length(sandvarlist))){

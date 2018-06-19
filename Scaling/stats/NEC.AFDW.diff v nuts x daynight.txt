@@ -6,8 +6,8 @@ NutLevel          81.189  40.594     2 241.000 17.9279 5.514e-08 ***
 DayNight:NutLevel 13.694   6.847     2 241.000  3.0239   0.05046 .  
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-Linear mixed model fit by REML t-tests use Satterthwaite approximations to degrees of
-  freedom [lmerMod]
+Linear mixed model fit by REML t-tests use Satterthwaite approximations to degrees of freedom [
+lmerMod]
 Formula: NEC.AFDW.diff ~ DayNight * NutLevel + (1 | Tank) + (DayNight |      DateTimeEx2)
    Data: DataEx2
 
