@@ -13,7 +13,6 @@ colnames(Sand)[which(colnames(Sand)=='Vol'|colnames(Sand)=='SA')]<-c('FinalVol',
 
 varlist <-c("AFDW","DW","FinalVol","FinalSA")  #custom list of vars 
 
-
 # sum by aquarium and sample ID for experiment 1
 biolist<-list(Coral, Algae, Rubble, Sand)
 substrate<-c('Coral','Algae','Rubble','Sand')
@@ -50,7 +49,6 @@ e[[i]][,'Aq_Ex1']<-as.integer(e[[i]][,'Aq_Ex1'])
 # bring everything together
 ScalDat<-rbind(e[[1]],e[[2]],e[[3]],e[[4]])
 
-
 # Calculate N uptale
 AllData$N.uptake<-NutCalc(AllData$HeaderN, AllData$TankN, AllData$ResTime.mean, AllData$AFDW)
 AllData$P.uptake<-NutCalc(AllData$HeaderP, AllData$TankP, AllData$ResTime.mean, AllData$AFDW)
@@ -62,7 +60,7 @@ colnames(DataEx1)[1] <- "Aq_Ex1"
 # merge with the NEC and NEP data
 ScalDat<-left_join(DataEx1,ScalDat,by=c("Aq_Ex1","Substrate"))
 
-
+# calculate estimated rate based on proportion of weight
 ScalDat$NN.wtd<-ScalDat$N.uptake*ScalDat$propAFDW
 ScalDat$PO.wtd<-ScalDat$P.uptake*ScalDat$propAFDW
 
@@ -71,19 +69,16 @@ DataEx2 <- AllData[AllData$Experiment==2,]
 colnames(DataEx2)[1] <- "Aq_Ex2"
 colnames(DataEx2)[49] <- "DateTimeEx2"
 
-
-
 ScalDat_Aqua<-ScalDat %>%
   group_by(Aq_Ex2, DateTime,NutLevel) %>%
   summarise(NN.pred = sum(NN.wtd), PO.pred = sum(PO.wtd))
 
 ScalDat_Aqua$DateTimeEx2<-ScalDat_Aqua$DateTime+60*60*48
 
-
 DataEx2 <- left_join(DataEx2,ScalDat_Aqua,by=c("Aq_Ex2","DateTimeEx2","NutLevel"))
 levels(DataEx2$DateTimeEx2)<- c(1:7)
 
-
+# calculate observed - predicted
 DataEx2 <- mutate(DataEx2,NN.diff = N.uptake - NN.pred,
                   PO.diff = P.uptake - PO.pred)
 
@@ -113,7 +108,8 @@ segments(rep(1:3,2), Uptake.diff.means$PO.diff.mean+Uptake.diff.means$PO.diff.SE
          rep(1:3,2), Uptake.diff.means$PO.diff.mean-Uptake.diff.means$PO.diff.SE,col = Uptake.diff.means$DayNight)
 abline(h=0)
 axis(1, at = c(1:3), c("Ambient","Medium","High"))
-# averages by nutrients 
+
+# averages by nutrients without day night
 Uptake.diff.means<-DataEx2 %>%
   group_by(NutLevel) %>%
   summarise(.,NN.diff.mean = mean(NN.diff),NN.diff.SE = sd(NN.diff)/sqrt(n()), PO.diff.mean = mean(PO.diff),PO.diff.SE = sd(PO.diff)/sqrt(n()) )
@@ -130,7 +126,7 @@ segments(1:3, Uptake.diff.means$PO.diff.mean+Uptake.diff.means$PO.diff.SE,
 abline(h=0)
 axis(1, at = c(1:3), c("Ambient","Medium","High"))
 
-# do we see differences in N uptake by nutrients or day night between predicted and observed?
+# do we see differences in N uptake by nutrients between predicted and observed?
 mod2.NN.diff <- lmer(NN.diff ~ NutLevel
                      + (1|Tank) 
                      + (1|DateTimeEx2),data=DataEx2)
