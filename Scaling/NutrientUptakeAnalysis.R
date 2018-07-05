@@ -5,6 +5,8 @@ load('Scaling/ProcBWorkspace.RData')
 
 
 library('tidyverse')
+library('lme4')
+library('lmerTest')
 
 # rename the columns so that everything is the same
 colnames(Coral)[which(colnames(Coral)=='Volume'|colnames(Coral)=='SA')]<-c('FinalVol','FinalSA')
@@ -63,6 +65,9 @@ ScalDat<-left_join(DataEx1,ScalDat,by=c("Aq_Ex1","Substrate"))
 # calculate estimated rate based on proportion of weight
 ScalDat$NN.wtd<-ScalDat$N.uptake*ScalDat$propAFDW
 ScalDat$PO.wtd<-ScalDat$P.uptake*ScalDat$propAFDW
+ScalDat$NCP.wtd<-ScalDat$NCP.AFDW*ScalDat$propAFDW
+ScalDat$NEC.wtd<-ScalDat$NEC.AFDW*ScalDat$propAFDW
+
 
 # now calculate the predicted
 DataEx2 <- AllData[AllData$Experiment==2,]
@@ -71,7 +76,7 @@ colnames(DataEx2)[49] <- "DateTimeEx2"
 
 ScalDat_Aqua<-ScalDat %>%
   group_by(Aq_Ex2, DateTime,NutLevel) %>%
-  summarise(NN.pred = sum(NN.wtd), PO.pred = sum(PO.wtd))
+  summarise(NN.pred = sum(NN.wtd), PO.pred = sum(PO.wtd), NCP.pred = sum(NCP.wtd), NEC.pred = sum(NEC.wtd))
 
 ScalDat_Aqua$DateTimeEx2<-ScalDat_Aqua$DateTime+60*60*48
 
@@ -80,7 +85,9 @@ levels(DataEx2$DateTimeEx2)<- c(1:7)
 
 # calculate observed - predicted
 DataEx2 <- mutate(DataEx2,NN.diff = N.uptake - NN.pred,
-                  PO.diff = P.uptake - PO.pred)
+                  PO.diff = P.uptake - PO.pred,
+                  NCP.diff = NCP.AFDW - NCP.pred,
+                  NEC.diff = NEC.AFDW - NEC.pred)
 
 DataEx2$DateTimeEx2<- as.factor(DataEx2$DateTimeEx2)
 DataEx2$DayNight<- as.factor(DataEx2$DayNight)
@@ -93,7 +100,8 @@ mod1.NN.diff <- lmer(NN.diff ~ DayNight*NutLevel
 
 Uptake.diff.means<-DataEx2 %>%
   group_by(DayNight, NutLevel) %>%
-  summarise(.,NN.diff.mean = mean(NN.diff),NN.diff.SE = sd(NN.diff)/sqrt(n()), PO.diff.mean = mean(PO.diff),PO.diff.SE = sd(PO.diff)/sqrt(n()) )
+  summarise(.,NN.diff.mean = mean(NN.diff),NN.diff.SE = sd(NN.diff)/sqrt(n()), PO.diff.mean = mean(PO.diff),PO.diff.SE = sd(PO.diff)/sqrt(n()),
+            NCP.diff.mean = mean(NCP.diff), NCP.diff.SE = sd(NCP.diff)/sqrt(n()),NEC.diff.mean = mean(NEC.diff), NEC.diff.SE = sd(NEC.diff)/sqrt(n()) )
 
 par(mfrow= c(1,2))
 plot(rep(1:3,2), Uptake.diff.means$NN.diff.mean, col = Uptake.diff.means$DayNight,
@@ -112,7 +120,8 @@ axis(1, at = c(1:3), c("Ambient","Medium","High"))
 # averages by nutrients without day night
 Uptake.diff.means<-DataEx2 %>%
   group_by(NutLevel) %>%
-  summarise(.,NN.diff.mean = mean(NN.diff),NN.diff.SE = sd(NN.diff)/sqrt(n()), PO.diff.mean = mean(PO.diff),PO.diff.SE = sd(PO.diff)/sqrt(n()) )
+  summarise(.,NN.diff.mean = mean(NN.diff),NN.diff.SE = sd(NN.diff)/sqrt(n()), PO.diff.mean = mean(PO.diff),PO.diff.SE = sd(PO.diff)/sqrt(n()),
+            NCP.diff.mean = mean(NCP.diff), NCP.diff.SE = sd(NCP.diff)/sqrt(n()),NEC.diff.mean = mean(NEC.diff), NEC.diff.SE = sd(NEC.diff)/sqrt(n()) )
 par(mfrow= c(1,2))
 plot(1:3, Uptake.diff.means$NN.diff.mean, 
      pch = 19, cex = 2, ylim = c(0,0.7), xaxt = 'n', ylab = 'Difference in uptake rate', xlab = '', main = 'N+N')
@@ -135,3 +144,18 @@ mod2.NN.diff <- lmer(NN.diff ~ NutLevel
 mod2.PO.diff <- lmer(PO.diff ~ NutLevel
                      + (1|Tank) 
                      + (1|DateTimeEx2),data=DataEx2)
+
+## NCP
+par(mfrow= c(1,2))
+plot(1:3, Uptake.diff.means$NCP.diff.mean, 
+     pch = 19, cex = 2, ylim = c(-5,5), xaxt = 'n', ylab = 'Difference in rate', xlab = '', main = 'NCP')
+segments(1:3, Uptake.diff.means$NCP.diff.mean+Uptake.diff.means$NCP.diff.SE, 
+         1:3, Uptake.diff.means$NCP.diff.mean-Uptake.diff.means$NCP.diff.SE)
+abline(h=0)
+#NEC
+axis(1, at = c(1:3), c("Ambient","Medium","High"))
+plot(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-1,1), xaxt = 'n', ylab = 'Difference in rate', xlab = '', main = 'NEC')
+segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
+         1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
+abline(h=0)
+axis(1, at = c(1:3), c("Ambient","Medium","High"))
