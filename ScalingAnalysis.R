@@ -1,9 +1,11 @@
 ### CRANE Scaling Analysis
 ### Started Sept 5, 2017
+### Last update July 24, 2018
 ### Testing whether the NEC and NEP rates are additive between single substrate and mixed substrates
 
 
-source("CRANEMetabolismAnalysis.R")
+#source("CRANEMetabolismAnalysis.R")
+metadata <- read.csv2(file="Scaling/data_ProcB/Metadata.csv")
 library("sjPlot")
 library("dplyr")
 

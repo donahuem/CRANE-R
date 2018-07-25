@@ -9,6 +9,10 @@
 # Clear workspace --------------------------------
 rm(list=ls())
 
+#define data location from CRANE-R
+dataloc <- "Scaling/data_ProcB/"
+
+
 # Add Libraries ---------------------------------
 library('plyr')
 library('oce')
@@ -92,22 +96,22 @@ NutCalc<-function(HeaderN,TankN,ResidenceTime,SurfaceArea, TankVolume=5678,SWDen
 
 # Load Data-----------------------------------------
 #Chem Data
-ChemData<-read.csv('Data/AllChemData_noCorrect_Nuts.csv') #read in 1st 12 columns only
+ChemData<-read.csv(paste0(dataloc,'AllChemData_noCorrect_Nuts.csv')) #read in 1st 12 columns only
 ChemData<-ChemData[,-c(24,25)]
 
 #Biology Data
 
 #Coral
-Coral <- read.csv("data/CoralSets_Rprocessed.csv",header=TRUE)
+Coral <- read.csv(paste0(dataloc,"CoralSets_Rprocessed.csv"),header=TRUE)
 
 #Rubble
-Rubble <- read.csv("data/Rubble_Rprocessed.csv",header=TRUE)
+Rubble <- read.csv(paste0(dataloc,"Rubble_Rprocessed.csv"),header=TRUE)
 
 #Algae
-Algae <- read.csv("data/Algae_Rprocessed.csv",header=TRUE)
+Algae <- read.csv(paste0(dataloc,"Algae_Rprocessed.csv"),header=TRUE)
 
 #Sand
-Sand<- read.csv("data/Sand_Rprocessed.csv",header=TRUE)
+Sand<- read.csv(paste0(dataloc,"Sand_Rprocessed.csv"),header=TRUE)
 
 
 ## TA Normalization----------------------------------------------------------------------
@@ -156,15 +160,11 @@ Algae$DW<-Algae$DW+Algae$DWbits # dry weight
 
 #calculate the average residence time by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
 ResTime.mean <- ddply(ChemData, c("Aquarium"), summarise,
-                          ResTime.mean = mean(ResTime, na.rm = T)
-                        
-                           )
+                          ResTime.mean = mean(ResTime, na.rm = T))
 
 #calculate the average flow rate by aquarium for each experiment (1-36 is exp 1 and 37-72 is exp 2).
 Flow.mean <- ddply(ChemData, c("Aquarium"), summarise,
-                      Flow.mean = mean(Flow, na.rm = T)
-                      
-)
+                      Flow.mean = mean(Flow, na.rm = T))
 
 
 ## Sum up all the biological data by aquarium for each experiment
