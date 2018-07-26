@@ -175,7 +175,7 @@ Coral.Exp1Summary <- ddply(Coral, c("Aq_Ex1"), summarise,
                           Volume = sum(Volume, na.rm = T)
 )
 
-Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2"), summarise,
+Coral.Exp2Summary <- ddply(Coral, c("Aq_Ex2", "Aq_Ex1"), summarise,
                            SA = sum(SA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
@@ -190,7 +190,7 @@ Rubble.Exp1Summary <- ddply(Rubble, c("Aq_Ex1"), summarise,
                            Volume = sum(Volume, na.rm = T)
 )
 
-Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2"), summarise,
+Rubble.Exp2Summary <- ddply(Rubble, c("Aq_Ex2","Aq_Ex1"), summarise,
                             SA = sum(SA, na.rm = T),
                             AFDW = sum(AFDW, na.rm = T),
                             DW = sum(DW, na.rm = T),
@@ -204,7 +204,7 @@ Algae.Exp1Summary <- ddply(Algae, c("Aq_Ex1"), summarise,
                             Volume = sum(FinalVol, na.rm = T)
 )
 
-Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2"), summarise,
+Algae.Exp2Summary <- ddply(Algae, c("Aq_Ex2","Aq_Ex1"), summarise,
                            SA = sum(FinalSA, na.rm = T),
                            AFDW = sum(AFDW, na.rm = T),
                            DW = sum(DW, na.rm = T),
@@ -218,7 +218,7 @@ Sand.Exp1Summary <- ddply(Sand, c("Aq_Ex1"), summarise,
                            Volume = sum(Vol, na.rm = T)
 )
 
-Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2"), summarise,
+Sand.Exp2Summary <- ddply(Sand, c("Aq_Ex2","Aq_Ex1"), summarise,
                           SA = sum(SA, na.rm = T),
                           AFDW = sum(AFDW, na.rm = T),
                           DW = sum(DW, na.rm = T),
