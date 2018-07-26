@@ -6,7 +6,7 @@ DayNight:NutLevel  20.07   10.04     2    64  0.9336    0.3984
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 Linear mixed model fit by REML. t-tests use Satterthwaite's method [lmerModLmerTest]
-Formula: NEC.AFDW.diff.mean ~ DayNight * NutLevel + (1 | Tank)
+Formula: NEC.AFDW.mean.diff ~ DayNight * NutLevel + (1 | Tank)
    Data: NEC_DN
 
 REML criterion at convergence: 364.6
