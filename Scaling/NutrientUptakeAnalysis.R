@@ -154,7 +154,7 @@ segments(1:3, Uptake.diff.means$NCP.diff.mean+Uptake.diff.means$NCP.diff.SE,
 abline(h=0)
 #NEC
 axis(1, at = c(1:3), c("Ambient","Medium","High"))
-plot(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-1,1), xaxt = 'n', ylab = 'Difference in rate', xlab = '', main = 'NEC')
+plot(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-1,1), xaxt = 'n', xlab = '', main = 'NEC')
 segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
          1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
 abline(h=0)
