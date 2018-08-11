@@ -1,0 +1,43 @@
+Type III Analysis of Variance Table with Satterthwaite's method
+                  Sum Sq Mean Sq NumDF DenDF  F value    Pr(>F)    
+DayNight          7385.3  7385.3     1    64 609.9460 < 2.2e-16 ***
+NutLevel           166.0    83.0     2    64   6.8535  0.002009 ** 
+DayNight:NutLevel   68.5    34.2     2    64   2.8283  0.066519 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [lmerModLmerTest]
+Formula: NCP.AFDW.fdiff.mean ~ DayNight * NutLevel + (1 | Tank)
+   Data: NCP_DN
+
+REML criterion at convergence: 370.2
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.20528 -0.60217 -0.00045  0.51471  2.95306 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ Tank     (Intercept)  2.225   1.491   
+ Residual             12.108   3.480   
+Number of obs: 72, groups:  Tank, 3
+
+Fixed effects:
+                           Estimate Std. Error      df t value Pr(>|t|)    
+(Intercept)                   8.124      1.323   7.213   6.140 0.000419 ***
+DayNightNight               -17.925      1.421  64.000 -12.618  < 2e-16 ***
+NutLevelMed                   3.350      1.421  64.000   2.358 0.021439 *  
+NutLevelHigh                  6.078      1.421  64.000   4.278 6.41e-05 ***
+DayNightNight:NutLevelMed    -2.217      2.009  64.000  -1.104 0.273835    
+DayNightNight:NutLevelHigh   -4.774      2.009  64.000  -2.376 0.020486 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) DyNghN NtLvlM NtLvlH DNN:NLM
+DayNghtNght -0.537                             
+NutLevelMed -0.537  0.500                      
+NutLevelHgh -0.537  0.500  0.500               
+DyNghtN:NLM  0.380 -0.707 -0.707 -0.354        
+DyNghtN:NLH  0.380 -0.707 -0.354 -0.707  0.500 
+RStudioGD 
+        2 

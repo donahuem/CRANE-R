@@ -10,10 +10,10 @@ Plot of RV.diff v nuts(3 levels)
 Plot of RVdiff v time or daynight
 Plot of RVObs and RVexp v nuts in day (panel1) and night(panel2)
 
-
-Questions:
-Do I need to scale the RVs?  These are all differences.
+Although warnings are thrown and "rescale" suggested; rescaling doesn't help the warnings and all numerics are the same
 
 First pass - look at AFDW only
 
-For ME model, including Tank as an RE does not get any variance associated with it.  regardless of which rv.  why is this?  bc this is experiment 2, where there are replicates by tank, there shoud be variability attributed to this level, right?  
+For ME model, including Tank as an RE does not get any variance associated with it,regardless of which rv.  
+why is this?  
+bc this is experiment 2, where there are replicates by tank, there shoud be variability attributed to this level, right?  

@@ -1,14 +1,12 @@
-Analysis of Variance Table of type III  with  Satterthwaite 
-approximation for degrees of freedom
-                    Sum Sq  Mean Sq NumDF   DenDF F.value    Pr(>F)    
+Type III Analysis of Variance Table with Satterthwaite's method
+                    Sum Sq  Mean Sq NumDF   DenDF F value    Pr(>F)    
 DayNight          0.000210 0.000210     1   4.957  0.0227 0.8861725    
-NutLevel          0.052687 0.026344     2 241.001  2.8453 0.0600687 .  
-DayNight:NutLevel 0.165802 0.082901     2 241.001  8.9540 0.0001774 ***
+NutLevel          0.052687 0.026344     2 241.000  2.8453 0.0600687 .  
+DayNight:NutLevel 0.165802 0.082901     2 241.000  8.9540 0.0001774 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-Linear mixed model fit by REML t-tests use Satterthwaite approximations to degrees of
-  freedom [lmerMod]
-Formula: NCP.AFDW.diff.rs ~ DayNight * NutLevel + (DayNight | DateTimeEx2)
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: NCP.AFDW.diff.rs ~ DayNight * NutLevel + (1 | Tank) + (DayNight |      DateTimeEx2)
    Data: DataEx2
 
 REML criterion at convergence: -412.9
@@ -20,18 +18,19 @@ Scaled residuals:
 Random effects:
  Groups      Name          Variance Std.Dev. Corr 
  DateTimeEx2 (Intercept)   0.012211 0.11050       
-             DayNightNight 0.004767 0.06904  -0.64
+             DayNightNight 0.038299 0.19570  -1.00
+ Tank        (Intercept)   0.000000 0.00000       
  Residual                  0.009259 0.09622       
-Number of obs: 252, groups:  DateTimeEx2, 7
+Number of obs: 252, groups:  DateTimeEx2, 7; Tank, 3
 
 Fixed effects:
                              Estimate Std. Error         df t value Pr(>|t|)    
-(Intercept)                  0.529912   0.056971   3.250000   9.301  0.00188 ** 
-DayNightNight               -0.043217   0.076964   5.500000  -0.562  0.59656    
-NutLevelMed                  0.006737   0.019641 241.000000   0.343  0.73189    
-NutLevelHigh                -0.027986   0.019641 241.000000  -1.425  0.15549    
-DayNightNight:NutLevelMed    0.039337   0.030002 241.000000   1.311  0.19106    
-DayNightNight:NutLevelHigh   0.124211   0.030002 241.000000   4.140  4.8e-05 ***
+(Intercept)                  0.529912   0.056971   3.252559   9.301  0.00188 ** 
+DayNightNight               -0.043217   0.076964   5.499616  -0.562  0.59656    
+NutLevelMed                  0.006737   0.019641 241.000004   0.343  0.73189    
+NutLevelHigh                -0.027986   0.019641 241.000004  -1.425  0.15549    
+DayNightNight:NutLevelMed    0.039337   0.030002 241.000004   1.311  0.19106    
+DayNightNight:NutLevelHigh   0.124211   0.030002 241.000004   4.140  4.8e-05 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
