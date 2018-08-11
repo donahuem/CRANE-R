@@ -21,37 +21,60 @@ substrate<-c('Coral','Algae','Rubble','Sand')
 e<-vector('list',4)
 
 for(i in 1:length(biolist)){
-a<- biolist[[i]] %>%group_by(Aq_Ex1, SampleID) %>%
-  summarise_at(varlist, sum) # sum by aquarium number 
+  # get sums for experiment 1 by individuals
+    a<- biolist[[i]] %>%group_by(Aq_Ex1, SampleID) %>%
+    summarise_at(varlist, sum) # sum by aquarium number 
   
-# sum for experiment 2
-b<-biolist[[i]] %>%
-  group_by(Aq_Ex2, SampleID) %>%
-  summarise_at(varlist, sum)
-
-# get the total sum by aquarium
-c<-biolist[[i]] %>%
-  group_by(Aq_Ex1) %>%
-  summarise_at(varlist, funs(total=sum))
-
-# merge everything
-d<-left_join(a,b)
-d<-left_join(d,c)
-
-# calculate proportion of aquarium for each sample
-proportions<-d[,varlist]/d[,c("AFDW_total",'DW_total','FinalVol_total',"FinalSA_total")]
-PropData<-cbind(data.frame(d),proportions)
-colnames(PropData)[12:15]<-c('propSA','propAFDW','propDW','propVolume')
-PropData$Substrate<-rep(substrate[i], nrow(d))
-
-e[[i]]<-PropData
-e[[i]][,'Aq_Ex1']<-as.integer(e[[i]][,'Aq_Ex1'])
-}
+  # sum for experiment 2
+  b<-biolist[[i]] %>%
+    group_by(Aq_Ex2, SampleID) %>%
+    summarise_at(varlist, sum)
+  
+  # get the total sum by aquarium
+  c<-biolist[[i]] %>%
+    group_by(Aq_Ex1) %>%
+    summarise_at(varlist, funs(total=sum))
+  
+  # merge everything
+  d<-left_join(a,b)
+  d<-left_join(d,c)
+  
+  # calculate proportion of aquarium for each sample
+  proportions<-d[,varlist]/d[,c("AFDW_total",'DW_total','FinalVol_total',"FinalSA_total")]
+  PropData<-cbind(data.frame(d),proportions)
+  colnames(PropData)[12:15]<-c('propSA','propAFDW','propDW','propVolume')
+  PropData$Substrate<-rep(substrate[i], nrow(d))
+  
+  e[[i]]<-PropData
+  e[[i]][,'Aq_Ex1']<-as.integer(e[[i]][,'Aq_Ex1'])
+  }
 
 # bring everything together
 ScalDat<-rbind(e[[1]],e[[2]],e[[3]],e[[4]])
 
-# Calculate N uptale
+### add normalization for residence time
+#experiment 1
+ResData.1<-AllData[AllData$Experiment==1,c('Aquarium','ResTime.mean')]
+# make the column names the same
+colnames(ResData.1)[c(1,2)]<-c('Aq_Ex1','ResTime1')
+# make it one value per aquarium
+ResData.1 <-ResData.1 %>% 
+  group_by(Aq_Ex1) %>% 
+  summarise_at('ResTime1',mean)
+
+#join with the scaled data
+ScalDat<-left_join(ScalDat,ResData.1)
+# experiment 2 residence time
+ResData.2<-AllData[AllData$Experiment==2,c('Aquarium','ResTime.mean')]
+# make the column names the same
+colnames(ResData.2)[c(1,2)]<-c('Aq_Ex2','ResTime2')
+ResData.2 <-ResData.2 %>% 
+  group_by(Aq_Ex2) %>% 
+  summarise_at('ResTime2',mean)
+#join with the scaled data
+ScalDat<-left_join(ScalDat,ResData.2)
+
+# Calculate N uptake
 AllData$N.uptake<-NutCalc(AllData$HeaderN, AllData$TankN, AllData$ResTime.mean, AllData$AFDW)
 AllData$P.uptake<-NutCalc(AllData$HeaderP, AllData$TankP, AllData$ResTime.mean, AllData$AFDW)
 
