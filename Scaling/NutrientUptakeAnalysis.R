@@ -100,6 +100,12 @@ colnames(coefs.sub.nut)<-c('Substrate','NutLevel','NCP.Intercept','NCP.Slope','N
 coefs.sub.nut$Substrate<-rep(sub[1:4],3)
 coefs.sub.nut$NutLevel<-c(rep(as.character(Nuts[1]),4),
                           rep(as.character(Nuts[2]),4),rep(as.character(Nuts[3]),4))
+
+# create a dataframe for just the substrate coefficients
+coefs.sub<-data.frame(matrix(NA, nrow=4, ncol=5))
+colnames(coefs.sub)<-c('Substrate','NCP.Intercept','NCP.Slope','NEC.Intercept','NEC.Slope')                          
+coefs.sub$Substrate<-sub[1:4]
+
 # Light by NCP plot across substrates and nutrients
 png('Scaling/plots/LightNormNCP.png',width = 10000, height = 12000, res = 800 )
 par(mfrow=c(4,3))
@@ -129,7 +135,9 @@ for (i in 1:4){
     mod<-lm(TankRates.sub$NCP.AFDW[TankRates.sub$Substrate==sub[i]]~CumLight[1,])
     lines(CumLight[1,],predict(mod))
     legend('topleft',c(paste('r2 = ',round(summary(mod)$r.squared,2)),paste('slope = ',formatC(coef(mod)[2], format = "e", digits = 2))), bty = 'n', cex = 2)
-     }
+    coefs.sub[coefs.sub$Substrate==sub[i],2:3]<-coef(mod)
+    
+    }
 
 dev.off()
 #NEC
@@ -141,7 +149,8 @@ for (i in 1:4){
   mod<-lm(TankRates.sub$NEC.AFDW[TankRates.sub$Substrate==sub[i]]~CumLight[1,])
   lines(CumLight[1,],predict(mod))
   legend('topleft',c(paste('r2 = ',round(summary(mod)$r.squared,2)),paste('slope = ',formatC(coef(mod)[2], format = "e", digits = 2))), bty = 'n', cex = 2)
-}
+  coefs.sub[coefs.sub$Substrate==sub[i],4:5]<-coef(mod)
+  }
 
 dev.off()
 # Light by NEC plot across substrates and nutrients
@@ -187,14 +196,23 @@ ScalDat_Ave<-ScalDat %>%
   summarise(NN.pred = mean(NN.wtd), PO.pred = mean(PO.wtd), NCP.pred = mean(NCP.wtd), NEC.pred = mean(NEC.wtd))%>%
   left_join(.,deltaLight)
 ScalDat_Ave<-ScalDat_Ave[-c(121:nrow(ScalDat_Ave)),]
+ScalDat_Ave.sub<-ScalDat_Ave
 
-# add light coefs 
-ScalDat_Ave<-left_join(ScalDat_Ave, coefs.sub.nut)
-#scale to light
+# add light coefs for substrate and nutrients
+ScalDat_Ave<-left_join(ScalDat_Ave, coefs.sub.nut) 
+
+# just substrate coefficients
+ScalDat_Ave.sub<-left_join(ScalDat_Ave.sub, coefs.sub)
+
+#scale to light with both nutrients and substrate
 ScalDat_Ave$NCP.pred.light<-with(ScalDat_Ave,NCP.pred+(NCP.Intercept+deltaPAR*NCP.Slope))
 ScalDat_Ave$NEC.pred.light<-with(ScalDat_Ave,NEC.pred+(NEC.Intercept+deltaPAR*NEC.Slope))
 
-# calculate observed - predicted
+#scale to light with only substrate coeffs
+ScalDat_Ave.sub$NCP.pred.light<-with(ScalDat_Ave.sub,NCP.pred+(NCP.Intercept+deltaPAR*NCP.Slope))
+ScalDat_Ave.sub$NEC.pred.light<-with(ScalDat_Ave.sub,NEC.pred+(NEC.Intercept+deltaPAR*NEC.Slope))
+
+# calculate observed - predicted for both substrate and nutrient coefficients
 # sum across all 4 substrates in each aquarium
 ScalDat_Avesum<-ScalDat_Ave %>%
   group_by(Aq_Ex2, NutLevel) %>%
@@ -211,13 +229,37 @@ DataEx2_Ave <- mutate(DataEx2_Ave,
                   NCP.diff = NCP.mean - NCP.pred,
                   NEC.diff = NEC.mean - NEC.pred)
 
-# does nutrients affect scaling?
+# calculate observed - predicted for just substrate coefficients
+# sum across all 4 substrates in each aquarium
+ScalDat_Avesum.sub<-ScalDat_Ave.sub %>%
+  group_by(Aq_Ex2, NutLevel) %>%
+  summarise(NCP.pred = sum(NCP.pred.light), NEC.pred = sum(NEC.pred.light))
+
+# average the observed data
+DataEx2_Ave.sub<-DataEx2 %>% group_by(Aq_Ex2, NutLevel, Tank) %>%
+  summarise(NCP.mean = mean(NCP.AFDW), NEC.mean = mean(NEC.AFDW))
+
+# bring together the observed and predicted
+DataEx2_Ave.sub<-left_join(ScalDat_Avesum.sub, DataEx2_Ave.sub)
+# calculate observed - predicted
+DataEx2_Ave.sub <- mutate(DataEx2_Ave.sub,
+                      NCP.diff = NCP.mean - NCP.pred,
+                      NEC.diff = NEC.mean - NEC.pred)
+### stats #####
+# does nutrients affect scaling with nutrient and substrate light coeffs?
 mod1.NEC.diff <- lmer(NEC.diff ~ NutLevel
                      + (1|Tank),data=DataEx2_Ave)
 mod1.NCP.diff <- lmer(NCP.diff ~ NutLevel
                       + (1|Tank),data=DataEx2_Ave)
 
-# plot
+# does nutrients affect scaling with substrate only light coeffs?
+mod1.NEC.diff.sub <- lmer(NEC.diff ~ NutLevel
+                      + (1|Tank),data=DataEx2_Ave.sub)
+mod1.NCP.diff.sub <- lmer(NCP.diff ~ NutLevel
+                      + (1|Tank),data=DataEx2_Ave.sub)
+
+# plot #####
+# nutrient and substrate light coefficients
 Uptake.diff.means<-DataEx2_Ave %>%
   group_by(NutLevel) %>%
   summarise(.,NCP.diff.mean = mean(NCP.diff), NCP.diff.SE = sd(NCP.diff)/sqrt(n()),NEC.diff.mean = mean(NEC.diff), NEC.diff.SE = sd(NEC.diff)/sqrt(n()) )
@@ -235,9 +277,28 @@ axis(1, at = c(1:3), c("Ambient","Medium","High"))
 points(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', xlab = '', main = 'NEC', col='grey',type = 'b', lty=2)
 segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
          1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
-#abline(h=0)
-#axis(1, at = c(1:3), c("Ambient","Medium","High"))
 legend('bottomleft', c('NCP','NCC'), pch = 19, col = c('black','grey'), bty = 'n')
+
+# substrate light coefficients
+Uptake.diff.means<-DataEx2_Ave.sub %>%
+  group_by(NutLevel) %>%
+  summarise(.,NCP.diff.mean = mean(NCP.diff), NCP.diff.SE = sd(NCP.diff)/sqrt(n()),NEC.diff.mean = mean(NEC.diff), NEC.diff.SE = sd(NEC.diff)/sqrt(n()) )
+
+## NCP
+#par(mfrow= c(1,2))
+par(mfrow= c(1,1))
+plot(1:3, Uptake.diff.means$NCP.diff.mean, 
+     pch = 19, cex = 2, ylim = c(-5,12), xaxt = 'n', ylab = 'Observed - predicted', xlab = '',type = 'b', lty=2)
+segments(1:3, Uptake.diff.means$NCP.diff.mean+Uptake.diff.means$NCP.diff.SE, 
+         1:3, Uptake.diff.means$NCP.diff.mean-Uptake.diff.means$NCP.diff.SE)
+abline(h=0)
+#NEC
+axis(1, at = c(1:3), c("Ambient","Medium","High"))
+points(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', xlab = '', main = 'NEC', col='grey',type = 'b', lty=2)
+segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
+         1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
+legend('bottomleft', c('NCP','NCC'), pch = 19, col = c('black','grey'), bty = 'n')
+
 ########################### stop ################################
 #### without scaling to light or averaging over the day
 ScalDat_Aqua<-ScalDat %>%
@@ -312,16 +373,17 @@ mod2.PO.diff <- lmer(PO.diff ~ NutLevel
                      + (1|DateTimeEx2),data=DataEx2)
 
 ## NCP
-par(mfrow= c(1,2))
+par(mfrow= c(1,1))
 plot(1:3, Uptake.diff.means$NCP.diff.mean, 
-     pch = 19, cex = 2, ylim = c(-5,5), xaxt = 'n', ylab = 'Difference in rate', xlab = '', main = 'NCP')
+     pch = 19, cex = 2, ylim = c(-5,5), xaxt = 'n', ylab = 'Difference in rate', xlab = '', lty=2, type ='b')
 segments(1:3, Uptake.diff.means$NCP.diff.mean+Uptake.diff.means$NCP.diff.SE, 
          1:3, Uptake.diff.means$NCP.diff.mean-Uptake.diff.means$NCP.diff.SE)
 abline(h=0)
 #NEC
 axis(1, at = c(1:3), c("Ambient","Medium","High"))
-plot(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-1,1), xaxt = 'n', xlab = '', main = 'NEC')
+points(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-1,1), xaxt = 'n', xlab = '', col = 'grey', type = 'b', lty=2)
 segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
          1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
 abline(h=0)
-axis(1, at = c(1:3), c("Ambient","Medium","High"))
+#axis(1, at = c(1:3), c("Ambient","Medium","High"))
+legend('bottomleft',c('NCP','NCC'), pch = 19, col = c('black','grey'), bty = 'n')
