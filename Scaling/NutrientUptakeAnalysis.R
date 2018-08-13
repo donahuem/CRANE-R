@@ -223,20 +223,21 @@ Uptake.diff.means<-DataEx2_Ave %>%
   summarise(.,NCP.diff.mean = mean(NCP.diff), NCP.diff.SE = sd(NCP.diff)/sqrt(n()),NEC.diff.mean = mean(NEC.diff), NEC.diff.SE = sd(NEC.diff)/sqrt(n()) )
 
 ## NCP
-par(mfrow= c(1,2))
+#par(mfrow= c(1,2))
+par(mfrow= c(1,1))
 plot(1:3, Uptake.diff.means$NCP.diff.mean, 
-     pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', ylab = 'Difference in rate', xlab = '', main = 'NCP')
+     pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', ylab = 'Observed - predicted', xlab = '',type = 'b', lty=2)
 segments(1:3, Uptake.diff.means$NCP.diff.mean+Uptake.diff.means$NCP.diff.SE, 
          1:3, Uptake.diff.means$NCP.diff.mean-Uptake.diff.means$NCP.diff.SE)
 abline(h=0)
 #NEC
 axis(1, at = c(1:3), c("Ambient","Medium","High"))
-plot(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', xlab = '', main = 'NEC')
+points(1:3, Uptake.diff.means$NEC.diff.mean, pch = 19, cex = 2, ylim = c(-10,10), xaxt = 'n', xlab = '', main = 'NEC', col='grey',type = 'b', lty=2)
 segments(1:3, Uptake.diff.means$NEC.diff.mean+Uptake.diff.means$NEC.diff.SE, 
          1:3, Uptake.diff.means$NEC.diff.mean-Uptake.diff.means$NEC.diff.SE)
-abline(h=0)
-axis(1, at = c(1:3), c("Ambient","Medium","High"))
-
+#abline(h=0)
+#axis(1, at = c(1:3), c("Ambient","Medium","High"))
+legend('bottomleft', c('NCP','NCC'), pch = 19, col = c('black','grey'), bty = 'n')
 ########################### stop ################################
 #### without scaling to light or averaging over the day
 ScalDat_Aqua<-ScalDat %>%
