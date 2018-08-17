@@ -160,7 +160,7 @@ png('Scaling/plots/LightNormNEC.png',width = 10000, height = 12000, res = 800 )
 par(mfrow=c(4,3))
 for (i in 1:4){
   for (j in 1:3){
-    plot(CumLight[1,], TankRates$NEC.AFDW[TankRates$Substrate==sub[i] & TankRates$NutLevel == Nuts[j]], ylim = c(min(TankRates.sub$NEC.AFDW), max(TankRates.sub$NEC.AFDW)),
+    plot(CumLight[1,], TankRates$NEC.AFDW[TankRates$Substrate==sub[i] & TankRates$NutLevel == Nuts[j]], ylim = c(min(TankRates$NEC.AFDW), max(TankRates$NEC.AFDW)),
          cex.lab = 2,cex.main = 2, cex.axis = 1.5, cex = 1.5,main = paste(sub[i], Nuts[j]), pch = 19,xlab = 'Cumulative PAR', ylab = 'mean NCC')
     mod<-lm(TankRates$NEC.AFDW[TankRates$Substrate==sub[i] & TankRates$NutLevel == Nuts[j]]~CumLight[1,])
     lines(CumLight[1,],predict(mod))
