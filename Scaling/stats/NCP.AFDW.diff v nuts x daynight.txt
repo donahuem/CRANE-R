@@ -5,7 +5,7 @@ NutLevel          1375.7   687.9     2    66  42.0694 1.662e-12 ***
 DayNight:NutLevel  119.6    59.8     2    66   3.6585   0.03113 *  
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-Linear mixed model fit by REML. t-tests use Satterthwaite's method [lmerModLmerTest]
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
 Formula: NCP.AFDW.diff.mean ~ DayNight * NutLevel + (1 | Tank)
    Data: NCP_DN
 
@@ -39,5 +39,3 @@ NutLevelMed -0.707  0.500
 NutLevelHgh -0.707  0.500  0.500               
 DyNghtN:NLM  0.500 -0.707 -0.707 -0.354        
 DyNghtN:NLH  0.500 -0.707 -0.354 -0.707  0.500 
-RStudioGD 
-        2 

@@ -1,6 +1,6 @@
 ### CRANE Scaling Analysis
 ### Started Sept 5, 2017
-### Last update July 24, 2018
+### Last update Aug 1, 2019
 ### Testing whether the NEC and NEP rates are additive between single substrate and mixed substrates
 
 source("Scaling/CRANEMetabolismAnalysis_ProcB.R")
@@ -155,78 +155,101 @@ NCP_DN <- ddply(AllData_Ex2,c("DayNight","Aquarium", "Tank","NutLevel"),
                 NCP.SA.mean.fdiff = NCP.SA.obs.mean-NCP.SA.predf.mean,
                 NCP.Vol.mean.fdiff = NCP.Vol.obs.mean-NCP.Vol.predf.mean)
 
+#Order the effects
+NEC_DN$NutLevel <- factor(NEC_DN$NutLevel, levels = c("Ambient","Med","High" ))
+
 #Run basic mixed model for NEC normalized to AFDW
-pdf('Scaling/plots/NEC.AFDW.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NEC.AFDW.diff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NEC.AFDW.diff v nuts x daynight.txt')
 mod1.NEC.AFDW.diff.mean <- lmer(NEC.AFDW.diff.mean ~ DayNight*NutLevel
                            + (1|Tank),data=NEC_DN)
 print(anova(mod1.NEC.AFDW.diff.mean))
 print(summary(mod1.NEC.AFDW.diff.mean))
-sjp.lmer(mod1.NEC.AFDW.diff.mean,type="fe")
-sjp.lmer(mod1.NEC.AFDW.diff.mean,type="re")
-dev.off()
+plot_model(mod1.NEC.AFDW.diff.mean, type = "int")
+plot_model(mod1.NEC.AFDW.diff.mean, type = "re")
+#sjp.lmer(mod1.NEC.AFDW.diff.mean,type="fe")
+#sjp.lmer(mod1.NEC.AFDW.diff.mean,type="re")
 sink()
+dev.off()
+
 
 #Run basic mixed model for NCP normalized to AFDW
-pdf('Scaling/plots/NCP.AFDW.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NCP.AFDW.diff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NCP.AFDW.diff v nuts x daynight.txt')
 mod1.NCP.AFDW.diff.mean <- lmer(NCP.AFDW.diff.mean ~ DayNight*NutLevel
                                 + (1|Tank),data=NCP_DN)
 print(anova(mod1.NCP.AFDW.diff.mean))
 print(summary(mod1.NCP.AFDW.diff.mean))
-sjp.lmer(mod1.NCP.AFDW.diff.mean,type="fe")
-sjp.lmer(mod1.NCP.AFDW.diff.mean,type="re")
-dev.off()
+plot_model(mod1.NCP.AFDW.diff.mean, type = "int")
+plot_model(mod1.NCP.AFDW.diff.mean, type = "re")
+
+#sjp.lmer(mod1.NCP.AFDW.diff.mean,type="fe")
+#sjp.lmer(mod1.NCP.AFDW.diff.mean,type="re")
 sink()
+dev.off()
 
 #Run basic mixed model for NEC normalized to flow &  AFDW
-pdf('Scaling/plots/NEC.AFDW.fdiff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NEC.AFDW.fdiff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NEC.AFDW.fdiff v nuts x daynight.txt')
 mod1.NEC.AFDW.fdiff.mean <- lmer(NEC.AFDW.fdiff.mean ~ DayNight*NutLevel
                                 + (1|Tank),data=NEC_DN)
 print(anova(mod1.NEC.AFDW.fdiff.mean))
 print(summary(mod1.NEC.AFDW.fdiff.mean))
-sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="fe")
-sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="re")
-dev.off()
+#sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="fe")
+#sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="re")
+plot_model(mod1.NEC.AFDW.fdiff.mean, type = "int")
+plot_model(mod1.NEC.AFDW.fdiff.mean, type = "re")
+
 sink()
+dev.off()
+
 
 #Run basic mixed model for NEC normalized to flow & AFDW
-pdf('Scaling/plots/NCP.AFDW.fdiff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NCP.AFDW.fdiff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NCP.AFDW.fdiff v nuts x daynight.txt')
 mod1.NCP.AFDW.fdiff.mean <- lmer(NCP.AFDW.fdiff.mean ~ DayNight*NutLevel
                                 + (1|Tank),data=NCP_DN)
 print(anova(mod1.NCP.AFDW.fdiff.mean))
 print(summary(mod1.NCP.AFDW.fdiff.mean))
-sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="fe")
-sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="re")
-dev.off()
+
+plot_model(mod1.NCP.AFDW.fdiff.mean, type = "int")
+plot_model(mod1.NCP.AFDW.fdiff.mean, type = "re")
+#sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="fe")
+#sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="re")
 sink()
+dev.off()
+
 #***********************
 
 #Run basic mixed model for NEC normalized to AFDW (difference before mean)
-pdf('Scaling/plots/NEC.AFDW.mean.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NEC.AFDW.mean.diff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NEC.AFDW.mean.diff v nuts x daynight.txt')
 mod1.NEC.AFDW.mean.diff <- lmer(NEC.AFDW.mean.diff ~ DayNight*NutLevel
                                  + (1|Tank),data=NEC_DN)
 print(anova(mod1.NEC.AFDW.mean.diff))
 print(summary(mod1.NEC.AFDW.mean.diff))
-sjp.lmer(mod1.NEC.AFDW.mean.diff,type="fe")
-sjp.lmer(mod1.NEC.AFDW.mean.diff,type="re")
-dev.off()
+plot_model(mod1.NEC.AFDW.mean.diff , type = "int")
+plot_model(mod1.NEC.AFDW.mean.diff , type = "re")
+#sjp.lmer(mod1.NEC.AFDW.mean.diff,type="fe")
+#sjp.lmer(mod1.NEC.AFDW.mean.diff,type="re")
 sink()
+dev.off()
+
 
 #Run basic mixed model for NCP normalized to AFDW (difference before mean)
-pdf('Scaling/plots/NCP.AFDW.mean.diff v nuts x daynight.pdf', width = 8, height = 10.5, paper="letter")
+pdf('Scaling/plots/NCP.AFDW.mean.diff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
 sink('Scaling/stats/NCP.AFDW.mean.diff v nuts x daynight.txt')
 mod1.NCP.AFDW.mean.diff <- lmer(NCP.AFDW.mean.diff ~ DayNight*NutLevel
                                 + (1|Tank),data=NCP_DN)
 print(anova(mod1.NCP.AFDW.mean.diff))
 print(summary(mod1.NCP.AFDW.mean.diff))
-sjp.lmer(mod1.NCP.AFDW.mean.diff,type="fe")
-sjp.lmer(mod1.NCP.AFDW.mean.diff,type="re")
-dev.off()
+plot_model(mod1.NCP.AFDW.mean.diff , type = "int")
+plot_model(mod1.NCP.AFDW.mean.diff , type = "re")
+#sjp.lmer(mod1.NCP.AFDW.mean.diff,type="fe")
+#sjp.lmer(mod1.NCP.AFDW.mean.diff,type="re")
 sink()
+dev.off()
+
  
 #********************
 
