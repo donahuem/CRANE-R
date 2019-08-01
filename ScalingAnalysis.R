@@ -165,7 +165,7 @@ mod1.NEC.AFDW.diff.mean <- lmer(NEC.AFDW.diff.mean ~ DayNight*NutLevel
                            + (1|Tank),data=NEC_DN)
 print(anova(mod1.NEC.AFDW.diff.mean))
 print(summary(mod1.NEC.AFDW.diff.mean))
-plot_model(mod1.NEC.AFDW.diff.mean, type = "int")
+plot_model(mod1.NEC.AFDW.diff.mean, type = "int", title = "NEC: mean (observed - predicted)")
 plot_model(mod1.NEC.AFDW.diff.mean, type = "re")
 #sjp.lmer(mod1.NEC.AFDW.diff.mean,type="fe")
 #sjp.lmer(mod1.NEC.AFDW.diff.mean,type="re")
@@ -180,7 +180,7 @@ mod1.NCP.AFDW.diff.mean <- lmer(NCP.AFDW.diff.mean ~ DayNight*NutLevel
                                 + (1|Tank),data=NCP_DN)
 print(anova(mod1.NCP.AFDW.diff.mean))
 print(summary(mod1.NCP.AFDW.diff.mean))
-plot_model(mod1.NCP.AFDW.diff.mean, type = "int")
+plot_model(mod1.NCP.AFDW.diff.mean, type = "int", title = "NCP: mean (observed - predicted)")
 plot_model(mod1.NCP.AFDW.diff.mean, type = "re")
 
 #sjp.lmer(mod1.NCP.AFDW.diff.mean,type="fe")
@@ -197,7 +197,7 @@ print(anova(mod1.NEC.AFDW.fdiff.mean))
 print(summary(mod1.NEC.AFDW.fdiff.mean))
 #sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="fe")
 #sjp.lmer(mod1.NEC.AFDW.fdiff.mean,type="re")
-plot_model(mod1.NEC.AFDW.fdiff.mean, type = "int")
+plot_model(mod1.NEC.AFDW.fdiff.mean, type = "int", title = "NEC: mean (observed - predicted) with flow")
 plot_model(mod1.NEC.AFDW.fdiff.mean, type = "re")
 
 sink()
@@ -212,7 +212,7 @@ mod1.NCP.AFDW.fdiff.mean <- lmer(NCP.AFDW.fdiff.mean ~ DayNight*NutLevel
 print(anova(mod1.NCP.AFDW.fdiff.mean))
 print(summary(mod1.NCP.AFDW.fdiff.mean))
 
-plot_model(mod1.NCP.AFDW.fdiff.mean, type = "int")
+plot_model(mod1.NCP.AFDW.fdiff.mean, type = "int", title = "NCP: mean (observed - predicted) with flow")
 plot_model(mod1.NCP.AFDW.fdiff.mean, type = "re")
 #sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="fe")
 #sjp.lmer(mod1.NCP.AFDW.fdiff.mean,type="re")
@@ -228,7 +228,7 @@ mod1.NEC.AFDW.mean.diff <- lmer(NEC.AFDW.mean.diff ~ DayNight*NutLevel
                                  + (1|Tank),data=NEC_DN)
 print(anova(mod1.NEC.AFDW.mean.diff))
 print(summary(mod1.NEC.AFDW.mean.diff))
-plot_model(mod1.NEC.AFDW.mean.diff , type = "int")
+plot_model(mod1.NEC.AFDW.mean.diff , type = "int", title = "NEC: mean (observed) - mean(predicted) ")
 plot_model(mod1.NEC.AFDW.mean.diff , type = "re")
 #sjp.lmer(mod1.NEC.AFDW.mean.diff,type="fe")
 #sjp.lmer(mod1.NEC.AFDW.mean.diff,type="re")
@@ -243,7 +243,7 @@ mod1.NCP.AFDW.mean.diff <- lmer(NCP.AFDW.mean.diff ~ DayNight*NutLevel
                                 + (1|Tank),data=NCP_DN)
 print(anova(mod1.NCP.AFDW.mean.diff))
 print(summary(mod1.NCP.AFDW.mean.diff))
-plot_model(mod1.NCP.AFDW.mean.diff , type = "int")
+plot_model(mod1.NCP.AFDW.mean.diff , type = "int", title = "NCP: mean (observed) - mean(predicted) ")
 plot_model(mod1.NCP.AFDW.mean.diff , type = "re")
 #sjp.lmer(mod1.NCP.AFDW.mean.diff,type="fe")
 #sjp.lmer(mod1.NCP.AFDW.mean.diff,type="re")
@@ -253,6 +253,34 @@ dev.off()
  
 #********************
 
+#Run basic mixed model for NEC normalized to AFDW (difference before mean) with flow
+pdf('Scaling/plots/NEC.AFDW.mean.fdiff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
+sink('Scaling/stats/NEC.AFDW.mean.fdiff v nuts x daynight.txt')
+mod1.NEC.AFDW.mean.fdiff <- lmer(NEC.AFDW.mean.fdiff ~ DayNight*NutLevel
+                                + (1|Tank),data=NEC_DN)
+print(anova(mod1.NEC.AFDW.mean.fdiff))
+print(summary(mod1.NEC.AFDW.mean.fdiff))
+plot_model(mod1.NEC.AFDW.mean.fdiff , type = "int", title = "NEC: mean (observed) - mean(predicted) with flow ")
+plot_model(mod1.NEC.AFDW.mean.fdiff , type = "re")
+#sjp.lmer(mod1.NEC.AFDW.mean.diff,type="fe")
+#sjp.lmer(mod1.NEC.AFDW.mean.diff,type="re")
+sink()
+dev.off()
+
+
+#Run basic mixed model for NCP normalized to AFDW (difference before mean) with flow
+pdf('Scaling/plots/NCP.AFDW.mean.fdiff v nuts x daynight.pdf', width = 5, height = 5, paper="letter")
+sink('Scaling/stats/NCP.AFDW.mean.fdiff v nuts x daynight.txt')
+mod1.NCP.AFDW.mean.fdiff <- lmer(NCP.AFDW.mean.fdiff ~ DayNight*NutLevel
+                                + (1|Tank),data=NCP_DN)
+print(anova(mod1.NCP.AFDW.mean.fdiff))
+print(summary(mod1.NCP.AFDW.mean.fdiff))
+plot_model(mod1.NCP.AFDW.mean.fdiff , type = "int", title = "NCP: mean (observed) - mean(predicted) ")
+plot_model(mod1.NCP.AFDW.mean.fdiff , type = "re")
+#sjp.lmer(mod1.NCP.AFDW.mean.diff,type="fe")
+#sjp.lmer(mod1.NCP.AFDW.mean.diff,type="re")
+sink()
+dev.off()
 
 # 
 # 
