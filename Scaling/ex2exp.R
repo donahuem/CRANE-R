@@ -3,8 +3,8 @@ ex2exp <- function(process,norms,normflow=FALSE) {
   #process = NEC or NCP; net community calcification or net community production 
   #norms = AFDW, DW, Vol, SA; normalization factor for process
   #normflow; TRUE if normalized to flow rates bt Ex1 and Ex2; FALSE if flow rates are ignored
-  process="NEC"
-  norms="AFDW"
+ # process="NEC"
+#  norms="AFDW"
   nm <- paste0(process,".",norms)
   process.coral <- NA
   process.algae <- NA

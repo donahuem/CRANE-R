@@ -24,6 +24,10 @@ Sand.Exp2Summary <- join(Sand.Exp2Summary,Sand.Exp1Summary, by=c("Aq_Ex1"),type=
 
 #Add the proportions of Coral/Algae/Rubble/Sand AFDW,DW,SA,Vol from _Exp2Summary to Ex2
 
+# Remove existing AFDW, SA, Vol, and DW columns
+
+AllData_Ex2<-AllData_Ex2[,-c(45:48)]
+
 AllData_Ex2 <- join(AllData_Ex2,Coral.Exp2Summary,by=c("Aq_Ex2"),type="left")
 AllData_Ex2$ResTime.mean.coral <- AllData_Ex1$ResTime.mean[match(AllData_Ex2$Aq_Ex1,AllData_Ex1$Aq_Ex1)]
 AllData_Ex2 <- plyr::rename(AllData_Ex2,replace=c("Aq_Ex1"="Aqua.coral",
