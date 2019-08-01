@@ -54,6 +54,7 @@ Exp2<-which(AllLight$DateTime>=as.POSIXct('2015-12-05 10:00:00', format="%Y-%m-%
 LightExp2<-AllLight[Exp2,] # new light df
 
 # plot day 1 ves 2 in each bin
+pdf('Scaling/plots/light.pdf', width = 5, height = 5)
 par(mfrow=c(2,2))
 plot(LightExp1$DateTime, LightExp1$PAR.A, type = 'l', col = 'red', ylab = 'PAR', xlab = 'Time', main = 'Tank A')
 lines(LightExp1$DateTime, LightExp2$PAR.A, type = 'l', col = 'blue')
@@ -69,5 +70,5 @@ Exp2.sum<-colSums(LightExp2[,c("PAR.A","PAR.B","PAR.C")])
 CumLight<-rbind(Exp1.sum,Exp2.sum)
 
 barplot(CumLight, beside = T, col = c('red','blue'), names.arg = c('A','B','C'), ylab = 'Cumulative PAR')
-
+dev.off()
         
