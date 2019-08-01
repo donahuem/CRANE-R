@@ -33,11 +33,11 @@ ex2exp <- function(process,norms,normflow=FALSE) {
     pred <- (process.coral*(AllData_Ex2$AFDW.coral/AllData_Ex2$AFDW.coral.tot)
              *(AllData_Ex2$ResTime.mean.coral/ftot)
              + process.algae*(AllData_Ex2$AFDW.algae/AllData_Ex2$AFDW.algae.tot)
-             *(AllData_Ex2$ResTime.mean.coral/ftot)
+             *(AllData_Ex2$ResTime.mean.algae/ftot)
              + process.rubble*(AllData_Ex2$AFDW.rubble/AllData_Ex2$AFDW.rubble.tot)
-             *(AllData_Ex2$ResTime.mean.coral/ftot)
+             *(AllData_Ex2$ResTime.mean.rubble/ftot)
              + process.sand*(AllData_Ex2$AFDW.sand/AllData_Ex2$AFDW.sand.tot)
-             *(AllData_Ex2$ResTime.mean.coral/ftot))*AllData_Ex2$ResTime.mean/favg
+             *(AllData_Ex2$ResTime.mean.sand/ftot))*AllData_Ex2$ResTime.mean/favg
   }
   return(pred)
 }

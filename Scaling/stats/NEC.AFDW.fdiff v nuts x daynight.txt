@@ -1,41 +1,41 @@
 Type III Analysis of Variance Table with Satterthwaite's method
                   Sum Sq Mean Sq NumDF DenDF F value    Pr(>F)    
-DayNight          44.857  44.857     1    64 73.0437 3.519e-12 ***
-NutLevel          42.597  21.298     2    64 34.6811 6.262e-11 ***
-DayNight:NutLevel  0.676   0.338     2    64  0.5502    0.5795    
+DayNight          44.242  44.242     1    64 72.0756 4.429e-12 ***
+NutLevel          42.484  21.242     2    64 34.6064 6.491e-11 ***
+DayNight:NutLevel  0.636   0.318     2    64  0.5183     0.598    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
 Formula: NEC.AFDW.fdiff.mean ~ DayNight * NutLevel + (1 | Tank)
    Data: NEC_DN
 
-REML criterion at convergence: 172.2
+REML criterion at convergence: 172.3
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--2.7988 -0.5215 -0.1439  0.5497  2.6063 
+-2.7905 -0.5315 -0.1681  0.5440  2.5965 
 
 Random effects:
  Groups   Name        Variance Std.Dev.
- Tank     (Intercept) 0.04957  0.2226  
- Residual             0.61412  0.7837  
+ Tank     (Intercept) 0.05375  0.2318  
+ Residual             0.61382  0.7835  
 Number of obs: 72, groups:  Tank, 3
 
 Fixed effects:
                            Estimate Std. Error      df t value Pr(>|t|)    
-(Intercept)                  1.9703     0.2602 13.3922   7.572 3.39e-06 ***
-DayNightNight               -1.3213     0.3199 64.0000  -4.130 0.000107 ***
-NutLevelMed                 -1.6372     0.3199 64.0000  -5.118 3.05e-06 ***
-NutLevelHigh                -1.1714     0.3199 64.0000  -3.662 0.000510 ***
-DayNightNight:NutLevelMed   -0.3045     0.4524 64.0000  -0.673 0.503345    
-DayNightNight:NutLevelHigh  -0.4675     0.4524 64.0000  -1.033 0.305330    
+(Intercept)                  1.9767     0.2628 12.6205   7.522 5.21e-06 ***
+DayNightNight               -1.3299     0.3198 64.0000  -4.158 9.74e-05 ***
+NutLevelMed                 -1.6574     0.3198 64.0000  -5.182 2.39e-06 ***
+NutLevelHigh                -1.1794     0.3198 64.0000  -3.687 0.000469 ***
+DayNightNight:NutLevelMed   -0.2539     0.4523 64.0000  -0.561 0.576549    
+DayNightNight:NutLevelHigh  -0.4597     0.4523 64.0000  -1.016 0.313315    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Correlation of Fixed Effects:
             (Intr) DyNghN NtLvlM NtLvlH DNN:NLM
-DayNghtNght -0.615                             
-NutLevelMed -0.615  0.500                      
-NutLevelHgh -0.615  0.500  0.500               
-DyNghtN:NLM  0.435 -0.707 -0.707 -0.354        
-DyNghtN:NLH  0.435 -0.707 -0.354 -0.707  0.500 
+DayNghtNght -0.609                             
+NutLevelMed -0.609  0.500                      
+NutLevelHgh -0.609  0.500  0.500               
+DyNghtN:NLM  0.430 -0.707 -0.707 -0.354        
+DyNghtN:NLH  0.430 -0.707 -0.354 -0.707  0.500 
